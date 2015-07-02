@@ -1,0 +1,68 @@
+project(ppi)
+
+# ----------------------------------------------------------------------
+# cmake settings
+
+cmake_minimum_required(VERSION 2.8)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+
+enable_testing()
+
+# ----------------------------------------------------------------------
+# Check packages, libraries, etc.
+
+find_package(Threads)
+find_package(PkgConfig)
+
+find_library(LIB_GFLAGS gflags)
+pkg_search_module(GLOG REQUIRED libglog)
+
+# ----------------------------------------------------------------------
+# Set include directories, c++ options, etc.
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
+
+function(ppi_add_cxx_flags flags)
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  else()
+    set(CMAKE_CXX_FLAGS "${flags} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+if(CYGWIN AND (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU"))
+  ppi_add_cxx_flags("-std=gnu++11")
+else()
+  ppi_add_cxx_flags("-std=c++11")
+endif()
+ppi_add_cxx_flags("-Wall -Wextra")
+ppi_add_cxx_flags("-O2")
+ppi_add_cxx_flags("-march=native")
+ppi_add_cxx_flags("-DSRC_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
+
+if(${build_type} MATCHES release)
+  ppi_add_cxx_flags("-Wno-error=deprecated-declarations")
+  ppi_add_cxx_flags("-Wno-error=missing-field-initializers")
+  ppi_add_cxx_flags("-Wno-error=sign-compare")
+  ppi_add_cxx_flags("-DNOINLINE_UNLESS_RELEASE=")
+endif()
+
+include_directories(.)
+
+add_subdirectory(third_party/gtest-1.7.0)
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories(${GLOG_INCLUDE_DIRS})
+
+# ----------------------------------------------------------------------
+# Add subdirectories
+
+function(ppi_target_link_libraries target)
+  target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${target} ${LIB_GFLAGS})
+  target_link_libraries(${target} ${GLOG_LIBRARIES})
+endfunction()
+
+add_subdirectory(base)
+add_subdirectory(number)
