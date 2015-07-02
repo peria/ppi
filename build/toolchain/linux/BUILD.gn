@@ -1,0 +1,8 @@
+import("//build/toolchain/clang_toolchain.gni")
+
+gcc_toolchain("x64") {
+  cc = "clang"
+  cxx = "clang++"
+  ar = "ar"
+  ld = cxx
+}

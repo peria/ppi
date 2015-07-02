@@ -1,0 +1,57 @@
+config("global") {
+  include_dirs = [
+    "//src"
+  ]
+
+  defines = [
+    "SRC_DIR=\"" + rebase_path("//src", root_build_dir) + "\"",
+    "DATA_DIR=\"" + rebase_path("//data", root_build_dir) + "\"",
+    "TESTDATA_DIR=\"" + rebase_path("//test_resources", root_build_dir) + "\"",
+  ]
+
+  if (is_posix) {
+    cflags = [
+      "-Wall",
+      "-Wextra",
+    ]
+    cflags_cc = [ "-std=c++14" ]
+    defines += [ "OS_POSIX" ]
+  }
+  if (is_mac) {
+    defines += [ "OS_MACOSX" ]
+  }
+  if (is_linux) {
+    defines += [ "OS_LINUX" ]
+  }
+
+  if (is_win) {
+    cflags = [ "/std:c++14" ]
+    # needs this if main function is main() instead of WinMain.
+    ldflags = [ "/SUBSYSTEM:CONSOLE" ]
+    defines += [
+      "NOMINMAX",
+      "WIN32_LEAN_AND_MEAN",
+      "OS_WIN",
+    ]
+  }
+}
+
+config("debug") {
+  if (is_posix) {
+    cflags = [ "-g" ]
+  }
+}
+
+config("release") {
+  defines = [
+    "NDEBUG",
+    "NOINLINE_UNLESS_RELEASE="
+  ]
+}
+
+config("asan") {
+  if (is_posix) {
+    cflags = [ "-fsanitize=address" ]
+    ldflags = [ "-fsanitize=address" ]
+  }
+}

@@ -1,0 +1,50 @@
+config("compiler") {
+  cflags = []
+  ldflags = []
+
+  if (is_posix) {
+    cflags += [
+      "-pthread",
+      "-march=native",
+    ]
+    ldflags += [
+      "-pthread",
+      "-march=native",
+    ]
+  }
+  if (is_win) {
+    cflags += [
+      "/EHsc",
+      "/MP",  # Build With Multiple Processes
+    ]
+  }
+}
+
+# optimization
+
+config("optimize") {
+  if (is_posix) {
+    cflags = [
+      "-O2",
+    ]
+  }
+  if (is_win) {
+    cflags = [
+      "/O2",  # Creates fast code.
+    ]
+  }
+}
+
+config("no_optimize") {
+  if (is_posix) {
+    cflags = [
+      "-O0",
+      "-W",
+    ]
+  }
+  if (is_win) {
+    cflags = [
+      "/Od",  # Disables optimization.
+    ]
+  }
+}
