@@ -16,7 +16,14 @@ class Integer {
   int64 size_;
 };
 
+// Computes c[n] = a[n] + b[n]
 void Add(const Integer& a, const Integer& b, Integer* c);
+
+// Computes c[n] = a[n] - b[n]
+void Subtract(const Integer& a, const Integer& b, Integer* c);
+
+// c[2n] = a[n] * b[n]
+void Mult(const Integer& a, const Integer& b, Integer* c);
 
 }  // namespace number
 }  // namespace ppi
