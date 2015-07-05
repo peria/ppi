@@ -66,3 +66,4 @@ endfunction()
 
 add_subdirectory(base)
 add_subdirectory(number)
+add_subdirectory(fmt)

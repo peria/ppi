@@ -11,8 +11,6 @@ class Integer {
   int64 size() const { return size_; }
 
   uint64* mantissa_;
-
- private:
   int64 size_;
 };
 
