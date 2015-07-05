@@ -78,8 +78,8 @@ void Mult(const Integer& a, const Integer& b, Integer* c) {
   Split4In8(b, db);
 
   // FMT complex[4n]
-  fmt::Fmt::Fmt4(da, 4 * n, fmt::Fmt::Type::Forward);
-  fmt::Fmt::Fmt4(db, 4 * n, fmt::Fmt::Type::Forward);
+  fmt::Fmt::Fmt4(fmt::Fmt::Type::Forward, 4 * n, da);
+  fmt::Fmt::Fmt4(fmt::Fmt::Type::Forward, 4 * n, db);
 
   for (int64 i = 0; i < 4 * n; ++i) {
     double ar = da[2 * i], ai = da[2 * i + 1];
@@ -88,7 +88,7 @@ void Mult(const Integer& a, const Integer& b, Integer* c) {
     da[2 * i + 1] = ar * bi + ai * br;
   }
   
-  fmt::Fmt::Fmt4(da, 4 * n, fmt::Fmt::Type::Inverse);
+  fmt::Fmt::Fmt4(fmt::Fmt::Type::Inverse, 4 * n, da);
 
   // Gather double[8n] -> int[2n]
   c->size_ = 2 * n;

@@ -11,9 +11,12 @@ class Fmt {
     Forward,
     Inverse,
   };
+
+  // Compute DFT of |da|.
+  static void Fft(const Type type, const int64 n, double* da);
   
-  // Convert 
-  static void Fmt4(double* da, const int64 n, const Type type);
+  // Compute DWT of |da| with using q=1/4.
+  static void Fmt4(const Type type, const int64 n, double* da);
 };
 
 }  // namespace fmt
