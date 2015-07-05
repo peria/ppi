@@ -4,11 +4,11 @@ add_library(ppi_number integer.cc)
 
 # ----------------------------------------------------------------------
 
-function(ppi_number_add_test target)
+function(ppi_number_test target)
   add_executable(${target}_test ${target}_test.cc)
   target_link_libraries(${target}_test gtest gtest_main)
   target_link_libraries(${target}_test ppi_base)
   ppi_target_link_libraries(${target}_test)
 endfunction()
 
-ppi_number_add_test(integer)
+ppi_number_test(integer)
