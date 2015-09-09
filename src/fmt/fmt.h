@@ -5,6 +5,11 @@
 namespace ppi {
 namespace fmt {
 
+struct Complex {
+  double real;
+  double imag;
+};
+
 class Fmt {
  public:
   enum Type {
@@ -12,11 +17,12 @@ class Fmt {
     Inverse,
   };
 
-  // Compute DFT of |da|.
-  static void Fft(const Type type, const int64 n, double* da);
-  
   // Compute DWT of |da| with using q=1/4.
-  static void Fmt4(const Type type, const int64 n, double* da);
+  static void Fmt4(const Type type, const int64 n, double da[]);
+
+ protected:
+  // Compute DFT of |da|.
+  static void Fft(const Type type, const int64 n, Complex a[]);
 };
 
 }  // namespace fmt

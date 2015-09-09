@@ -25,4 +25,10 @@ using uint8  = std::uint8_t;
 // TODO: Check if build_type is release or not.
 #define DCHECK_EQ(a, b) assert((a) == (b))
 
+template<typename T>
+T pointer_cast(void* p) {
+  return static_cast<T>(p);
+}
+
+
 }  // namespace ppi
