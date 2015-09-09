@@ -11,7 +11,8 @@ namespace fmt {
 
 namespace {
 const int64 kMaxSize = 1 << 15;
-double work[kMaxSize * 2];
+Complex work[kMaxSize];
+
 }
 
 void Fmt::Fft(const Type type, const int64 n, Complex a[]) {
@@ -22,7 +23,7 @@ void Fmt::Fft(const Type type, const int64 n, Complex a[]) {
   }
 
   Complex* x = a;
-  Complex* y = pointer_cast<Complex*>(work);
+  Complex* y = work;
   for (int64 width = 1, height = n; height > 1;) {
     height /= 2;
     double th = -M_PI / width;
@@ -30,15 +31,15 @@ void Fmt::Fft(const Type type, const int64 n, Complex a[]) {
       double wr = std::cos(th * j);
       double wi = std::sin(th * j);
       for (int64 k = 0; k < height; ++k) {
-        int64 ix0 = height *  2 * j      + k;
-        int64 ix1 = height * (2 * j + 1) + k;
+        int64 ix0 = height * 2 * j + k;
+        int64 ix1 = ix0 + height;
         double x0r = x[ix0].real, x0i = x[ix0].imag;
         double x1r = x[ix1].real, x1i = x[ix1].imag;
         double xwr = x1r * wr - x1i * wi;
         double xwi = x1r * wi + x1i * wr;
 
-        int64 iy0 = height *  j          + k;
-        int64 iy1 = height * (j + width) + k;
+        int64 iy0 = height * j + k;
+        int64 iy1 = iy0 + n / 2;
         y[iy0].real = x0r + xwr;
         y[iy0].imag = x0i + xwi;
         y[iy1].real = x0r - xwr;
@@ -50,7 +51,7 @@ void Fmt::Fft(const Type type, const int64 n, Complex a[]) {
   }
  
   if (x != a)
-    std::memcpy(a, x, sizeof(double) * n * 2);
+    std::memcpy(a, x, sizeof(Complex) * n);
 
   if (type == Type::Inverse) {
     for (int64 i = 0; i < n; ++i) {
