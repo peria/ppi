@@ -1,27 +1,15 @@
 #pragma once
 
 #include "base/base.h"
+#include "fmt/fft.h"
 
 namespace ppi {
 namespace fmt {
 
-struct Complex {
-  double real;
-  double imag;
-};
-
 class Fmt {
  public:
-  enum Type {
-    Forward,
-    Inverse,
-  };
-
-  // Compute DFT of |da|.
-  static void Fft(const Type type, const int64 n, Complex a[]);
-
   // Compute DWT of |da| with using q=1/4.
-  static void Fmt4(const Type type, const int64 n, double da[]);
+  static void Fmt4(const Fft::Type type, const int64 n, double da[]);
 };
 
 }  // namespace fmt
