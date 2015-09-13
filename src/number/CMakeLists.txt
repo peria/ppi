@@ -5,10 +5,8 @@ add_library(ppi_number integer.cc)
 # ----------------------------------------------------------------------
 
 function(ppi_number_test target)
-  add_executable(${target}_test ${target}_test.cc)
-  target_link_libraries(${target}_test gtest gtest_main)
-  target_link_libraries(${target}_test ppi_base)
-  ppi_target_link_libraries(${target}_test)
+  ppi_test(number_${target} ${ARGN})
+  target_link_libraries(number_${target}_test ppi_number)
 endfunction()
 
-ppi_number_test(integer)
+ppi_number_test(integer integer_test.cc)
