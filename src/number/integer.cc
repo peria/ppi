@@ -1,5 +1,10 @@
 #include "number/integer.h"
 
+#include <glog/logging.h>
+
+#include <algorithm>
+#include <cmath>
+
 #include "base/base.h"
 #include "fmt/fmt.h"
 
@@ -33,6 +38,7 @@ void Subtract(const Integer& a, const Integer& b, Integer* c) {
 }
 
 namespace {
+
 const int64 kMaxFFTSize = 1 << 15;
 double g_workarea[2 * kMaxFFTSize];
 
@@ -54,20 +60,25 @@ void Split4In8(const Integer& a, double* da) {
 
 double Gather4(double* da, Integer* a) {
   // TODO: Evaluate the maximum error in the integration.
+  double max_error = 0;
   const int64 n = a->size();
   for (int64 i = 0; i < n; ++i) {
     uint64 ia0 = da[4 * i]     + 0.5;
+    max_error = std::max(max_error, std::abs(ia0 - da[4 * i]));
     uint64 ia1 = da[4 * i + 1] + 0.5;
+    max_error = std::max(max_error, std::abs(ia1 - da[4 * i + 1]));
     uint64 ia2 = da[4 * i + 2] + 0.5;
+    max_error = std::max(max_error, std::abs(ia2 - da[4 * i + 2]));
     uint64 ia3 = da[4 * i + 3] + 0.5;
+    max_error = std::max(max_error, std::abs(ia3 - da[4 * i + 3]));
     a->mantissa_[i] = (ia3 << 45) | (ia2 << 30) | (ia1 << 15) | ia0;
   }
-  return 0;
+  return max_error;
 }
 
 }  // namespace
 
-void Mult(const Integer& a, const Integer& b, Integer* c) {
+double Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = a.size();
 
   double* da = g_workarea;
@@ -92,7 +103,9 @@ void Mult(const Integer& a, const Integer& b, Integer* c) {
 
   // Gather double[8n] -> int[2n]
   c->size_ = 2 * n;
-  Gather4(da, c);
+  double err = Gather4(da, c);
+
+  return err;
 }
 
 }  // namespace number

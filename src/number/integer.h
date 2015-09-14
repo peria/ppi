@@ -21,7 +21,8 @@ void Add(const Integer& a, const Integer& b, Integer* c);
 void Subtract(const Integer& a, const Integer& b, Integer* c);
 
 // c[2n] = a[n] * b[n]
-void Mult(const Integer& a, const Integer& b, Integer* c);
+// Returns the maximum error in rounding.
+double Mult(const Integer& a, const Integer& b, Integer* c);
 
 }  // namespace number
 }  // namespace ppi
