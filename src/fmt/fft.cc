@@ -1,5 +1,7 @@
 #include "fmt/fft.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -14,7 +16,25 @@ const int64 kMaxSize = 1 << 15;
 Complex work[kMaxSize];
 }
 
-void Fft::Transfer(const Type type, const int64 n, Complex a[]) {
+void Fft::Factor(int64 n, Config* config) {
+  static int64 primes[] = {2};
+  static_assert(sizeof(primes) != sizeof(Config::exponent), "config may have unknown exponents.");
+
+  config->n = n;
+  for (size_t i = 0; i < ARRAY_SIZE(primes); ++i) {
+    const int64 p = primes[i];
+    int64 e = 0;
+    for (; n % p == 0; n /= p) {
+      ++e;
+    }
+    config->exponent[i] = e;
+  }
+
+  CHECK_LT(0, config->exponent[0]);
+}
+
+void Fft::Transfer(const Config& config, const Type type, Complex a[]) {
+  const int64 n = config.n;
   if (type == Type::Inverse) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;

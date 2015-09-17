@@ -16,9 +16,16 @@ class Fft {
     Forward,
     Inverse,
   };
+  struct Config {
+    int64 n;
+    int exponent[3];
+  };
+
+  // Factor n with 2, 3, and 5.
+  static void Factor(int64 n, Config* config);
 
   // Compute DFT of |a|.
-  static void Transfer(const Type type, const int64 n, Complex a[]);
+  static void Transfer(const Config& config, const Type type, Complex a[]);
 };
 
 }  // namespace fmt

@@ -11,6 +11,10 @@ namespace ppi {
 namespace fmt {
 
 void Fmt::Fmt4(const Fft::Type type, const int64 n, double da[]) {
+  // TODO: Move config to out side of this method.
+  Fft::Config config;
+  Fft::Factor(n, &config);
+
   Complex* a = pointer_cast<Complex*>(da);
   if (type == Fft::Type::Forward) {
     double th = M_PI / 2; // q = 1/4
@@ -24,7 +28,7 @@ void Fmt::Fmt4(const Fft::Type type, const int64 n, double da[]) {
     }
   }
 
-  Fft::Transfer(type, n, a);
+  Fft::Transfer(config, type, a);
 
   if (type == Fft::Type::Inverse) {
     double th = -M_PI / 2; // q = 1/4
