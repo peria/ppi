@@ -11,7 +11,25 @@
 namespace ppi {
 namespace number {
 
-void Add(const Integer& a, const Integer& b, Integer* c) {
+namespace {
+
+const int64 kMaxFFTSize = 1 << 15;
+double g_workarea[2 * kMaxFFTSize];
+const int kMaskBitSize = 16;
+const uint64 kMask = (1ULL << kMaskBitSize) - 1;
+
+}  // namespace
+
+void Integer::assign(uint64* mantissa, int64 sz) {
+  mantissa_ = mantissa;
+  size_ = sz;
+}
+
+void Integer::Set(int64 i, const uint64& limb) {
+  mantissa_[i] = limb;
+}
+
+void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   DCHECK_EQ(a.size(), b.size());
 
   const int64 n = a.size();
@@ -24,7 +42,7 @@ void Add(const Integer& a, const Integer& b, Integer* c) {
   }
 }
 
-void Subtract(const Integer& a, const Integer& b, Integer* c) {
+void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   DCHECK_EQ(a.size(), b.size());
 
   const int64 n = a.size();
@@ -37,48 +55,7 @@ void Subtract(const Integer& a, const Integer& b, Integer* c) {
   }
 }
 
-namespace {
-
-const int64 kMaxFFTSize = 1 << 15;
-double g_workarea[2 * kMaxFFTSize];
-
-void Split4In8(const Integer& a, double* da) {
-  static const uint64 kMask = (1ULL << 15) - 1;
-  const int64 n = a.size();
-  for (int64 i = 0; i < n; ++i) {
-    uint64 ia = a[i];
-    da[8 * i] = ia & kMask;
-    da[8 * i + 1] = 0;
-    da[8 * i + 2] = (ia >> 15) & kMask;
-    da[8 * i + 3] = 0;
-    da[8 * i + 4] = (ia >> 30) & kMask;
-    da[8 * i + 5] = 0;
-    da[8 * i + 6] = ia >> 45;
-    da[8 * i + 7] = 0;
-  }
-}
-
-double Gather4(double* da, Integer* a) {
-  // TODO: Evaluate the maximum error in the integration.
-  double max_error = 0;
-  const int64 n = a->size();
-  for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = da[4 * i]     + 0.5;
-    max_error = std::max(max_error, std::abs(ia0 - da[4 * i]));
-    uint64 ia1 = da[4 * i + 1] + 0.5;
-    max_error = std::max(max_error, std::abs(ia1 - da[4 * i + 1]));
-    uint64 ia2 = da[4 * i + 2] + 0.5;
-    max_error = std::max(max_error, std::abs(ia2 - da[4 * i + 2]));
-    uint64 ia3 = da[4 * i + 3] + 0.5;
-    max_error = std::max(max_error, std::abs(ia3 - da[4 * i + 3]));
-    a->mantissa_[i] = (ia3 << 45) | (ia2 << 30) | (ia1 << 15) | ia0;
-  }
-  return max_error;
-}
-
-}  // namespace
-
-double Mult(const Integer& a, const Integer& b, Integer* c) {
+double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = a.size();
 
   double* da = g_workarea;
@@ -106,6 +83,58 @@ double Mult(const Integer& a, const Integer& b, Integer* c) {
   double err = Gather4(da, c);
 
   return err;
+}
+
+double Integer::Gather4(double* da, Integer* a) {
+  // TODO: Evaluate the maximum error in the integration.
+  double max_error = 0;
+  const int64 n = a->size();
+  uint64 carry = 0;
+  for (int64 i = 0; i < n; ++i) {
+    // Convert double numbers to integers.
+    uint64 ia0 = da[4 * i]     + 0.5;
+    uint64 ia1 = da[4 * i + 1] + 0.5;
+    uint64 ia2 = da[4 * i + 2] + 0.5;
+    uint64 ia3 = da[4 * i + 3] + 0.5;
+
+    // Compute rounding error.
+    double e0 = std::abs(ia0 - da[4 * i]);
+    double e1 = std::abs(ia1 - da[4 * i + 1]);
+    double e2 = std::abs(ia2 - da[4 * i + 2]);
+    double e3 = std::abs(ia3 - da[4 * i + 3]);
+    max_error = std::max(max_error, std::max(std::max(e0, e1), std::max(e2, e3)));
+
+    // Normalize to fit in kMaskBitSize bits.
+    ia0 += carry;
+    ia1 += (ia0 >> kMaskBitSize);
+    ia2 += (ia1 >> kMaskBitSize);
+    ia3 += (ia2 >> kMaskBitSize);
+    carry = ia3 >> kMaskBitSize;
+
+    // set value
+    ia3 = ((ia3 & kMask) << (kMaskBitSize * 3));
+    ia2 = ((ia2 & kMask) << (kMaskBitSize * 2));
+    ia2 = ((ia1 & kMask) << kMaskBitSize);
+    ia0 = ia0 & kMask;
+
+    a->Set(i, ia3 | ia2 | ia1 | ia0);
+  }
+  return max_error;
+}
+
+void Integer::Split4In8(const Integer& a, double* da) {
+  const int64 n = a.size();
+  for (int64 i = 0; i < n; ++i) {
+    uint64 ia = a[i];
+    da[8 * i] = ia & kMask;
+    da[8 * i + 1] = 0;
+    da[8 * i + 2] = (ia >> kMaskBitSize) & kMask;
+    da[8 * i + 3] = 0;
+    da[8 * i + 4] = (ia >> (kMaskBitSize * 2)) & kMask;
+    da[8 * i + 5] = 0;
+    da[8 * i + 6] = ia >> (kMaskBitSize * 3);
+    da[8 * i + 7] = 0;
+  }
 }
 
 }  // namespace number
