@@ -24,6 +24,9 @@ class Integer {
   static void Split4In8(const Integer& a, double* da);
   static double Gather4(double* da, Integer* a);
 
+  // c[n] = a[n] / b
+  static void Div(const Integer& a, const uint32 b, Integer* c);
+
  protected:
   uint64* mantissa_;
   int64 size_;

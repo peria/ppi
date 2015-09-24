@@ -57,18 +57,23 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
 
 double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = a.size();
+  bool is_square = (&a == &b);
 
   double* da = g_workarea;
   double* db = g_workarea + 8 * n;
 
   // Split int[n] -> double[4n], where doube[4n+1:8n] = 0
   Split4In8(a, da);
-  Split4In8(b, db);
+  if (!is_square)
+    Split4In8(b, db);
 
   // FMT complex[4n]
   fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, da);
-  fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
+  if (!is_square)
+    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
 
+  if (is_square)
+    db = da;
   for (int64 i = 0; i < 4 * n; ++i) {
     double ar = da[2 * i], ai = da[2 * i + 1];
     double br = db[2 * i], bi = db[2 * i + 1];
@@ -134,6 +139,24 @@ void Integer::Split4In8(const Integer& a, double* da) {
     da[8 * i + 5] = 0;
     da[8 * i + 6] = ia >> (kMaskBitSize * 3);
     da[8 * i + 7] = 0;
+  }
+}
+
+void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
+  // TODO: Move these constant values to a header in base/.
+  const int64 kHalfSize = 32;
+  const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
+
+  uint64 limb = 0;
+  for (int64 i = a.size() - 1; i >= 0; --i) {
+    uint64 ia = a[i];
+    limb = (limb << kHalfSize) + (ia >> kHalfSize);
+    uint64 ic = limb / b;
+    limb %= b;
+    limb = (limb << kHalfSize) + (ia & kHalfBitMask);
+    ic = (ic << kHalfSize) + limb / b;
+    limb %= b;
+    c->Set(i, ic);
   }
 }
 

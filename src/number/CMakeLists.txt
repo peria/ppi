@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(ppi_number integer.cc)
+add_library(ppi_number integer.cc real.cc)
 target_link_libraries(ppi_number ppi_fmt)
 
 # ----------------------------------------------------------------------
@@ -11,3 +11,4 @@ function(ppi_number_test target)
 endfunction()
 
 ppi_number_test(integer integer_test.cc)
+#ppi_number_test(real real_test.cc)
