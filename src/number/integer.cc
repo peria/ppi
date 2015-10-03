@@ -142,11 +142,27 @@ void Integer::Split4In8(const Integer& a, double* da) {
   }
 }
 
-void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
-  // TODO: Move these constant values to a header in base/.
-  const int64 kHalfSize = 32;
-  const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
+namespace {
+// TODO: Move these constant values to a header in base/.
+const int64 kHalfSize = 32;
+const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
+}
 
+void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
+  uint64 carry = 0;
+  for (int64 i = 0; i < a.size(); ++i) {
+    uint64 a_low = a[i] & kHalfBitMask;
+    uint64 a_high = a[i] >> kHalfSize;
+    uint64 c_low = a_low * b + carry;
+    uint64 c_high = a_high * b;
+    c->Set(i, c_low + (c_high << kHalfSize));
+    carry = c_high >> kHalfSize;
+    if ((*c)[i] < c_low)
+      ++carry;
+  }
+}
+
+void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
   uint64 limb = 0;
   for (int64 i = a.size() - 1; i >= 0; --i) {
     uint64 ia = a[i];

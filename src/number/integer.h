@@ -18,11 +18,14 @@ class Integer {
   // Computes c[n] = a[n] - b[n]
   static void Subtract(const Integer& a, const Integer& b, Integer* c);
 
-  // c[2n] = a[n] * b[n]
+  // Computes c[2n] = a[n] * b[n]
   // Returns the maximum error in rounding.
   static double Mult(const Integer& a, const Integer& b, Integer* c);
   static void Split4In8(const Integer& a, double* da);
   static double Gather4(double* da, Integer* a);
+
+  // Computes c[n] = a[n] * b.
+  static void Mult(const Integer& a, const uint32 b, Integer* c);
 
   // c[n] = a[n] / b
   static void Div(const Integer& a, const uint32 b, Integer* c);
