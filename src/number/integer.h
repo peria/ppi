@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include "base/base.h"
 
 namespace ppi {
@@ -25,15 +26,19 @@ class Integer {
   static double Gather4(double* da, Integer* a);
 
   // Computes c[n] = a[n] * b.
-  static void Mult(const Integer& a, const uint32 b, Integer* c);
+  static uint64 Mult(const Integer& a, const uint32 b, Integer* c);
 
   // c[n] = a[n] / b
   static void Div(const Integer& a, const uint32 b, Integer* c);
+
+  // TODO: Support decimal output
+  static void Show(const Integer& val, std::ostream& os);
 
  protected:
   uint64* mantissa_;
   int64 size_;
 };
+
 
 }  // namespace number
 }  // namespace ppi

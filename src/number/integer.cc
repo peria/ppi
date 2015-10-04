@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ostream>
 
 #include "base/base.h"
 #include "fmt/fmt.h"
@@ -148,7 +149,7 @@ const int64 kHalfSize = 32;
 const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 }
 
-void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
+uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
   uint64 carry = 0;
   for (int64 i = 0; i < a.size(); ++i) {
     uint64 a_low = a[i] & kHalfBitMask;
@@ -160,6 +161,7 @@ void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
     if ((*c)[i] < c_low)
       ++carry;
   }
+  return carry;
 }
 
 void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
@@ -173,6 +175,15 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
     ic = (ic << kHalfSize) + limb / b;
     limb %= b;
     c->Set(i, ic);
+  }
+}
+
+void Integer::Show(const Integer& val, std::ostream& os) {
+  // TODO: Support decimal output
+  static char buffer[50];
+  for (int64 i = val.size() - 1; i >= 0; --i) {
+    sprintf(buffer, "%016x", val[i]);
+    os << buffer;
   }
 }
 

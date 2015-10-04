@@ -11,4 +11,4 @@ function(ppi_number_test target)
 endfunction()
 
 ppi_number_test(integer integer_test.cc)
-#ppi_number_test(real real_test.cc)
+ppi_number_test(real real_test.cc)
