@@ -6,12 +6,21 @@
 namespace ppi {
 namespace number {
 
+// Integer class represents a long integer, using an array of uint64.
+// It usually stores digits in hexadecimal format. 16 hexadecimal digts
+// are stored in a uint64 element.
+// size() shows its length counted in uint64. If size() is zero, then
+// it represents a zero. If size() is negative, then it shows NaN.
 class Integer {
  public:
+  Integer();
+  Integer(uint64* mantissa, int64 sz);
+
+  // Returns the n-th least significant limb.
   uint64& operator[](int64 n) const { return mantissa_[n]; }
-  int64 size() const { return size_; }
+  int64 size() const { return used_size_; }
+  // TODO: deprecated method.
   void assign(uint64* mantissa, int64 sz);
-  void Set(int64 i, const uint64& limb);
 
   // Computes c[n] = a[n] + b[n]
   static void Add(const Integer& a, const Integer& b, Integer* c);
@@ -35,8 +44,11 @@ class Integer {
   static void Show(const Integer& val, std::ostream& os);
 
  protected:
+  void normalize();
+
   uint64* mantissa_;
-  int64 size_;
+  int64 used_size_;
+  int64 allocated_size_;
 };
 
 

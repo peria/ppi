@@ -21,13 +21,29 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 }  // namespace
 
+Integer::Integer()
+    : mantissa_(nullptr), used_size_(0), allocated_size_(0) {}
+
+Integer::Integer(uint64* mantissa, int64 sz)
+    : mantissa_(mantissa), used_size_(0), allocated_size_(sz) {}
+
+// TODO: deprecated method.
 void Integer::assign(uint64* mantissa, int64 sz) {
   mantissa_ = mantissa;
-  size_ = sz;
+  used_size_ = 0;
+  allocated_size_ = sz;
 }
 
-void Integer::Set(int64 i, const uint64& limb) {
-  mantissa_[i] = limb;
+void Integer::normalize() {
+  int sz = used_size_;
+  if (mantissa_[sz - 1]) {
+    while (sz < allocated_size_ && mantissa_[sz])
+      ++sz;
+  } else {
+    while (sz > 0 && !mantissa_[sz - 1])
+      --sz;
+  }
+  used_size_ = sz;
 }
 
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
@@ -85,7 +101,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, da);
 
   // Gather double[8n] -> int[2n]
-  c->size_ = 2 * n;
+  c->used_size_ = 2 * n;
   double err = Gather4(da, c);
 
   return err;
@@ -123,7 +139,7 @@ double Integer::Gather4(double* da, Integer* a) {
     ia2 = ((ia1 & kMask) << kMaskBitSize);
     ia0 = ia0 & kMask;
 
-    a->Set(i, ia3 | ia2 | ia1 | ia0);
+    (*a)[i] = ia3 | ia2 | ia1 | ia0;
   }
   return max_error;
 }
@@ -156,7 +172,7 @@ uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
     uint64 a_high = a[i] >> kHalfSize;
     uint64 c_low = a_low * b + carry;
     uint64 c_high = a_high * b;
-    c->Set(i, c_low + (c_high << kHalfSize));
+    (*c)[i] = c_low + (c_high << kHalfSize);
     carry = c_high >> kHalfSize;
     if ((*c)[i] < c_low)
       ++carry;
@@ -174,15 +190,17 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
     limb = (limb << kHalfSize) + (ia & kHalfBitMask);
     ic = (ic << kHalfSize) + limb / b;
     limb %= b;
-    c->Set(i, ic);
+    (*c)[i] = ic;
   }
+  c->used_size_ = a.size();
+  c->normalize();
 }
 
 void Integer::Show(const Integer& val, std::ostream& os) {
   // TODO: Support decimal output
   static char buffer[50];
   for (int64 i = val.size() - 1; i >= 0; --i) {
-    sprintf(buffer, "%016x", val[i]);
+    sprintf(buffer, "%016lx", val[i]);
     os << buffer;
   }
 }

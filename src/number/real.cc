@@ -22,8 +22,8 @@ double Real::InverseSqrt(uint64 a, Real* val) {
   // TODO: assign memory on tmp.mantissa
   Real tmp;
 
-  val->Set(0, static_cast<uint64>(kPow2_64 / std::sqrt(a)));
-  val->size_ = 1;
+  (*val)[0] = static_cast<uint64>(kPow2_64 / std::sqrt(a));
+  val->used_size_ = 1;
   val->exponent_ = -1;
 
   double max_error = 0;
@@ -33,7 +33,7 @@ double Real::InverseSqrt(uint64 a, Real* val) {
     Mult(tmp, a, &tmp);
 
     // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
-    for (int64 i = 0; i < val->size_; ++i) {
+    for (int64 i = 0; i < val->used_size_; ++i) {
       tmp.mantissa_[i] = ~(tmp.mantissa_[i]);
     }
     // TODO: check carrying up
@@ -56,9 +56,9 @@ void Real::Mult(const Real& a, const uint32 b, Real* c) {
   uint64 carry = Integer::Mult(a, b, c);
   c->exponent_ = a.exponent_;
   if (carry) {
-    c->Set(c->size(), carry);
-    ++c->size_;
+    (*c)[c->size()] = carry;
   }
+  c->normalize();
 }
 
 void Real::Div(const Real& a, const uint32 b, Real* c) {
