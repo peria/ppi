@@ -11,9 +11,7 @@ namespace number {
 TEST(RealTest, DISABLED_InverseSqrt) {
   Real val;
   Real::InverseSqrt(2, &val);
-  std::ostringstream oss;
-  Real::Show(val, oss);
-  LOG(INFO) << oss.str();
+  LOG(INFO) << val;
 }
 
 }  // namespace number

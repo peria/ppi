@@ -183,13 +183,13 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
   c->normalize();
 }
 
-void Integer::Show(const Integer& val, std::ostream& os) {
-  // TODO: Support decimal output
+std::ostream& operator<<(std::ostream& os, const Integer& val) {
   static char buffer[50];
   for (int64 i = val.size() - 1; i >= 0; --i) {
     sprintf(buffer, "%016lx", val[i]);
     os << buffer;
   }
+  return os;
 }
 
 }  // namespace number

@@ -23,13 +23,13 @@ class Real : public Integer {
   // Computes a/b.
   static void Div(const Real& a, const uint32 b, Real* c);
 
-  static void Show(const Real& val, std::ostream& os);
-
   int64 exponent() const { return exponent_; }
 
  protected:
   int64 exponent_;
 };
+
+std::ostream& operator<<(std::ostream& os, const Real& a);
 
 }  // namespace number
 }  // namespace ppi

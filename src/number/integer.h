@@ -42,6 +42,7 @@ class Integer : public std::vector<uint64> {
   void normalize();
 };
 
+std::ostream& operator<<(std::ostream& os, const Integer& val);
 
 }  // namespace number
 }  // namespace ppi
