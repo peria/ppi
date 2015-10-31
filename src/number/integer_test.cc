@@ -13,9 +13,9 @@ TEST(IntegerTest, ErrorInMult) {
   for (int i = 0; i < 2 * n; ++i)
     storage[i] = 0x123456789abcdefULL;
 
-  a.assign(storage, n);
-  b.assign(storage + n, n);
-  c.assign(storage + 2 * n, 2 * n);
+  a.resize(n);
+  b.resize(n);
+  c.resize(2 * n);
 
   double err = Integer::Mult(a, b, &c);
   EXPECT_GT(1e-2, err);

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdio>
 #include <ostream>
+#include <vector>
 
 #include "base/base.h"
 
@@ -19,11 +20,10 @@ const double kPow2_64 = 18446744073709551616.0;  // 2^64
 }  // namespace
 
 double Real::InverseSqrt(uint64 a, Real* val) {
-  // TODO: assign memory on tmp.mantissa
   Real tmp;
 
   (*val)[0] = static_cast<uint64>(kPow2_64 / std::sqrt(a));
-  val->used_size_ = 1;
+  val->resize(1);
   val->exponent_ = -1;
 
   double max_error = 0;
@@ -33,11 +33,11 @@ double Real::InverseSqrt(uint64 a, Real* val) {
     Mult(tmp, a, &tmp);
 
     // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
-    for (int64 i = 0; i < val->used_size_; ++i) {
-      tmp.mantissa_[i] = ~(tmp.mantissa_[i]);
+    for (size_t i = 0; i < val->size(); ++i) {
+      tmp[i] = ~tmp[i];
     }
     // TODO: check carrying up
-    ++(tmp.mantissa_[0]);
+    ++tmp[0];
 
     Div(tmp, 2, &tmp);
     Add(*val, tmp, val);

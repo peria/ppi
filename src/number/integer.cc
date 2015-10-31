@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ostream>
+#include <vector>
 
 #include "base/base.h"
 #include "fmt/fmt.h"
@@ -21,29 +22,15 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 }  // namespace
 
-Integer::Integer()
-    : mantissa_(nullptr), used_size_(0), allocated_size_(0) {}
-
-Integer::Integer(uint64* mantissa, int64 sz)
-    : mantissa_(mantissa), used_size_(0), allocated_size_(sz) {}
-
-// TODO: deprecated method.
-void Integer::assign(uint64* mantissa, int64 sz) {
-  mantissa_ = mantissa;
-  used_size_ = 0;
-  allocated_size_ = sz;
-}
+Integer::Integer() : std::vector<uint64>() {}
 
 void Integer::normalize() {
-  int sz = used_size_;
-  if (mantissa_[sz - 1]) {
-    while (sz < allocated_size_ && mantissa_[sz])
-      ++sz;
-  } else {
-    while (sz > 0 && !mantissa_[sz - 1])
-      --sz;
+  int64 i = size() - 1;
+  while (i >= 0 && at(i) == 0) {
+    --i;
   }
-  used_size_ = sz;
+  ++i;
+  erase(begin() + i, end());
 }
 
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
@@ -54,8 +41,8 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   for (int64 i = 0; i < n; ++i) {
     uint64 s = b[i] + carry;
     carry = (s < b[i]) ? 1 : 0;
-    c->mantissa_[i] = a[i] + s;
-    carry += (c->mantissa_[i] < s) ? 1 : 0;
+    (*c)[i] = a[i] + s;
+    carry += ((*c)[i] < s) ? 1 : 0;
   }
 }
 
@@ -67,8 +54,8 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   for (int64 i = 0; i < n; ++i) {
     uint64 s = a[i] - carry;
     carry = (s > a[i]) ? 1 : 0;
-    c->mantissa_[i] = s - b[i];
-    carry += (c->mantissa_[i] > s) ? 1 : 0;
+    (*c)[i] = s - b[i];
+    carry += ((*c)[i] > s) ? 1 : 0;
   }
 }
 
@@ -101,7 +88,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, da);
 
   // Gather double[8n] -> int[2n]
-  c->used_size_ = 2 * n;
+  c->resize(2 * n);
   double err = Gather4(da, c);
 
   return err;
@@ -167,7 +154,7 @@ const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 
 uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
   uint64 carry = 0;
-  for (int64 i = 0; i < a.size(); ++i) {
+  for (size_t i = 0; i < a.size(); ++i) {
     uint64 a_low = a[i] & kHalfBitMask;
     uint64 a_high = a[i] >> kHalfSize;
     uint64 c_low = a_low * b + carry;
@@ -192,7 +179,7 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
     limb %= b;
     (*c)[i] = ic;
   }
-  c->used_size_ = a.size();
+  c->resize(a.size());
   c->normalize();
 }
 
