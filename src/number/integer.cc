@@ -17,6 +17,7 @@ namespace {
 
 const int64 kMaxFFTSize = 1 << 15;
 double g_workarea[2 * kMaxFFTSize];
+
 const int kMaskBitSize = 16;
 const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
@@ -92,46 +93,56 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
 
   // Gather double[8n][2] -> int[2n]
   c->resize(2 * n);
-  double err = Gather4(da, c);
+  double err = Gather4In8(da, c);
 
   return err;
 }
 
-double Integer::Gather4(double* da, Integer* a) {
-  // TODO: Evaluate the maximum error in the integration.
-  double max_error = 0;
-  const int64 n = a->size();
-  uint64 carry = 0;
-  for (int64 i = 0; i < n; ++i) {
-    // Convert double numbers to integers.
-    uint64 ia0 = da[4 * i]     + 0.5;
-    uint64 ia1 = da[4 * i + 1] + 0.5;
-    uint64 ia2 = da[4 * i + 2] + 0.5;
-    uint64 ia3 = da[4 * i + 3] + 0.5;
+double Integer::Gather4In8(double* da, Integer* a) {
+  DCHECK_EQ(0, a->size() % 2);
+  const int64 n = a->size() / 2;
 
-    // Compute rounding error.
-    double e0 = std::abs(ia0 - da[4 * i]);
-    double e1 = std::abs(ia1 - da[4 * i + 1]);
-    double e2 = std::abs(ia2 - da[4 * i + 2]);
-    double e3 = std::abs(ia3 - da[4 * i + 3]);
-    max_error = std::max(max_error, std::max(std::max(e0, e1), std::max(e2, e3)));
-
-    // Normalize to fit in kMaskBitSize bits.
-    ia0 += carry;
-    ia1 += (ia0 >> kMaskBitSize);
-    ia2 += (ia1 >> kMaskBitSize);
-    ia3 += (ia2 >> kMaskBitSize);
-    carry = ia3 >> kMaskBitSize;
-
-    // set value
-    ia3 = ((ia3 & kMask) << (kMaskBitSize * 3));
-    ia2 = ((ia2 & kMask) << (kMaskBitSize * 2));
-    ia2 = ((ia1 & kMask) << kMaskBitSize);
-    ia0 = ia0 & kMask;
-
-    (*a)[i] = ia3 | ia2 | ia1 | ia0;
+  double err = 0;
+  // 1. Dobule -> integral double
+  for (int64 i = 0; i < 8 * n; ++i) {
+    double dd = da[i];
+    da[i] = std::floor(dd + 0.5);
+    double e = std::abs(dd - da[i]);
+    err = std::max(e, err);
   }
-  return max_error;
+
+  // 2. Normalize & re-alignment
+  uint64 carry = 0;
+  double* d = da;
+  for (int64 i = 0; i < n; ++i) {
+    uint64 ia0 = d[0], ia1 = d[2], ia2 = d[4], ia3 = d[6];
+    ia0 += carry;
+    ia1 += ia0 >> kMaskBitSize;
+    ia2 += ia1 >> kMaskBitSize;
+    ia3 += ia2 >> kMaskBitSize;
+    carry = ia3 >> kMaskBitSize;
+    ia0 &= kMask;
+    ia1 &= kMask;
+    ia2 &= kMask;
+    (*a)[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
+    d += 8;
+  }
+  d = da;
+  for (int64 i = 0; i < n; ++i) {
+    uint64 ia0 = d[1], ia1 = d[3], ia2 = d[5], ia3 = d[7];
+    ia0 += carry;
+    ia1 += ia0 >> kMaskBitSize;
+    ia2 += ia1 >> kMaskBitSize;
+    ia3 += ia2 >> kMaskBitSize;
+    carry = ia3 >> kMaskBitSize;
+    ia0 &= kMask;
+    ia1 &= kMask;
+    ia2 &= kMask;
+    (*a)[i + n] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
+    d += 8;
+  }
+
+  return err;
 }
 
 void Integer::Split4In8(const Integer& a, double* da) {

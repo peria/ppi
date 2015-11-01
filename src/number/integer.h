@@ -37,9 +37,18 @@ class Integer : public std::vector<uint64> {
   static void Show(const Integer& val, std::ostream& os);
 
  protected:
-  static void Split4In8(const Integer& a, double* da);
-  static double Gather4(double* da, Integer* a);
   void normalize();
+
+  // static ----------------------------------------------------------
+
+  // Split a[n] into d[4n*2]. If a[i] represents 0x1234567890ABCDEF,
+  // da[8*i..8*i+7] will be {0xCDEF, 0,  0x90AB, 0,  0x5678, 0,  0x1234, 0}.
+  static void Split4In8(const Integer& a, double* da);
+
+  // Gather d[4n*2] into a[2n]. (Length is specified by a.size())
+  // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then
+  // a[2*i] = 0x7000500030001, a[2*i+n] = 0x8000600040002.
+  static double Gather4In8(double* da, Integer* a);
 };
 
 std::ostream& operator<<(std::ostream& os, const Integer& val);

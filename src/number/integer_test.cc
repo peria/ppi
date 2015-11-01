@@ -6,6 +6,12 @@
 namespace ppi {
 namespace number {
 
+class IntegerForTest : public Integer {
+ public:
+  using Integer::Split4In8;
+  using Integer::Gather4In8;
+};
+
 TEST(IntegerTest, ErrorInMult) {
   const int n = 64;
   Integer a, b, c;
@@ -18,6 +24,26 @@ TEST(IntegerTest, ErrorInMult) {
 
   double err = Integer::Mult(a, b, &c);
   EXPECT_GT(1e-2, err);
+}
+
+TEST(IntegerTest, SplitAndGather) {
+  Integer a;
+  double d[4 * 2];
+  a.push_back(0x1234567890abcdefULL);
+
+  // Integer -> double[4][2]
+  IntegerForTest::Split4In8(a, d);
+  EXPECT_EQ(static_cast<double>(0xcdef), d[0]);
+  EXPECT_EQ(static_cast<double>(0x90ab), d[2]);
+  EXPECT_EQ(static_cast<double>(0x5678), d[4]);
+  EXPECT_EQ(static_cast<double>(0x1234), d[6]);
+
+  // double[4][2] -> Integer
+  Integer b;
+  b.resize(2);
+  IntegerForTest::Gather4In8(d, &b);
+  EXPECT_EQ(0x1234567890abcdefULL, b[0]);
+  EXPECT_EQ(0ULL, b[1]);
 }
 
 TEST(IntegerTest, Mult) {
