@@ -33,6 +33,7 @@ void Integer::normalize() {
   erase(begin() + i, end());
 }
 
+// static
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   DCHECK_EQ(a.size(), b.size());
 
@@ -46,6 +47,7 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   }
 }
 
+// static
 void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   DCHECK_EQ(a.size(), b.size());
 
@@ -59,6 +61,7 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   }
 }
 
+// static
 double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = a.size();
   bool is_square = (&a == &b);
@@ -66,18 +69,18 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   double* da = g_workarea;
   double* db = g_workarea + 8 * n;
 
-  // Split int[n] -> double[4n], where doube[4n+1:8n] = 0
+  // Split uint64[n] -> double[4n][2], where double[*][1] == 0
   Split4In8(a, da);
-  if (!is_square)
-    Split4In8(b, db);
-
-  // FMT complex[4n]
+  // FMT it, with q=1/4
   fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, da);
-  if (!is_square)
-    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
 
-  if (is_square)
+  if (is_square) {
     db = da;
+  } else {
+    Split4In8(b, db);
+    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
+  }
+
   for (int64 i = 0; i < 4 * n; ++i) {
     double ar = da[2 * i], ai = da[2 * i + 1];
     double br = db[2 * i], bi = db[2 * i + 1];
@@ -87,7 +90,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   
   fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, da);
 
-  // Gather double[8n] -> int[2n]
+  // Gather double[8n][2] -> int[2n]
   c->resize(2 * n);
   double err = Gather4(da, c);
 
