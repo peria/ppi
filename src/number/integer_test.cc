@@ -48,19 +48,45 @@ TEST(IntegerTest, SplitAndGather) {
 
 TEST(IntegerTest, Mult) {
   Integer a, b, c;
-  a.push_back(0x123456789abcdef0ULL);
-  a.push_back(0x13579bdf2468ace0ULL);
-  b.push_back(0x0fedcba987654321ULL);
-  b.push_back(0x1234567890123456ULL);
-  EXPECT_EQ(2, static_cast<int>(a.size()));
-  EXPECT_EQ(2, static_cast<int>(b.size()));
+
+  // Each number fits in splitted elements.
+  a.push_back(0x1234ULL);
+  b.push_back(0x1234ULL);
+  Integer::Mult(a, b, &c);
+  ASSERT_EQ(2, static_cast<int>(c.size()));
+  EXPECT_EQ(0x1234ULL * 0x1234ULL, c[0]);
+  EXPECT_EQ(0ULL, c[1]);
+
+  // The result is in a limb.
+  a[0] = 0xabcd1234ULL;
+  b[0] = 0x98765432ULL;
+  Integer::Mult(a, b, &c);
+  ASSERT_EQ(2, static_cast<int>(c.size()));
+  EXPECT_EQ(0xabcd1234ULL * 0x98765432ULL, c[0]);
+  EXPECT_EQ(0ULL, c[1]);
+
+  // The result is in a limb.
+  a[0] = 0x1000100010001ULL;
+  b[0] = 0x1000100010001ULL;
+  Integer::Mult(a, b, &c);
+  ASSERT_EQ(2, static_cast<int>(c.size()));
+  EXPECT_EQ(0x4000300020001ULL, c[0]);
+  EXPECT_EQ(0x0000100020003ULL, c[1]);
+}
+
+TEST(IntegerTest, LongMult) {
+  Integer a, b, c;
+  a.push_back(0xba686c78678e686bULL);
+  a.push_back(0xac7d868e97d8a076ULL);
+  b.push_back(0x7868d76876b876e8ULL);
+  b.push_back(0x97d6897c7d8976e7ULL);
 
   Integer::Mult(a, b, &c);
   ASSERT_EQ(4, static_cast<int>(c.size()));
-  EXPECT_EQ(0x2236d88fe5618cf0ULL, c[0]);
-  EXPECT_EQ(0x9cdc93c31e3064c2ULL, c[1]);
-  EXPECT_EQ(0xe066ea72819d9ae5ULL, c[2]);
-  EXPECT_EQ(0x01601d49e4337009ULL, c[3]);
+  EXPECT_EQ(0xc5ec27cddc17f2f8ULL, c[0]);
+  EXPECT_EQ(0x072b6856aa68cfceULL, c[1]);
+  EXPECT_EQ(0x1ae057afe5749b51ULL, c[2]);
+  EXPECT_EQ(0x664e97efa5291c0fULL, c[3]);
 }
 
 }  // namespace number

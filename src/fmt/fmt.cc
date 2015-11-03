@@ -17,7 +17,7 @@ void Fmt::Fmt4(const Fft::Type type, const int64 n, double da[]) {
 
   Complex* a = pointer_cast<Complex*>(da);
   if (type == Fft::Type::Forward) {
-    double th = M_PI / 2; // q = 1/4
+    double th = M_PI / (2 * n); // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
       double ai = a[i].imag;
@@ -31,7 +31,7 @@ void Fmt::Fmt4(const Fft::Type type, const int64 n, double da[]) {
   Fft::Transfer(config, type, a);
 
   if (type == Fft::Type::Inverse) {
-    double th = -M_PI / 2; // q = 1/4
+    double th = -M_PI / (2 * n); // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
       double ai = a[i].imag;

@@ -65,7 +65,6 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
 // static
 double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = a.size();
-  bool is_square = (&a == &b);
 
   double* da = g_workarea;
   double* db = g_workarea + 8 * n;
@@ -75,7 +74,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   // FMT it, with q=1/4
   fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, da);
 
-  if (is_square) {
+  if (&a == &b) {
     db = da;
   } else {
     Split4In8(b, db);
