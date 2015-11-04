@@ -16,14 +16,23 @@ class Real : public Integer {
   // Computes 1/\sqrt{a}.  Returns the maximum rounding error.
   static double InverseSqrt(uint64 a, Real* val);
 
-  // Computes a/b 
+  // Comptues c=a+b
+  static void Add(const Real& a, const Real& b, Real* c);
+  // Computes c+=a
+  static void Add(const Real& a, Real* c);
+  
+  // Computes c=a*b 
   static double Mult(const Real& a, const Real& b, Real* c);
   static void Mult(const Real& a, const uint32 b, Real* c);
 
-  // Computes a/b.
+  // Computes c=a/b.
   static void Div(const Real& a, const uint32 b, Real* c);
 
   int64 exponent() const { return exponent_; }
+
+  // TODO: Implement precision independent from size().
+  size_t precision() const { return size(); }
+  void setPrecision(int64 prec);
 
  protected:
   int64 exponent_;

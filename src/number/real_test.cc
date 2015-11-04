@@ -14,7 +14,7 @@ TEST(RealTest, InverseSqrt) {
   std::ostringstream oss;
   oss << val;
 
-  const std::string expect = "0.b504f333f9d";
+  const std::string expect = "0.b504f333f9de648459";
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));
 }
 
