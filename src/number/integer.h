@@ -23,7 +23,9 @@ class Integer : public std::vector<uint64> {
   // Computes c[n] = a[n] - b[n]
   static void Subtract(const Integer& a, const Integer& b, Integer* c);
 
-  // Computes c[2n] = a[n] * b[n]. Returns the maximum error in rounding.
+  // Computes c[f(n+m)] = a[n] * b[m].  f(x) is the least power of 2,
+  // which is greater than or equal to x.
+  // Returns the maximum error in rounding.
   static double Mult(const Integer& a, const Integer& b, Integer* c);
 
   // Computes c[n] = a[n] * b. Returns a carried limb.
@@ -41,9 +43,13 @@ class Integer : public std::vector<uint64> {
 
   // static ----------------------------------------------------------
 
-  // Split a[n] into d[4n*2]. If a[i] represents 0x1234567890ABCDEF,
-  // da[8*i..8*i+7] will be {0xCDEF, 0,  0x90AB, 0,  0x5678, 0,  0x1234, 0}.
-  static void Split4In8(const Integer& a, double* da);
+  // Split a[m] into d[4n][2], where m <= 2*n.
+  // If a[i] is 0x1234567890ABCDEF,
+  // da[4*i..4*i+3][0] will be {0xCDEF, 0x90AB, 0x5678, 0x1234},
+  // and a[j+n] is 0x1234567890ABCDEF,
+  // da[4*j..4*j+3][1] will be {0xCDEF, 0x90AB, 0x5678, 0x1234}.
+  // Other valus will be filled with 0.
+  static void Split4In8(const Integer& a, const int64 n, double* da);
 
   // Gather d[4n*2] into a[2n]. (Length is specified by a.size())
   // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then

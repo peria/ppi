@@ -27,16 +27,17 @@ double Real::InverseSqrt(uint64 a, Real* val) {
   (*val)[0] = static_cast<uint64>(kPow2_64 / std::sqrt(a));
 
   double max_error = 0;
-  for (int64 k = 0; k < 5; ++k) {
+  // TODO: Set loop count depending on the precision of val.
+  for (int64 k = 0; k < 10; ++k) {
     double err = Mult(*val, *val, &tmp);
     max_error = std::max(err, max_error);
     Mult(tmp, a, &tmp);
 
-    LOG(INFO) << tmp;
     // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
     for (size_t i = 0; i < tmp.size(); ++i) {
       tmp[i] = ~tmp[i];
     }
+    tmp.normalize();
     for (size_t i = 0; i < tmp.size(); ++i) {
       if (++tmp[i])
         break;
@@ -48,9 +49,13 @@ double Real::InverseSqrt(uint64 a, Real* val) {
     // FIXME: in this multiplication, &tmp needs to be extended.
     // Currently, the size of |tmp| is not updated.
     Mult(*val, tmp, &tmp);
+    tmp.normalize();
 
     val->setPrecision(tmp.precision());
     Add(*val, tmp, val);
+    if (k == 3) {
+      val->setPrecision(1 << 3);
+    }
   }
   
   return max_error;
@@ -72,7 +77,7 @@ void Real::Add(const Real& a, Real* c) {
   int64 c_lead = c->size() + c->exponent();
 
   uint64 carry = 0;
-  if (a_lead < c_lead) {
+  if (a_lead <= c_lead) {
     size_t ia = 0, ic = 0;
     if (a.exponent() >= c->exponent()) {
       // a:    xxxxxxxx
@@ -94,6 +99,7 @@ void Real::Add(const Real& a, Real* c) {
       carry = ((*c)[ic] == 0) ? 1 : 0;
     }
   } else {
+
   }
 
   if (carry) {

@@ -62,22 +62,39 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   }
 }
 
+namespace {
+
+int64 MinPow2(int64 n) {
+  static const int64 kCandidates[] = {
+      1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7,
+      1 << 8, 1 << 9, 1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14,
+      1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 21,
+      1 << 22, 1 << 23, 1 << 24, 1 << 25, 1 << 26, 1 << 27, 1 << 28,
+      1 << 29, 1 << 30,};
+  return *std::lower_bound(kCandidates,
+                           kCandidates + ARRAY_SIZE(kCandidates), n);
+}
+
+}
+
 // static
 double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
-  const int64 n = a.size();
+  const int64 na = a.size();
+  const int64 nb = b.size();
+  const int64 n = MinPow2(na + nb) / 2;
 
   double* da = g_workarea;
   double* db = g_workarea + 8 * n;
 
-  // Split uint64[n] -> double[4n][2], where double[*][1] == 0
-  Split4In8(a, da);
+  // Split uint64[na] -> double[4n][2]
+  Split4In8(a, n, da);
   // FMT it, with q=1/4
   fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, da);
 
   if (&a == &b) {
     db = da;
   } else {
-    Split4In8(b, db);
+    Split4In8(b, n, db);
     fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
   }
 
@@ -144,18 +161,23 @@ double Integer::Gather4In8(double* da, Integer* a) {
   return err;
 }
 
-void Integer::Split4In8(const Integer& a, double* da) {
-  const int64 n = a.size();
-  for (int64 i = 0; i < n; ++i) {
+void Integer::Split4In8(const Integer& a, const int64 n, double* da) {
+  std::fill_n(da, n * 8, 0.0);
+
+  const int64 na = a.size();
+  for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
     da[8 * i] = ia & kMask;
-    da[8 * i + 1] = 0;
     da[8 * i + 2] = (ia >> kMaskBitSize) & kMask;
-    da[8 * i + 3] = 0;
     da[8 * i + 4] = (ia >> (kMaskBitSize * 2)) & kMask;
-    da[8 * i + 5] = 0;
     da[8 * i + 6] = ia >> (kMaskBitSize * 3);
-    da[8 * i + 7] = 0;
+  }
+  for (int64 i = n, j = 0; i < na; ++i, ++j) {
+    uint64 ia = a[i];
+    da[8 * j + 1] = ia & kMask;
+    da[8 * j + 3] = (ia >> kMaskBitSize) & kMask;
+    da[8 * j + 5] = (ia >> (kMaskBitSize * 2)) & kMask;
+    da[8 * j + 7] = ia >> (kMaskBitSize * 3);
   }
 }
 
