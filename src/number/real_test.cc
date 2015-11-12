@@ -7,9 +7,9 @@
 namespace ppi {
 namespace number {
 
-// Segmentation fault, some Real instances have no memory for mantissa_.
 TEST(RealTest, InverseSqrt) {
   Real val;
+  val.setPrecision(10);
   Real::InverseSqrt(2, &val);
   std::ostringstream oss;
   oss << val;

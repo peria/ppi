@@ -16,19 +16,21 @@ namespace number {
 namespace {
 
 const double kPow2_64 = 18446744073709551616.0;  // 2^64
+const double kPow2_m64 = 1.0 / kPow2_64;
 
 }  // namespace
 
 double Real::InverseSqrt(uint64 a, Real* val) {
   Real tmp;
+  int64 length = val->precision();
 
-  val->resize(1);
-  val->exponent_ = -1;
-  (*val)[0] = static_cast<uint64>(kPow2_64 / std::sqrt(a));
+  // Initialize
+  *val = 1.0 / std::sqrt(a);
 
   double max_error = 0;
-  // TODO: Set loop count depending on the precision of val.
-  for (int64 k = 0; k < 10; ++k) {
+  for (int64 k = 1; k < length;) {
+    k *= 2;
+    tmp.setPrecision(k);
     double err = Mult(*val, *val, &tmp);
     max_error = std::max(err, max_error);
     Mult(tmp, a, &tmp);
@@ -37,26 +39,27 @@ double Real::InverseSqrt(uint64 a, Real* val) {
     for (size_t i = 0; i < tmp.size(); ++i) {
       tmp[i] = ~tmp[i];
     }
-    tmp.normalize();
+    tmp.Normalize();
     for (size_t i = 0; i < tmp.size(); ++i) {
       if (++tmp[i])
         break;
     }
     if (tmp.back() == 0)
       tmp.push_back(1);
-    
+
     Div(tmp, 2, &tmp);
     // FIXME: in this multiplication, &tmp needs to be extended.
     // Currently, the size of |tmp| is not updated.
     Mult(*val, tmp, &tmp);
-    tmp.normalize();
+    tmp.Normalize();
 
-    val->setPrecision(tmp.precision());
+    val->setPrecision(k);
     Add(*val, tmp, val);
-    if (k == 3) {
-      val->setPrecision(1 << 3);
-    }
+    LOG(INFO) << *val;
   }
+
+  val->setPrecision(length);
+  val->Normalize();
   
   return max_error;
 }
@@ -78,6 +81,12 @@ void Real::Add(const Real& a, Real* c) {
 
   uint64 carry = 0;
   if (a_lead <= c_lead) {
+    if (c->precision() > c->size()) {
+      int64 diff = c->precision() - c->size();
+      c->insert(c->begin(), diff, 0);
+      c->exponent_ -= diff;
+    }
+
     size_t ia = 0, ic = 0;
     if (a.exponent() >= c->exponent()) {
       // a:    xxxxxxxx
@@ -111,23 +120,66 @@ void Real::Add(const Real& a, Real* c) {
 
 double Real::Mult(const Real& a, const Real& b, Real* c) {
   double err = Integer::Mult(a, b, c);
+  c->precision_ = c->size();
   c->exponent_ = a.exponent_ + b.exponent_;
   return err;
 }
 
 void Real::Mult(const Real& a, const uint32 b, Real* c) {
   uint64 carry = Integer::Mult(a, b, c);
+  c->precision_ = c->size();
   c->exponent_ = a.exponent_;
   if (carry) {
     (*c)[c->size()] = carry;
   }
-  c->normalize();
+  c->Normalize();
 }
 
 void Real::Div(const Real& a, const uint32 b, Real* c) {
   Integer::Div(a, b, c);
   c->exponent_ = a.exponent_;
   // TODO: Shift mantissa and update the exponent, if the leading limb is 0.
+  c->Normalize();
+}
+
+void Real::setPrecision(int64 prec) {
+  int64 diff = precision_ - prec;
+  if (diff == 0)
+    return;
+
+  precision_ = prec;
+  Normalize();
+}
+
+Real& Real::operator=(double d) {
+  DCHECK(d > 0);
+  
+  int64 e = 0;
+  while (d >= kPow2_64) {
+    ++e;
+    d *= kPow2_m64;
+  }
+  while (d < 1) {
+    --e;
+    d *= kPow2_64;
+  }
+
+  resize(1);
+  (*this)[0] = static_cast<uint64>(d);
+  precision_ = 1;
+  exponent_ = e;
+
+  return *this;
+}
+
+void Real::Normalize() {
+  Integer::Normalize();
+
+  int64 diff = size() - precision_;
+  if (diff > 0) {
+    erase(begin(), begin() + diff);
+    exponent_ += diff;
+  }
 }
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {
@@ -137,20 +189,6 @@ std::ostream& operator<<(std::ostream& os, const Real& val) {
     os << " * (2^64)^(" << diff << ")";
   }
   return os;
-}
-
-void Real::setPrecision(int64 prec) {
-  int64 sz = size();
-  int64 diff = sz - prec;
-  if (diff == 0)
-    return;
-
-  if (diff < 0) {
-    insert(begin(), -diff, 0ULL);
-  } else {
-    erase(begin(), begin() + diff);
-  }
-  exponent_ += diff;
 }
 
 }  // namespace number

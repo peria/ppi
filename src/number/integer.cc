@@ -25,7 +25,7 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 Integer::Integer() : std::vector<uint64>() {}
 
-void Integer::normalize() {
+void Integer::Normalize() {
   int64 i = size() - 1;
   while (i >= 0 && at(i) == 0) {
     --i;
@@ -215,7 +215,7 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
     (*c)[i] = ic;
   }
   c->resize(a.size());
-  c->normalize();
+  c->Normalize();
 }
 
 std::ostream& operator<<(std::ostream& os, const Integer& val) {

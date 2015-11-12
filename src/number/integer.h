@@ -39,7 +39,7 @@ class Integer : public std::vector<uint64> {
   static void Show(const Integer& val, std::ostream& os);
 
  protected:
-  void normalize();
+  void Normalize();
 
   // static ----------------------------------------------------------
 
