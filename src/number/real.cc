@@ -55,7 +55,51 @@ double Real::InverseSqrt(uint64 a, Real* val) {
 
     val->setPrecision(k);
     Add(*val, tmp, val);
-    LOG(INFO) << *val;
+  }
+
+  val->setPrecision(length);
+  val->Normalize();
+
+  return max_error;
+}
+
+double Real::Inverse(const Real& a, Real* val) {
+  Real tmp;
+  int64 length = val->precision();
+
+  // If a == 1
+  if (a.size() == 1 && a[0] == 1) {
+    *val = 1;
+    val->exponent_ = -a.exponent();
+    return 0;
+  }
+  
+  // Initialize
+  *val = 1.0 / a.back();
+  val->exponent_ = a.exponent() + a.size() - 1;
+
+  double max_error = 0;
+  for (int64 k = val->size(); k < length;) {
+    k *= 2;
+    tmp.setPrecision(k);
+    double err = Mult(a, *val, &tmp);
+    max_error = std::max(max_error, err);
+
+    // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
+    for (size_t i = 0; i < tmp.size(); ++i) {
+      tmp[i] = ~tmp[i];
+    }
+    tmp.Normalize();
+    for (size_t i = 0; i < tmp.size(); ++i) {
+      if (++tmp[i])
+        break;
+    }
+    if (tmp.back() == 0)
+      tmp.push_back(1);
+
+    Mult(*val, tmp, &tmp);
+    val->setPrecision(k);
+    Add(*val, tmp, val);
   }
 
   val->setPrecision(length);
@@ -120,8 +164,8 @@ void Real::Add(const Real& a, Real* c) {
 
 double Real::Mult(const Real& a, const Real& b, Real* c) {
   double err = Integer::Mult(a, b, c);
-  c->precision_ = c->size();
   c->exponent_ = a.exponent_ + b.exponent_;
+  c->Normalize();
   return err;
 }
 
@@ -164,9 +208,17 @@ Real& Real::operator=(double d) {
     d *= kPow2_64;
   }
 
-  resize(1);
-  (*this)[0] = static_cast<uint64>(d);
-  precision_ = 1;
+  uint64 lead = static_cast<uint64>(d);
+  if (d == static_cast<double>(lead)) {
+    resize(1);
+    (*this)[0] = lead;
+    precision_ = 1;
+  } else {
+    resize(2);
+    (*this)[0] = static_cast<uint64>((d - lead) * kPow2_64);
+    (*this)[1] = lead;
+    precision_ = 2;
+  }
   exponent_ = e;
 
   return *this;

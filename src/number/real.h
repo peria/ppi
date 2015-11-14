@@ -16,6 +16,9 @@ class Real : public Integer {
   // Computes 1/\sqrt{a}.  Returns the maximum rounding error.
   static double InverseSqrt(uint64 a, Real* val);
 
+  // Compute 1/a.
+  static double Inverse(const Real& a, Real* val);
+
   // Comptues c=a+b
   static void Add(const Real& a, const Real& b, Real* c);
   // Computes c+=a
