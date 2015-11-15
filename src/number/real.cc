@@ -191,6 +191,62 @@ void Real::Add(const Real& a, Real* c) {
   }
 }
 
+void Real::Sub(const Real& a, const Real& b, Real* c) {
+  if (&b == c) {
+    Sub(a, c);
+    return;
+  }
+  if (&a == c) {
+    Sub(b, c);
+    return;
+  }
+}
+
+void Real::Sub(const Real& a, Real* c) {
+#if 0  
+  int64 a_lead = a.size() + a.exponent();
+  int64 c_lead = c->size() + c->exponent();
+
+  uint64 carry = 0;
+  if (a_lead <= c_lead) {
+    if (c->precision() > c->size()) {
+      int64 diff = c->precision() - c->size();
+      c->insert(c->begin(), diff, 0);
+      c->exponent_ -= diff;
+    }
+
+    size_t ia = 0, ic = 0;
+    if (a.exponent() >= c->exponent()) {
+      // a:    xxxxxxxx
+      // c: yyyyyyyyyyyyyy
+      ic = a.exponent() - c->exponent();
+    } else {
+      // a:    xxxxxxx
+      // c: yyyyyyy
+      ia = c->exponent() - a.exponent();
+    }
+    for (; ia < a.size() && ic < c->size(); ++ia, ++ic) {
+      uint64 tmp = a[ia] + carry;
+      carry = (tmp < carry) ? 1 : 0;
+      (*c)[ic] += tmp;
+      carry += (tmp > (*c)[ic]) ? 1 : 0;
+    }
+    for (; ic < c->size() && carry; ++ic) {
+      (*c)[ic] += carry;
+      carry = ((*c)[ic] == 0) ? 1 : 0;
+    }
+  } else {
+
+  }
+
+  if (carry) {
+    c->push_back(carry);
+    c->erase(c->begin());
+    ++(c->exponent_);
+  }
+#endif
+}
+
 double Real::Mult(const Real& a, const Real& b, Real* c) {
   double err = Integer::Mult(a, b, c);
   c->exponent_ = a.exponent_ + b.exponent_;

@@ -26,6 +26,11 @@ class Real : public Integer {
   static void Add(const Real& a, const Real& b, Real* c);
   // Computes c+=a
   static void Add(const Real& a, Real* c);
+
+  // Comptues c=a-b
+  static void Sub(const Real& a, const Real& b, Real* c);
+  // Computes c-=a
+  static void Sub(const Real& a, Real* c);
   
   // Computes c=a*b 
   static double Mult(const Real& a, const Real& b, Real* c);
