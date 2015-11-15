@@ -13,6 +13,9 @@ namespace number {
 // |size_| figures its precision.
 class Real : public Integer {
  public:
+  Real();
+  Real(double d);
+  
   // Computes 1/\sqrt{a}.  Returns the maximum rounding error.
   static double InverseSqrt(uint64 a, Real* val);
 
@@ -37,8 +40,6 @@ class Real : public Integer {
   size_t precision() const { return precision_; }
   void setPrecision(int64 prec);
 
-  Real& operator=(double d);
-  
  protected:
   void Normalize();
   

@@ -20,6 +20,35 @@ const double kPow2_m64 = 1.0 / kPow2_64;
 
 }  // namespace
 
+Real::Real() : precision_(0), exponent_(0) {}
+
+Real::Real(double d) {
+  DCHECK(d > 0);
+  
+  int64 e = 0;
+  while (d >= kPow2_64) {
+    ++e;
+    d *= kPow2_m64;
+  }
+  while (d < 1) {
+    --e;
+    d *= kPow2_64;
+  }
+
+  uint64 lead = static_cast<uint64>(d);
+  if (d == static_cast<double>(lead)) {
+    resize(1);
+    (*this)[0] = lead;
+    precision_ = 1;
+  } else {
+    resize(2);
+    (*this)[0] = static_cast<uint64>((d - lead) * kPow2_64);
+    (*this)[1] = lead;
+    precision_ = 2;
+  }
+  exponent_ = e;
+}
+
 double Real::InverseSqrt(uint64 a, Real* val) {
   Real tmp;
   int64 length = val->precision();
@@ -193,35 +222,6 @@ void Real::setPrecision(int64 prec) {
 
   precision_ = prec;
   Normalize();
-}
-
-Real& Real::operator=(double d) {
-  DCHECK(d > 0);
-  
-  int64 e = 0;
-  while (d >= kPow2_64) {
-    ++e;
-    d *= kPow2_m64;
-  }
-  while (d < 1) {
-    --e;
-    d *= kPow2_64;
-  }
-
-  uint64 lead = static_cast<uint64>(d);
-  if (d == static_cast<double>(lead)) {
-    resize(1);
-    (*this)[0] = lead;
-    precision_ = 1;
-  } else {
-    resize(2);
-    (*this)[0] = static_cast<uint64>((d - lead) * kPow2_64);
-    (*this)[1] = lead;
-    precision_ = 2;
-  }
-  exponent_ = e;
-
-  return *this;
 }
 
 void Real::Normalize() {
