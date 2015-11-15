@@ -75,5 +75,6 @@ function(ppi_target_link_libraries target)
 endfunction()
 
 add_subdirectory(base)
-add_subdirectory(number)
 add_subdirectory(fmt)
+add_subdirectory(number)
+add_subdirectory(pi)
