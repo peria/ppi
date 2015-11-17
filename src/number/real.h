@@ -29,8 +29,6 @@ class Real : public Integer {
 
   // Comptues c=a-b
   static void Sub(const Real& a, const Real& b, Real* c);
-  // Computes c-=a
-  static void Sub(const Real& a, Real* c);
   
   // Computes c=a*b 
   static double Mult(const Real& a, const Real& b, Real* c);
@@ -46,7 +44,13 @@ class Real : public Integer {
   void setPrecision(int64 prec);
 
  protected:
+  // Update the number to fill either of following conditions.
+  // - size() == 0
+  // - size() <= precision() && front() != 0 && back() != 0
   void Normalize();
+
+  // Returns the number zeros in tail.
+  int64 TailingZero();
   
   int64 precision_;
   int64 exponent_;

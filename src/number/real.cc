@@ -192,59 +192,55 @@ void Real::Add(const Real& a, Real* c) {
 }
 
 void Real::Sub(const Real& a, const Real& b, Real* c) {
-  if (&b == c) {
-    Sub(a, c);
-    return;
-  }
-  if (&a == c) {
-    Sub(b, c);
-    return;
-  }
-}
-
-void Real::Sub(const Real& a, Real* c) {
-#if 0  
   int64 a_lead = a.size() + a.exponent();
-  int64 c_lead = c->size() + c->exponent();
+  int64 b_lead = b.size() + b.exponent();
 
-  uint64 carry = 0;
-  if (a_lead <= c_lead) {
-    if (c->precision() > c->size()) {
-      int64 diff = c->precision() - c->size();
-      c->insert(c->begin(), diff, 0);
-      c->exponent_ -= diff;
-    }
+  // Assume a > b.
+  // TODO: put ASSERT to check a > b.
 
-    size_t ia = 0, ic = 0;
-    if (a.exponent() >= c->exponent()) {
-      // a:    xxxxxxxx
-      // c: yyyyyyyyyyyyyy
-      ic = a.exponent() - c->exponent();
-    } else {
-      // a:    xxxxxxx
-      // c: yyyyyyy
-      ia = c->exponent() - a.exponent();
-    }
-    for (; ia < a.size() && ic < c->size(); ++ia, ++ic) {
-      uint64 tmp = a[ia] + carry;
-      carry = (tmp < carry) ? 1 : 0;
-      (*c)[ic] += tmp;
-      carry += (tmp > (*c)[ic]) ? 1 : 0;
-    }
-    for (; ic < c->size() && carry; ++ic) {
-      (*c)[ic] += carry;
-      carry = ((*c)[ic] == 0) ? 1 : 0;
-    }
+  // a: xxxxxx
+  // b:        yyyyyy
+  if (a.exponent() > b_lead) {
+    *c = a;
+    return;
+  }
+
+  // Prepare a storage in case c==a or c==b.
+  Real tmp;
+  tmp.exponent_ = std::min(a.exponent(), b.exponent());
+  tmp.resize(a_lead - tmp.exponent());
+
+  size_t ia = 0, ib = 0, ic = 0;
+  if (a.exponent() > b.exponent()) {
+    // a: xxxxxxxxx
+    // b:     yyyyyyyyyy
+    ib = a.exponent() - b.exponent();
+    for (ic = 0; ic < ib; ++ic)
+      tmp[ic] = ~b[ic];
   } else {
-
+    // a: xxxxxxxxx
+    // b:    yyy
+    ia = b.exponent() - a.exponent();
+    for (ic = 0; ic < ia; ++ic)
+      tmp[ic] = a[ic];
+  }
+  uint64 borrow = 0;
+  for (; ib < b.size(); ++ia, ++ib, ++ic) {
+    uint64 t = a[ia] - borrow;
+    borrow = (t > a[ia]) ? 1 : 0;
+    tmp[ic] = t - b[ib];
+    borrow += (tmp[ic] > t) ? 1 : 0;
+  }
+  for (; ia < a.size() && borrow; ++ia, ++ic) {
+    tmp[ic] = a[ia] - borrow;
+    borrow = (tmp[ic] > a[ia]) ? 1 : 0;
+  }
+  for (; ia < a.size(); ++ia, ++ic) {
+    tmp[ic] = a[ia];
   }
 
-  if (carry) {
-    c->push_back(carry);
-    c->erase(c->begin());
-    ++(c->exponent_);
-  }
-#endif
+  *c = tmp;
+  c->Normalize();
 }
 
 double Real::Mult(const Real& a, const Real& b, Real* c) {
@@ -281,13 +277,29 @@ void Real::setPrecision(int64 prec) {
 }
 
 void Real::Normalize() {
+  // Remove leading zeros.
   Integer::Normalize();
 
-  int64 diff = size() - precision_;
+  // Remove tailing zeros.
+  int64 tail = TailingZero();
+  if (tail > 0) {
+    erase(begin(), begin() + tail);
+    exponent_ += tail;
+  }
+
+  // Remove tailing limbs if the mantissa is long.
+  int diff = size() - precision_;
   if (diff > 0) {
     erase(begin(), begin() + diff);
     exponent_ += diff;
   }
+}
+
+int64 Real::TailingZero() {
+  auto itr = begin();
+  while (itr != end() && *itr == 0)
+    ++itr;
+  return itr - begin();
 }
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {
