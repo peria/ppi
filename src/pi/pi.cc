@@ -10,12 +10,12 @@ namespace pi {
 
 double Pi::Arctan2(Real* pi) {
   int64 length = pi->precision();
-  (*pi) = 0;
+  (*pi) = 0.0;
   pi->setPrecision(length);
 
   Real a = 16.0 * 5;
-  Real sum = 0;
-  Real b = 0;
+  Real sum = 0.0;
+  Real b = 0.0;
 
   a.setPrecision(length);
   sum.setPrecision(length);
@@ -28,6 +28,7 @@ double Pi::Arctan2(Real* pi) {
     } else {
       Real::Sub(sum, b, &sum);
     }
+    LOG(INFO) << i;
   }
   Real::Add(*pi, sum, pi);
 
@@ -47,6 +48,7 @@ double Pi::Arctan2(Real* pi) {
     }
   }
   Real::Sub(*pi, sum, pi);
+
   LOG(INFO) << *pi;
 
   return 0;

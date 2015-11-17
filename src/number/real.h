@@ -43,6 +43,8 @@ class Real : public Integer {
   size_t precision() const { return precision_; }
   void setPrecision(int64 prec);
 
+  Real& operator=(double d);
+
  protected:
   // Update the number to fill either of following conditions.
   // - size() == 0

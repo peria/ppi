@@ -22,14 +22,6 @@ using uint32 = std::uint32_t;
 using uint16 = std::uint16_t;
 using uint8  = std::uint8_t;
 
-// TODO: Check if build_type is release or not.
-#define DCHECK_NE(a, b) assert((a) != (b))
-#define DCHECK_EQ(a, b) assert((a) == (b))
-#define DCHECK_LT(a, b) assert((a) < (b))
-#define DCHECK_LE(a, b) assert((a) <= (b))
-#define DCHECK_GT(a, b) assert((a) > (b))
-#define DCHECK_GE(a, b) assert((a) >= (b))
-
 template<typename T>
 T pointer_cast(void* p) {
   return static_cast<T>(p);
