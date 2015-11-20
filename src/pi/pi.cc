@@ -20,7 +20,7 @@ double Pi::Arctan2(Real* pi) {
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 30; ++i) {
     Real::Div(a, 25, &a);
     Real::Div(a, 2 * i + 1, &b);
     if (i % 2 == 0) {
@@ -28,28 +28,25 @@ double Pi::Arctan2(Real* pi) {
     } else {
       Real::Sub(sum, b, &sum);
     }
-    LOG(INFO) << i;
   }
   Real::Add(*pi, sum, pi);
 
-  a = 4 * 239;
-  sum = 0;
-  b = 0;
+  a = 4 * 239.0;
+  sum = 0.0;
+  b = 0.0;
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
   for (int i = 0; i < 10; ++i) {
     Real::Div(a, 239 * 239, &a);
     Real::Div(a, 2 * i + 1, &b);
-    if (i % 2 == 1) {
+    if (i % 2 == 0) {
       Real::Add(sum, b, &sum);
     } else {
       Real::Sub(sum, b, &sum);
     }
   }
   Real::Sub(*pi, sum, pi);
-
-  LOG(INFO) << *pi;
 
   return 0;
 }

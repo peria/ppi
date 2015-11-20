@@ -15,6 +15,7 @@ namespace number {
 class Integer : public std::vector<uint64> {
  public:
   Integer();
+  int64 ssize() const { return static_cast<int64>(size()); }
 
   // APIs -----------------------------------------------------------
   // Computes c[n] = a[n] + b[n]

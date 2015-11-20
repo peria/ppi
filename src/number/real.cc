@@ -143,109 +143,112 @@ double Real::Inverse(const Real& a, Real* val) {
 }
 
 void Real::Add(const Real& a, const Real& b, Real* c) {
-  if (&b == c) {
-    Add(a, c);
-    return;
-  }
-  if (&a == c) {
-    Add(b, c);
-    return;
-  }
-}
-
-void Real::Add(const Real& a, Real* c) {
+  int64 prec = c->precision();
   int64 a_lead = a.size() + a.exponent();
-  int64 c_lead = c->size() + c->exponent();
+  int64 b_lead = b.size() + b.exponent();
+  int64 c_lead = std::max(a_lead, b_lead);
+  int64 c_exp = std::min(a.exponent(), b.exponent());
 
+  Real sum;
+  sum.resize(c_lead - c_exp, 0);
+  sum.exponent_ = c_exp;
+
+  int64 ica = a.exponent() - c_exp;
+  int64 icb = b.exponent() - c_exp;
+  int64 ia = 0, ib = 0, ic = 0;
+  for (; ic < icb && ia < a.ssize(); ++ic, ++ia) {
+    sum[ic] = a[ia];
+  }
+  for (; ic < ica && ib < b.ssize(); ++ic, ++ib) {
+    sum[ic] = b[ib];
+  }
+
+  if (a_lead < b.exponent()) {
+    ic = icb;
+  }
+  if (b_lead < a.exponent()) {
+    ic = ica;
+  }
+  
+  // Now our situation is either of 
+  //   aaaaaa          aaa
+  // +    bbb  or + bbbbbb
   uint64 carry = 0;
-  if (a_lead <= c_lead) {
-    if (c->precision() > c->size()) {
-      int64 diff = c->precision() - c->size();
-      c->insert(c->begin(), diff, 0);
-      c->exponent_ -= diff;
-    }
-
-    size_t ia = 0, ic = 0;
-    if (a.exponent() >= c->exponent()) {
-      // a:    xxxxxxxx
-      // c: yyyyyyyyyyyyyy
-      ic = a.exponent() - c->exponent();
-    } else {
-      // a:    xxxxxxx
-      // c: yyyyyyy
-      ia = c->exponent() - a.exponent();
-    }
-    for (; ia < a.size() && ic < c->size(); ++ia, ++ic) {
-      uint64 tmp = a[ia] + carry;
-      carry = (tmp < carry) ? 1 : 0;
-      (*c)[ic] += tmp;
-      carry += (tmp > (*c)[ic]) ? 1 : 0;
-    }
-    for (; ic < c->size() && carry; ++ic) {
-      (*c)[ic] += carry;
-      carry = ((*c)[ic] == 0) ? 1 : 0;
-    }
-  } else {
-
+  for (; ia < a.ssize() && ib < b.ssize(); ++ia, ++ib, ++ic) {
+    uint64 t = a[ia] + carry;
+    carry = (t < carry) ? 1 : 0;
+    sum[ic] = b[ib] + t;
+    carry += (t > sum[ic]) ? 1 : 0;
   }
-
-  if (carry) {
-    c->push_back(carry);
-    c->erase(c->begin());
-    ++(c->exponent_);
+  for (; ia < a.ssize(); ++ia, ++ic) {
+    sum[ic] = a[ia] + carry;
+    carry = (sum[ic] < carry) ? 1 : 0;
   }
+  for (; ib < b.ssize(); ++ib, ++ic) {
+    sum[ic] = b[ib] + carry;
+    carry = (sum[ic] < carry) ? 1 : 0;
+  }
+  if (carry)
+    sum.push_back(carry);
+
+  sum.setPrecision(prec);
+  sum.Normalize();
+
+  *c = sum;
 }
 
 void Real::Sub(const Real& a, const Real& b, Real* c) {
+  int64 prec = c->precision();
   int64 a_lead = a.size() + a.exponent();
   int64 b_lead = b.size() + b.exponent();
+  int64 c_lead = std::max(a_lead, b_lead);
+  int64 c_exp = std::min(a.exponent(), b.exponent());
 
-  // Assume a > b.
-  // TODO: put ASSERT to check a > b.
+  Real diff;
+  diff.resize(c_lead - c_exp, 0);
+  diff.exponent_ = c_exp;
 
-  // a: xxxxxx
-  // b:        yyyyyy
-  if (a.exponent() > b_lead) {
-    *c = a;
-    return;
-  }
-
-  // Prepare a storage in case c==a or c==b.
-  Real tmp;
-  tmp.exponent_ = std::min(a.exponent(), b.exponent());
-  tmp.resize(a_lead - tmp.exponent());
-
-  size_t ia = 0, ib = 0, ic = 0;
-  if (a.exponent() > b.exponent()) {
-    // a: xxxxxxxxx
-    // b:     yyyyyyyyyy
-    ib = a.exponent() - b.exponent();
-    for (ic = 0; ic < ib; ++ic)
-      tmp[ic] = ~b[ic];
-  } else {
-    // a: xxxxxxxxx
-    // b:    yyy
-    ia = b.exponent() - a.exponent();
-    for (ic = 0; ic < ia; ++ic)
-      tmp[ic] = a[ic];
-  }
   uint64 borrow = 0;
-  for (; ib < b.size(); ++ia, ++ib, ++ic) {
+  int64 ica = a.exponent() - c_exp;
+  int64 icb = b.exponent() - c_exp;
+  int64 ia = 0, ib = 0, ic = 0;
+  for (; ic < icb && ia < a.ssize(); ++ic, ++ia) {
+    diff[ic] = a[ia];
+  }
+  for (; ic < ica && ib < b.ssize(); ++ic, ++ib) {
+    diff[ic] = ~b[ib];
+    borrow = 1;
+  }
+  for (; ic < ica; ++ic) {
+    diff[ic] = ~0ULL;
+    borrow = 1;
+  }
+
+  // Now our situation is
+  //   aaaaaa
+  // -    bbb
+  // because we are assuming a > b.
+  for (; ia < a.ssize() && ib < b.ssize(); ++ia, ++ib, ++ic) {
     uint64 t = a[ia] - borrow;
     borrow = (t > a[ia]) ? 1 : 0;
-    tmp[ic] = t - b[ib];
-    borrow += (tmp[ic] > t) ? 1 : 0;
+    diff[ic] = t - b[ib];
+    borrow += (t < diff[ic]) ? 1 : 0;
   }
-  for (; ia < a.size() && borrow; ++ia, ++ic) {
-    tmp[ic] = a[ia] - borrow;
-    borrow = (tmp[ic] > a[ia]) ? 1 : 0;
+  for (; ia < a.ssize(); ++ia, ++ic) {
+    diff[ic] = a[ia] - borrow;
+    borrow = (diff[ic] > a[ia]) ? 1 : 0;
   }
-  for (; ia < a.size(); ++ia, ++ic) {
-    tmp[ic] = a[ia];
+  for (; ib < b.ssize(); ++ib, ++ic) {
+    uint64 t = -borrow;
+    borrow = (t > 0) ? 1 : 0;
+    diff[ic] = t - b[ib];
+    borrow += (t < diff[ic]) ? 1 : 0;
   }
 
-  *c = tmp;
-  c->Normalize();
+  diff.setPrecision(prec);
+  diff.Normalize();
+
+  *c = diff;
 }
 
 double Real::Mult(const Real& a, const Real& b, Real* c) {
@@ -266,8 +269,17 @@ void Real::Mult(const Real& a, const uint32 b, Real* c) {
 }
 
 void Real::Div(const Real& a, const uint32 b, Real* c) {
-  Integer::Div(a, b, c);
+  int64 prec = c->precision();
+
+  *c = a;
   c->exponent_ = a.exponent_;
+  if (c->precision() > c->size()) {
+    int64 diff = c->precision() - c->size();
+    c->insert(c->begin(), diff, 0);
+    c->exponent_ -= diff;
+  }
+  Integer::Div(*c, b, c);
+  c->setPrecision(prec);
   // TODO: Shift mantissa and update the exponent, if the leading limb is 0.
   c->Normalize();
 }
