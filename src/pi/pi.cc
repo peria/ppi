@@ -1,6 +1,7 @@
 #include "pi/pi.h"
 
 #include <glog/logging.h>
+#include <cmath>
 
 #include "base/base.h"
 #include "number/real.h"
@@ -20,7 +21,8 @@ double Pi::Arctan2(Real* pi) {
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
-  for (int i = 0; i < 30; ++i) {
+  const int64 n5 = length * 16 / (std::log2(25) / 4) + 2;
+  for (int64 i = 0; i < n5; ++i) {
     Real::Div(a, 25, &a);
     Real::Div(a, 2 * i + 1, &b);
     if (i % 2 == 0) {
@@ -37,7 +39,8 @@ double Pi::Arctan2(Real* pi) {
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
-  for (int i = 0; i < 10; ++i) {
+  const int64 n239 = length * 16 / (std::log2(239 * 239) / 4) + 2;
+  for (int64 i = 0; i < n239; ++i) {
     Real::Div(a, 239 * 239, &a);
     Real::Div(a, 2 * i + 1, &b);
     if (i % 2 == 0) {
