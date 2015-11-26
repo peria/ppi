@@ -39,6 +39,8 @@ class Integer : public std::vector<uint64> {
   // TODO: Support decimal output
   static void Show(const Integer& val, std::ostream& os);
 
+  Integer& operator=(uint64 a);
+  
  protected:
   void Normalize();
 

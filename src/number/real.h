@@ -15,6 +15,8 @@ class Real : public Integer {
  public:
   Real();
   Real(double d);
+
+  void fitInteger(int64 n);
   
   // Computes 1/\sqrt{a}.  Returns the maximum rounding error.
   static double InverseSqrt(uint64 a, Real* val);

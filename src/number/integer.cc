@@ -218,6 +218,12 @@ void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
   c->Normalize();
 }
 
+Integer& Integer::operator=(uint64 a) {
+  this->resize(1);
+  (*this)[0] = a;
+  return (*this);
+}
+
 std::ostream& operator<<(std::ostream& os, const Integer& val) {
   static char buffer[50];
   for (int64 i = val.size() - 1; i >= 0; --i) {

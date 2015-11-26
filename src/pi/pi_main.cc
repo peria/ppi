@@ -6,12 +6,21 @@
 #include "pi/pi.h"
 #include "number/real.h"
 
+DEFINE_int32(type, 0, "0:Chudnovsky, 1:arctan");
+
 int main(int argc, char* argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
   ppi::number::Real pi;
   pi.setPrecision(10);
-  ppi::pi::Pi::Arctan2(&pi);
+  switch (FLAGS_type) {
+  case 0:
+    ppi::pi::Pi::Chudnovsky(&pi);
+    break;
+  case 1:
+    ppi::pi::Pi::Arctan2(&pi);
+    break;
+  }
   std::cout << pi << "\n";
   
   return 0;

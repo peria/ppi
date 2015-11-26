@@ -54,6 +54,11 @@ Real::Real(double d) {
   exponent_ = e;
 }
 
+void Real::fitInteger(int64 n) {
+  exponent_ = 0;
+  precision_ = n;
+}
+
 double Real::InverseSqrt(uint64 a, Real* val) {
   Real tmp;
   int64 length = val->precision();
