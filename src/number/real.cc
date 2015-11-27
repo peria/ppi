@@ -114,11 +114,15 @@ double Real::Inverse(const Real& a, Real* val) {
   }
   
   // Initialize
-  *val = 1.0 / a.back();
-  val->exponent_ = a.exponent() + a.size() - 1;
+  double da = a.back();
+  if (a.size() > 1) {
+    da += a[a.size() - 2] * kPow2_m64;
+  }
+  *val = 1.0 / da;
+  val->exponent_ = -(a.exponent() + a.size()) - 1;
 
   double max_error = 0;
-  for (int64 k = val->size(); k < length;) {
+  for (int64 k = val->size(); k < length * 2;) {
     k *= 2;
     tmp.setPrecision(k);
     double err = Mult(a, *val, &tmp);

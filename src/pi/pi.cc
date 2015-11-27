@@ -56,7 +56,7 @@ double Pi::Arctan2(Real* pi) {
 
 double Pi::Chudnovsky(Real* pi) {
   int64 length = pi->precision();
-  int64 n = 2; // # of terms
+  int64 n = 4; // # of terms
 
   int64 half = (n + 1) / 2;
   Real a, b, c;
@@ -71,7 +71,9 @@ double Pi::Chudnovsky(Real* pi) {
   b.setPrecision(len);
   pi->setPrecision(len);
 
+  LOG(INFO) << b;
   Real::Inverse(b, &b);
+  LOG(INFO) << b;
   Real::Mult(a, b, &a);
   Real::InverseSqrt(10005, &b);
   Real::Mult(a, b, pi);
