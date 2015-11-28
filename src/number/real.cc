@@ -103,6 +103,8 @@ double Real::InverseSqrt(uint64 a, Real* val) {
 }
 
 double Real::Inverse(const Real& a, Real* val) {
+  DCHECK(&a != val);
+
   Real tmp;
   int64 length = val->precision();
 
@@ -119,11 +121,10 @@ double Real::Inverse(const Real& a, Real* val) {
     da += a[a.size() - 2] * kPow2_m64;
   }
   *val = 1.0 / da;
-  val->exponent_ = -(a.exponent() + a.size()) - 1;
+  val->exponent_ = -(a.exponent() + a.ssize()) - 1;
 
   double max_error = 0;
-  for (int64 k = val->size(); k < length * 2;) {
-    k *= 2;
+  for (int64 k = 2; k < length * 2; k*= 2) {
     tmp.setPrecision(k);
     double err = Mult(a, *val, &tmp);
     max_error = std::max(max_error, err);
@@ -141,7 +142,7 @@ double Real::Inverse(const Real& a, Real* val) {
       tmp.push_back(1);
 
     Mult(*val, tmp, &tmp);
-    val->setPrecision(k);
+    val->setPrecision(k * 2);
     Add(*val, tmp, val);
   }
 
