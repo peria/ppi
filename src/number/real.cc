@@ -120,7 +120,9 @@ double Real::Inverse(const Real& a, Real* val) {
   if (a.size() > 1) {
     da += a[a.size() - 2] * kPow2_m64;
   }
-  *val = 1.0 / da;
+  // TODO: Look for better method.
+  // Here, (*val * da) <= 1.
+  *val = (1.0 - (1.0 / (1ULL << 52))) / da;
   val->exponent_ = -(a.exponent() + a.ssize()) - 1;
 
   double max_error = 0;

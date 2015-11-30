@@ -72,7 +72,6 @@ double Pi::Chudnovsky(Real* pi) {
   pi->setPrecision(len);
 
   Real::Inverse(b, pi);
-  Real::Mult(b, *pi, &b);
   Real::Mult(*pi, a, pi);
   Real::InverseSqrt(10005, &b);
   Real::Mult(*pi, b, pi);
