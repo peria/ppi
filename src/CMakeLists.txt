@@ -74,6 +74,23 @@ function(ppi_target_link_libraries target)
   target_link_libraries(${target} ${GLOG_LIBRARIES})
 endfunction()
 
+function(ppi_add_executable target)
+  add_executable(${target} ${ARGN})
+  target_link_libraries(${target} ppi_base)
+  ppi_target_link_libraries(${target})
+  if(NOT ${build_type} MATCHES release)
+    # if you want to profile CPU usage or memory usage, set CPUPROFILE
+    # or HEAPPROFILE environment to figure an output file.
+    # e.g. $ CPUPROFILE=cpu.prof /path/to/execute_file
+    #      $ HEAPPROFILE=heap.prof /path/to/execute_file
+    # then you can see the result with pprof.
+    # e.g. $ pprof --text /path/to/execute_file cpu.prof
+    #      $ pprof --text /path/to/execute_file heap.prof.0001.heap
+    target_link_libraries(${target} libprofiler.so)
+    target_link_libraries(${target} libtcmalloc.so)
+  endif()
+endfunction()
+
 add_subdirectory(base)
 add_subdirectory(fmt)
 add_subdirectory(number)
