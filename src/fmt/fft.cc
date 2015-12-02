@@ -10,7 +10,7 @@ namespace ppi {
 namespace fmt {
 
 namespace {
-const int64 kMaxSize = 1 << 20;
+const int64 kMaxSize = 1 << 21;
 Complex work[kMaxSize];
 }
 

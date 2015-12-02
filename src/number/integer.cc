@@ -14,7 +14,7 @@ namespace number {
 namespace {
 
 // kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
-const int64 kMaxLimbsForMult = 1 << 16;
+const int64 kMaxLimbsForMult = 1 << 17;
 const int64 kMaxShortLimbsForMult = kMaxLimbsForMult * 4;
 const int64 kMaxComplexsForMult = kMaxShortLimbsForMult * 2;
 double g_workarea[2][kMaxComplexsForMult];
