@@ -1,7 +1,5 @@
 #include "fmt/fft.h"
 
-#include <glog/logging.h>
-
 #include <algorithm>
 #include <cmath>
 #include <cstring>

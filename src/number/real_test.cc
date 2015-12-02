@@ -1,7 +1,6 @@
 #include "number/real.h"
 
 #include <gtest/gtest.h>
-#include <glog/logging.h>
 #include <sstream>
 
 namespace ppi {

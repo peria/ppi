@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include <glog/logging.h>
-#include <gflags/gflags.h>
-
 #include "base/base.h"
 #include "pi/pi.h"
 #include "number/real.h"
