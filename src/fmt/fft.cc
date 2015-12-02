@@ -10,7 +10,7 @@ namespace ppi {
 namespace fmt {
 
 namespace {
-const int64 kMaxSize = 1 << 15;
+const int64 kMaxSize = 1 << 20;
 Complex work[kMaxSize];
 }
 
@@ -33,6 +33,7 @@ void Fft::Factor(int64 n, Config* config) {
 
 void Fft::Transfer(const Config& config, const Type type, Complex a[]) {
   const int64 n = config.n;
+  CHECK_GE(kMaxSize, n);
   if (type == Type::Inverse) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;

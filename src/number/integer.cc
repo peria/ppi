@@ -13,8 +13,11 @@ namespace number {
 
 namespace {
 
-const int64 kMaxFFTSize = 1 << 15;
-double g_workarea[2 * kMaxFFTSize];
+// kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
+const int64 kMaxLimbsForMult = 1 << 16;
+const int64 kMaxShortLimbsForMult = kMaxLimbsForMult * 4;
+const int64 kMaxComplexsForMult = kMaxShortLimbsForMult * 2;
+double g_workarea[2][kMaxComplexsForMult];
 
 const int kMaskBitSize = 16;
 const uint64 kMask = (1ULL << kMaskBitSize) - 1;
@@ -80,9 +83,10 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 na = a.size();
   const int64 nb = b.size();
   const int64 n = MinPow2(na + nb) / 2;
+  CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
 
-  double* da = g_workarea;
-  double* db = g_workarea + 8 * n;
+  double* da = g_workarea[0];
+  double* db = g_workarea[1];
 
   // Split uint64[na] -> double[4n][2]
   Split4In8(a, n, da);
