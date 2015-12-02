@@ -18,7 +18,6 @@ find_package(Threads)
 find_package(PkgConfig)
 
 find_library(LIB_GFLAGS gflags)
-find_library(LIB_PPROF libprofiler.so)
 pkg_search_module(GLOG REQUIRED libglog)
 
 # ----------------------------------------------------------------------
@@ -79,7 +78,7 @@ function(ppi_add_executable target)
   add_executable(${target} ${ARGN})
   target_link_libraries(${target} ppi_base)
   ppi_target_link_libraries(${target})
-  if(${LIB_PPROF} AND NOT ${build_type} MATCHES release)
+  if(${build_type} MATCHES "relwithdebinfo")
     # if you want to profile CPU usage or memory usage, set CPUPROFILE
     # or HEAPPROFILE environment to figure an output file.
     # e.g. $ CPUPROFILE=cpu.prof /path/to/execute_file
@@ -96,3 +95,7 @@ add_subdirectory(base)
 add_subdirectory(fmt)
 add_subdirectory(number)
 add_subdirectory(pi)
+
+# ----------------------------------------------------------------------
+# Display settings
+message(STATUS "Build type:" ${build_type})
