@@ -20,7 +20,7 @@ double Pi::Arctan2(Real* pi) {
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
-  const int64 n5 = length * 16 / (std::log2(25) / 4) + 2;
+  const int64 n5 = length * 64 / std::log2(25) + 2;
   for (int64 i = 0; i < n5; ++i) {
     Real::Div(a, 25, &a);
     Real::Div(a, 2 * i + 1, &b);
@@ -38,7 +38,7 @@ double Pi::Arctan2(Real* pi) {
   a.setPrecision(length);
   sum.setPrecision(length);
   b.setPrecision(length);
-  const int64 n239 = length * 16 / (std::log2(239 * 239) / 4) + 2;
+  const int64 n239 = length * 64 / std::log2(239 * 239) + 2;
   for (int64 i = 0; i < n239; ++i) {
     Real::Div(a, 239 * 239, &a);
     Real::Div(a, 2 * i + 1, &b);

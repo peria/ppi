@@ -3,7 +3,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+#include <fstream>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "base/base.h"
@@ -290,8 +293,35 @@ void Real::Div(const Real& a, const uint32 b, Real* c) {
   }
   Integer::Div(*c, b, c);
   c->setPrecision(prec);
-  // TODO: Shift mantissa and update the exponent, if the leading limb is 0.
   c->Normalize();
+}
+
+int64 Real::Compare(std::string& filename) {
+  std::ifstream ifs(filename.c_str());
+  if (!ifs.is_open()) {
+    LOG(INFO) << "Cannot read " << filename << "\n";
+    return 0;
+  }
+
+  char refer[20];
+  ifs.read(refer, 2);
+  if (std::strncmp(refer, "0.", 2)) {
+    LOG(INFO) << filename << " may have a wrong format\n";
+    return 0;
+  }
+
+  int64 match = -16;
+  for (int64 i = size() - 1; i >= 0 && !ifs.eof(); --i) {
+    char buffer[20];
+    ifs.read(refer, 16);
+    std::sprintf(buffer, "%016lx", (*this)[i]);
+    for (int64 j = 0; j < 16; ++j) {
+      if (buffer[j] != refer[j])
+        return match + j;
+    }
+    match += 16;
+  }
+  return match;
 }
 
 void Real::setPrecision(int64 prec) {

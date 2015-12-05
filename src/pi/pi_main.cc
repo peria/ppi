@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "base/base.h"
 #include "pi/pi.h"
@@ -6,6 +7,7 @@
 
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:arctan");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
+DEFINE_string(refer, "", "file name which has another computing result");
 
 using namespace ppi;
 
@@ -24,6 +26,11 @@ int main(int argc, char* argv[]) {
     break;
   }
   std::cout << pi << "\n";
+  if (!FLAGS_refer.empty()) {
+    int64 size = pi.size() * 16;
+    int64 same = pi.Compare(FLAGS_refer);
+    std::cerr << same << " out of " << size << " digits are same.\n";
+  }
   
   return 0;
 }

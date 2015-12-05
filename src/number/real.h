@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ostream>
+#include <string>
 
 #include "base/base.h"
 #include "number/integer.h"
@@ -38,6 +39,10 @@ class Real : public Integer {
 
   // Computes c=a/b.
   static void Div(const Real& a, const uint32 b, Real* c);
+
+  // Compares with the content of the file.
+  // If the file is not readable, returns 0.
+  int64 Compare(std::string& filename);
 
   int64 exponent() const { return exponent_; }
 
