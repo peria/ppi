@@ -72,6 +72,7 @@ function(ppi_target_link_libraries target)
   target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
   target_link_libraries(${target} ${LIB_GFLAGS})
   target_link_libraries(${target} ${GLOG_LIBRARIES})
+  target_link_libraries(${target} ${ARGN})
 endfunction()
 
 function(ppi_add_executable target)
