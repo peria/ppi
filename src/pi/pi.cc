@@ -58,6 +58,7 @@ double Pi::Chudnovsky(Real* pi) {
   int64 n = length * 64 / std::log2(151931373056000.0);
 
   int64 half = (n + 1) / 2;
+  LOG(INFO) << "Use " << n << " terms to get " << (length * 16) << " hex digits.";
   Real a, b, c;
   // Pass a, b, and c as Integer elements into binary split
   ChudnovskyInternal(0, half, &a, &b, &c);

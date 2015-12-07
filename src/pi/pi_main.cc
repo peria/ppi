@@ -11,8 +11,8 @@ DEFINE_string(refer, "", "file name which has another computing result");
 
 using namespace ppi;
 
-int main(int argc, char* argv[]) {
-  google::ParseCommandLineFlags(&argc, &argv, true);
+int main(int, char* argv[]) {
+  google::InitGoogleLogging(argv[0]);
 
   int64 limbs = FLAGS_digits / 16 + 1;
   ppi::number::Real pi;
