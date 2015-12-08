@@ -58,19 +58,17 @@ TEST(IntegerTest, Mult) {
   a.push_back(0x1234ULL);
   b.push_back(0x1234ULL);
   Integer::Mult(a, b, &c);
-  ASSERT_EQ(2, static_cast<int>(c.size()));
+  ASSERT_EQ(1, static_cast<int>(c.size()));
   EXPECT_EQ(0x1234ULL * 0x1234ULL, c[0]);
-  EXPECT_EQ(0ULL, c[1]);
 
   // The result is in a limb.
   a[0] = 0xabcd1234ULL;
   b[0] = 0x98765432ULL;
   Integer::Mult(a, b, &c);
-  ASSERT_EQ(2, static_cast<int>(c.size()));
+  ASSERT_EQ(1, static_cast<int>(c.size()));
   EXPECT_EQ(0xabcd1234ULL * 0x98765432ULL, c[0]);
-  EXPECT_EQ(0ULL, c[1]);
 
-  // The result is in a limb.
+  // The result is not in a limb.
   a[0] = 0x1000100010001ULL;
   b[0] = 0x1000100010001ULL;
   Integer::Mult(a, b, &c);
