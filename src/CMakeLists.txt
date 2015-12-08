@@ -16,6 +16,7 @@ enable_testing()
 
 find_package(Threads)
 find_package(PkgConfig)
+find_package(gflags REQUIRED)
 
 pkg_search_module(GLOG REQUIRED libglog)
 
@@ -52,10 +53,6 @@ include_directories(.)
 
 add_subdirectory(third_party/googletest/googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-include_directories(${GLOG_INCLUDE_DIRS})
-
-add_subdirectory(third_party/gflags)
-include_directories(${gflags_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(${GLOG_INCLUDE_DIRS})
 
 # ----------------------------------------------------------------------
