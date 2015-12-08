@@ -54,19 +54,27 @@ double Pi::Arctan2(Real* pi) {
 }
 
 double Pi::Chudnovsky(Real* pi) {
-  int64 length = pi->precision();
+  int64 length = pi->precision() + 1;
   int64 n = length * 64 / std::log2(151931373056000.0);
 
   int64 half = (n + 1) / 2;
   LOG(INFO) << "Use " << n << " terms to get " << (length * 16) << " hex digits.";
   Real a, b, c;
+
   // Pass a, b, and c as Integer elements into binary split
   ChudnovskyInternal(0, half, &a, &b, &c);
+  VLOG(1) << a;
+  VLOG(1) << b;
+  VLOG(1) << c;
   // c is no longer used.
   c.clear();
 
-  Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
+  Integer coef;
+  coef = 640320ULL * 8 * 10005 / 12;
+  Integer::Mult(a, coef, &a);
   int64 len = std::max(a.ssize(), b.ssize());
+  if (len < 2)
+    len = 2;
   a.setPrecision(len);
   b.setPrecision(len);
   pi->setPrecision(len);
@@ -94,30 +102,31 @@ double Pi::ChudnovskyInternal(int64 n0, int64 n1,
     Integer::Subtract(*b0, b1, b0);
     Integer::Mult(*a0, a1, a0);
     Integer::Mult(*c0, c1, c0);
+  } else {
+    int64 m = (n0 + n1) / 2;
+    ChudnovskyInternal(n0, m, a0, b0, c0);
+    ChudnovskyInternal(m, n1, &a1, &b1, &c1);
 
-    return 0;
+    Integer::Mult(*b0, a1, b0);
+    Integer::Mult(*c0, b1, &b1);
+    Integer::Add(*b0, b1, b0);
+    Integer::Mult(*a0, a1, a0);
+    Integer::Mult(*c0, c1, c0);
   }
-
-  int64 m = (n0 + n1) / 2;
-  ChudnovskyInternal(n0, m, a0, b0, c0);
-  ChudnovskyInternal(m, n1, &a1, &b1, &c1);
-
-  Integer::Mult(*b0, a1, b0);
-  Integer::Mult(*c0, b1, &b1);
-  Integer::Add(*b0, b1, b0);
-  Integer::Mult(*a0, a1, a0);
-  Integer::Mult(*c0, c1, c0);
 
   return 0;
 }
 
 void Pi::ChudnovskySetValues(int64 n, Integer* a, Integer* b, Integer* c) {
+  // TODO: Take care of overflow in implicit conversion
   if (n == 0) {
     *a = 1;
   } else {
-    *a = n * 640320;
-    Integer::Mult(*a, n * 640320, a);
-    Integer::Mult(*a, n * 640320 / 24, a);
+    *a = n * 640320 / 24;
+    Integer t;
+    t = n * 640320;
+    Integer::Mult(*a, t, a);
+    Integer::Mult(*a, t, a);
   }
 
   *b = 13591409 + n * 545140134;

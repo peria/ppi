@@ -16,8 +16,8 @@ enable_testing()
 
 find_package(Threads)
 find_package(PkgConfig)
-find_package(gflags REQUIRED)
 
+find_library(LIB_GFLAGS gflags)
 pkg_search_module(GLOG REQUIRED libglog)
 
 # ----------------------------------------------------------------------
