@@ -26,6 +26,11 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 Integer::Integer() : std::vector<uint64>() {}
 
+Integer::Integer(uint64 value) {
+  resize(1);
+  (*this)[0] = value;
+}
+
 void Integer::Normalize() {
   int64 i = size() - 1;
   while (i >= 0 && at(i) == 0) {

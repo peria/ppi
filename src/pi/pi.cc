@@ -54,7 +54,7 @@ double Pi::Arctan2(Real* pi) {
 }
 
 double Pi::Chudnovsky(Real* pi) {
-  int64 length = pi->precision() + 1;
+  int64 length = pi->precision();
   int64 n = length * 64 / std::log2(151931373056000.0);
 
   int64 half = (n + 1) / 2;
@@ -69,9 +69,7 @@ double Pi::Chudnovsky(Real* pi) {
   // c is no longer used.
   c.clear();
 
-  Integer coef;
-  coef = 640320ULL * 8 * 10005 / 12;
-  Integer::Mult(a, coef, &a);
+  Integer::Mult(a, Integer(640320ULL * 8 * 10005 / 12), &a);
   int64 len = std::max(a.ssize(), b.ssize());
   if (len < 2)
     len = 2;
@@ -123,8 +121,7 @@ void Pi::ChudnovskySetValues(int64 n, Integer* a, Integer* b, Integer* c) {
     *a = 1;
   } else {
     *a = n * 640320 / 24;
-    Integer t;
-    t = n * 640320;
+    Integer t(n * 640320);
     Integer::Mult(*a, t, a);
     Integer::Mult(*a, t, a);
   }
