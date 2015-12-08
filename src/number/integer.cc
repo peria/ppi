@@ -112,6 +112,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   // Gather double[8n][2] -> int[2n]
   c->resize(2 * n);
   double err = Gather4In8(da, c);
+  c->Normalize();
 
   return err;
 }
