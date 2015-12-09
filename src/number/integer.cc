@@ -42,30 +42,50 @@ void Integer::Normalize() {
 
 // static
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
-  DCHECK_EQ(a.size(), b.size());
+  const int64 n = std::min(a.ssize(), b.ssize());
+  c->resize(std::max(a.ssize(), b.ssize()));
 
-  const int64 n = a.size();
   uint64 carry = 0;
-  for (int64 i = 0; i < n; ++i) {
+  int64 i = 0;
+  for (i = 0; i < n; ++i) {
     uint64 s = b[i] + carry;
     carry = (s < b[i]) ? 1 : 0;
     (*c)[i] = a[i] + s;
     carry += ((*c)[i] < s) ? 1 : 0;
   }
+  for (; i < a.ssize(); ++i) {
+    (*c)[i] = a[i] + carry;
+    carry = ((*c)[i] < carry) ? 1 : 0;
+  }
+  for (; i < b.ssize(); ++i) {
+    (*c)[i] = b[i] + carry;
+    carry = ((*c)[i] < carry) ? 1 : 0;
+  }
+  if (carry) {
+    c->push_back(carry);
+  }
+
+  c->Normalize();
 }
 
 // static
 void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
-  DCHECK_EQ(a.size(), b.size());
+  c->resize(a.ssize());
 
-  const int64 n = a.size();
   uint64 carry = 0;
-  for (int64 i = 0; i < n; ++i) {
+  for (int64 i = 0; i < b.ssize(); ++i) {
     uint64 s = a[i] - carry;
     carry = (s > a[i]) ? 1 : 0;
     (*c)[i] = s - b[i];
     carry += ((*c)[i] > s) ? 1 : 0;
   }
+  for (int64 i = b.ssize(); i < a.ssize(); ++i) {
+    uint64 s = a[i] - carry;
+    carry = (s > a[i]) ? 1 : 0;
+    (*c)[i] = s;
+  }
+
+  c->Normalize();
 }
 
 namespace {
@@ -195,6 +215,7 @@ const int64 kHalfSize = 32;
 const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 }
 
+// TODO: Accept uint64 as a second argument.
 uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
   uint64 carry = 0;
   for (size_t i = 0; i < a.size(); ++i) {
