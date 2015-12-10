@@ -216,7 +216,8 @@ const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 }
 
 // TODO: Accept uint64 as a second argument.
-uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
+void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
+  c->resize(a.size());
   uint64 carry = 0;
   for (size_t i = 0; i < a.size(); ++i) {
     uint64 a_low = a[i] & kHalfBitMask;
@@ -228,7 +229,9 @@ uint64 Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
     if ((*c)[i] < c_low)
       ++carry;
   }
-  return carry;
+  if (carry) {
+    c->push_back(carry);
+  }
 }
 
 void Integer::Div(const Integer& a, const uint32 b, Integer* c) {

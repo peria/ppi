@@ -31,7 +31,7 @@ class Integer : public std::vector<uint64> {
   static double Mult(const Integer& a, const Integer& b, Integer* c);
 
   // Computes c[n] = a[n] * b. Returns a carried limb.
-  static uint64 Mult(const Integer& a, const uint32 b, Integer* c);
+  static void Mult(const Integer& a, const uint32 b, Integer* c);
 
   // c[n] = a[n] / b
   static void Div(const Integer& a, const uint32 b, Integer* c);

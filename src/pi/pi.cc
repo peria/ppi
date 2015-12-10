@@ -69,10 +69,9 @@ double Pi::Chudnovsky(Real* pi) {
   // c is no longer used.
   c.clear();
 
-  Integer::Mult(a, Integer(640320ULL * 8 * 10005 / 12), &a);
-  int64 len = std::max(a.ssize(), b.ssize());
-  if (len < 2)
-    len = 2;
+  Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
+  VLOG(1) << a;
+  int64 len = std::max(a.ssize(), b.ssize()) + 1;
   a.setPrecision(len);
   b.setPrecision(len);
   pi->setPrecision(len);
@@ -111,6 +110,11 @@ double Pi::ChudnovskyInternal(int64 n0, int64 n1,
     Integer::Mult(*a0, a1, a0);
     Integer::Mult(*c0, c1, c0);
   }
+
+  VLOG(2) << n0 << " - " << n1;
+  VLOG(2) << *a0;
+  VLOG(2) << *b0;
+  VLOG(2) << *c0;
 
   return 0;
 }

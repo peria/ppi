@@ -272,12 +272,9 @@ double Real::Mult(const Real& a, const Real& b, Real* c) {
 }
 
 void Real::Mult(const Real& a, const uint32 b, Real* c) {
-  uint64 carry = Integer::Mult(a, b, c);
+  Integer::Mult(a, b, c);
   c->precision_ = c->size();
   c->exponent_ = a.exponent_;
-  if (carry) {
-    (*c)[c->size()] = carry;
-  }
   c->Normalize();
 }
 
