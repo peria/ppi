@@ -92,5 +92,33 @@ TEST(IntegerTest, LongMult) {
   EXPECT_EQ(0x664e97efa5291c0fULL, c[3]);
 }
 
+TEST(IntegerTest, Add) {
+  Integer a(1ULL << 63);
+  EXPECT_EQ(1, a.ssize());
+  Integer::Add(a, a, &a);
+  ASSERT_EQ(2, a.ssize());
+  EXPECT_EQ(0ULL, a[0]);
+  EXPECT_EQ(1ULL, a[1]);
+}
+
+TEST(IntegerTest, MultWithUint32) {
+  Integer a(1ULL << 63);
+  Integer::Mult(a, 2, &a);
+  ASSERT_EQ(2, a.ssize());
+  EXPECT_EQ(0ULL, a[0]);
+  EXPECT_EQ(1ULL, a[1]);
+}
+
+// Enable after implement Mult(, uint64,)
+/*
+TEST(IntegerTest, DISABLD_MultWithUint64) {
+  Integer a(1ULL << 32);
+  Integer::Mult(a, 1ULL << 32, &a);
+  ASSERT_EQ(2, a.ssize());
+  EXPECT_EQ(0ULL, a[0]);
+  EXPECT_EQ(1ULL, a[1]);
+}
+*/
+
 }  // namespace number
 }  // namespace ppi
