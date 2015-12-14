@@ -71,7 +71,7 @@ double Pi::Chudnovsky(Real* pi) {
 
   Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
   VLOG(1) << a;
-  int64 len = std::max(a.ssize(), b.ssize()) + 1;
+  int64 len = std::max(a.size(), b.size()) + 1;
   a.setPrecision(len);
   b.setPrecision(len);
   pi->setPrecision(len);

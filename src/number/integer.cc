@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <ostream>
-#include <vector>
 
+#include "base/allocator.h"
 #include "base/base.h"
 #include "fmt/fmt.h"
 
@@ -24,26 +24,74 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 }  // namespace
 
-Integer::Integer() : std::vector<uint64>() {}
+Integer::Integer() : data_(base::Allocator::Allocate(0)) {}
 
-Integer::Integer(uint64 value) {
-  resize(1);
+Integer::Integer(uint64 value) : data_(base::Allocator::Allocate(1)) {
   (*this)[0] = value;
 }
 
 void Integer::Normalize() {
   int64 i = size() - 1;
-  while (i >= 0 && at(i) == 0) {
+  while (i >= 0 && (*this)[i] == 0) {
     --i;
   }
   ++i;
-  erase(begin() + i, end());
+  erase(i, size());
+}
+
+uint64 Integer::back() const {
+  return (*this)[size() - 1];
+}
+
+void Integer::resize(int64 sz, uint64 value) {
+  uint64* new_ptr = base::Allocator::Allocate(sz);
+  for (int64 i = 0; i < std::min(sz, size()); ++i)
+    new_ptr[i] = (*this)[i];
+  for (int64 i = size(); i < sz; ++i)
+    new_ptr[i] = value;
+  
+  std::swap(data_, new_ptr);
+  base::Allocator::Deallocate(new_ptr);
+}
+
+void Integer::erase(int64 begin, int64 end) {
+  int64 erase_size = end - begin;
+  uint64* new_ptr = base::Allocator::Allocate(size() - erase_size);
+  for (int64 i = end, j = 0; i < size(); ++i, ++j) {
+    new_ptr[j] = (*this)[i];
+  }
+
+  std::swap(data_, new_ptr);
+  base::Allocator::Deallocate(new_ptr);
+}
+
+void Integer::clear() {
+  base::Allocator::Deallocate(data_);
+  data_ = base::Allocator::Allocate(0);
+}
+
+void Integer::insert(int64 from, int64 number, uint64 value) {
+  uint64* new_ptr = base::Allocator::Allocate(size() + number);
+
+  for (int64 i = 0; i < from; ++i)
+    new_ptr[i] = (*this)[i];
+  for (int64 i = 0; i < number; ++i)
+    new_ptr[i + from] = value;
+  for (int64 i = from + number, j = from; j < size(); ++i, ++j)
+    new_ptr[i] = (*this)[j];
+
+  std::swap(data_, new_ptr);
+  base::Allocator::Deallocate(new_ptr);
+}
+
+void Integer::push_back(uint64 value) {
+  resize(size() + 1, value);
 }
 
 // static
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
-  const int64 n = std::min(a.ssize(), b.ssize());
-  c->resize(std::max(a.ssize(), b.ssize()));
+  const int64 n = std::min(a.size(), b.size());
+  c->resize(std::max(a.size(), b.size()));
 
   uint64 carry = 0;
   int64 i = 0;
@@ -53,11 +101,11 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
     (*c)[i] = a[i] + s;
     carry += ((*c)[i] < s) ? 1 : 0;
   }
-  for (; i < a.ssize(); ++i) {
+  for (; i < a.size(); ++i) {
     (*c)[i] = a[i] + carry;
     carry = ((*c)[i] < carry) ? 1 : 0;
   }
-  for (; i < b.ssize(); ++i) {
+  for (; i < b.size(); ++i) {
     (*c)[i] = b[i] + carry;
     carry = ((*c)[i] < carry) ? 1 : 0;
   }
@@ -70,16 +118,16 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
 
 // static
 void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
-  c->resize(a.ssize());
+  c->resize(a.size());
 
   uint64 carry = 0;
-  for (int64 i = 0; i < b.ssize(); ++i) {
+  for (int64 i = 0; i < b.size(); ++i) {
     uint64 s = a[i] - carry;
     carry = (s > a[i]) ? 1 : 0;
     (*c)[i] = s - b[i];
     carry += ((*c)[i] > s) ? 1 : 0;
   }
-  for (int64 i = b.ssize(); i < a.ssize(); ++i) {
+  for (int64 i = b.size(); i < a.size(); ++i) {
     uint64 s = a[i] - carry;
     carry = (s > a[i]) ? 1 : 0;
     (*c)[i] = s;
@@ -219,7 +267,7 @@ const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
   c->resize(a.size());
   uint64 carry = 0;
-  for (size_t i = 0; i < a.size(); ++i) {
+  for (int64 i = 0; i < a.size(); ++i) {
     uint64 a_low = a[i] & kHalfBitMask;
     uint64 a_high = a[i] >> kHalfSize;
     uint64 c_low = a_low * b + carry;

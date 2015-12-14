@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(ppi_base base.cc time.cc)
+add_library(ppi_base base.cc time.cc allocator.cc)
 
 # ----------------------------------------------------------------------
 

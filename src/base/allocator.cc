@@ -16,12 +16,5 @@ void Allocator::Deallocate(uint64* ptr) {
   delete[] ptr;
 }
 
-uint64* Allocator::Reallocate(uint64* from_ptr, int64 number) {
-  uint64* to_ptr = Allocate(number);
-  int64 size = from_ptr[-1];
-  std::copy(from_ptr, from_ptr + size, to_ptr);
-  return to_ptr;
-}
-
 }  // namespace base
 }  // namespace ppi

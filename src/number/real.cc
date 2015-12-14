@@ -76,11 +76,11 @@ double Real::InverseSqrt(uint64 a, Real* val) {
     Mult(tmp, a, &tmp);
 
     // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
-    for (size_t i = 0; i < tmp.size(); ++i) {
+    for (int64 i = 0; i < tmp.size(); ++i) {
       tmp[i] = ~tmp[i];
     }
     tmp.Normalize();
-    for (size_t i = 0; i < tmp.size(); ++i) {
+    for (int64 i = 0; i < tmp.size(); ++i) {
       if (++tmp[i])
         break;
     }
@@ -124,7 +124,7 @@ double Real::Inverse(const Real& a, Real* val) {
   // TODO: Look for better method.
   // Here, (*val * da) <= 1.
   *val = (1.0 - (1.0 / (1ULL << 52))) / da;
-  val->exponent_ = -(a.exponent() + a.ssize()) - 1;
+  val->exponent_ = -(a.exponent() + a.size()) - 1;
 
   double max_error = 0;
   for (int64 k = 2; k < length * 2; k*= 2) {
@@ -133,11 +133,11 @@ double Real::Inverse(const Real& a, Real* val) {
     max_error = std::max(max_error, err);
 
     // Computing "1 - |tmp|", assuming |tmp| is a bit smaller than 1.
-    for (size_t i = 0; i < tmp.size(); ++i) {
+    for (int64 i = 0; i < tmp.size(); ++i) {
       tmp[i] = ~tmp[i];
     }
     tmp.Normalize();
-    for (size_t i = 0; i < tmp.size(); ++i) {
+    for (int64 i = 0; i < tmp.size(); ++i) {
       if (++tmp[i])
         break;
     }
@@ -169,10 +169,10 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   int64 ica = a.exponent() - c_exp;
   int64 icb = b.exponent() - c_exp;
   int64 ia = 0, ib = 0, ic = 0;
-  for (; ic < icb && ia < a.ssize(); ++ic, ++ia) {
+  for (; ic < icb && ia < a.size(); ++ic, ++ia) {
     sum[ic] = a[ia];
   }
-  for (; ic < ica && ib < b.ssize(); ++ic, ++ib) {
+  for (; ic < ica && ib < b.size(); ++ic, ++ib) {
     sum[ic] = b[ib];
   }
 
@@ -187,17 +187,17 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   //   aaaaaa          aaa
   // +    bbb  or + bbbbbb
   uint64 carry = 0;
-  for (; ia < a.ssize() && ib < b.ssize(); ++ia, ++ib, ++ic) {
+  for (; ia < a.size() && ib < b.size(); ++ia, ++ib, ++ic) {
     uint64 t = a[ia] + carry;
     carry = (t < carry) ? 1 : 0;
     sum[ic] = b[ib] + t;
     carry += (t > sum[ic]) ? 1 : 0;
   }
-  for (; ia < a.ssize(); ++ia, ++ic) {
+  for (; ia < a.size(); ++ia, ++ic) {
     sum[ic] = a[ia] + carry;
     carry = (sum[ic] < carry) ? 1 : 0;
   }
-  for (; ib < b.ssize(); ++ib, ++ic) {
+  for (; ib < b.size(); ++ib, ++ic) {
     sum[ic] = b[ib] + carry;
     carry = (sum[ic] < carry) ? 1 : 0;
   }
@@ -225,10 +225,10 @@ void Real::Sub(const Real& a, const Real& b, Real* c) {
   int64 ica = a.exponent() - c_exp;
   int64 icb = b.exponent() - c_exp;
   int64 ia = 0, ib = 0, ic = 0;
-  for (; ic < icb && ia < a.ssize(); ++ic, ++ia) {
+  for (; ic < icb && ia < a.size(); ++ic, ++ia) {
     diff[ic] = a[ia];
   }
-  for (; ic < ica && ib < b.ssize(); ++ic, ++ib) {
+  for (; ic < ica && ib < b.size(); ++ic, ++ib) {
     diff[ic] = ~b[ib];
     borrow = 1;
   }
@@ -241,17 +241,17 @@ void Real::Sub(const Real& a, const Real& b, Real* c) {
   //   aaaaaa
   // -    bbb
   // because we are assuming a > b.
-  for (; ia < a.ssize() && ib < b.ssize(); ++ia, ++ib, ++ic) {
+  for (; ia < a.size() && ib < b.size(); ++ia, ++ib, ++ic) {
     uint64 t = a[ia] - borrow;
     borrow = (t > a[ia]) ? 1 : 0;
     diff[ic] = t - b[ib];
     borrow += (t < diff[ic]) ? 1 : 0;
   }
-  for (; ia < a.ssize(); ++ia, ++ic) {
+  for (; ia < a.size(); ++ia, ++ic) {
     diff[ic] = a[ia] - borrow;
     borrow = (diff[ic] > a[ia]) ? 1 : 0;
   }
-  for (; ib < b.ssize(); ++ib, ++ic) {
+  for (; ib < b.size(); ++ib, ++ic) {
     uint64 t = -borrow;
     borrow = (t > 0) ? 1 : 0;
     diff[ic] = t - b[ib];
@@ -285,7 +285,7 @@ void Real::Div(const Real& a, const uint32 b, Real* c) {
   c->exponent_ = a.exponent_;
   if (c->precision() > c->size()) {
     int64 diff = c->precision() - c->size();
-    c->insert(c->begin(), diff, 0);
+    c->insert(0, diff, 0);
     c->exponent_ -= diff;
   }
   Integer::Div(*c, b, c);
@@ -371,23 +371,23 @@ void Real::Normalize() {
   // Remove tailing zeros.
   int64 tail = TailingZero();
   if (tail > 0) {
-    erase(begin(), begin() + tail);
+    erase(0, tail);
     exponent_ += tail;
   }
 
   // Remove tailing limbs if the mantissa is long.
   int diff = size() - precision_;
   if (diff > 0) {
-    erase(begin(), begin() + diff);
+    erase(0, diff);
     exponent_ += diff;
   }
 }
 
 int64 Real::TailingZero() {
-  auto itr = begin();
-  while (itr != end() && *itr == 0)
-    ++itr;
-  return itr - begin();
+  int64 val = 0;
+  while (val < size() && (*this)[val] == 0)
+    ++val;
+  return val;
 }
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 add_library(ppi_number integer.cc real.cc montgomery.cc)
-ppi_target_link_libraries(ppi_number ppi_fmt)
+ppi_target_link_libraries(ppi_number ppi_base ppi_fmt)
 
 # ----------------------------------------------------------------------
 
