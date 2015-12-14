@@ -43,21 +43,24 @@ uint64 Integer::back() const {
   return (*this)[size() - 1];
 }
 
-void Integer::resize(int64 sz, uint64 value) {
+void Integer::resize(int64 sz) {
   uint64* new_ptr = base::Allocator::Allocate(sz);
   for (int64 i = 0; i < std::min(sz, size()); ++i)
     new_ptr[i] = (*this)[i];
-  for (int64 i = size(); i < sz; ++i)
-    new_ptr[i] = value;
-  
   std::swap(data_, new_ptr);
   base::Allocator::Deallocate(new_ptr);
 }
 
 void Integer::erase(int64 begin, int64 end) {
+  if (begin == end)
+    return;
+
   int64 erase_size = end - begin;
   uint64* new_ptr = base::Allocator::Allocate(size() - erase_size);
-  for (int64 i = end, j = 0; i < size(); ++i, ++j) {
+  for (int64 i = 0; i < begin; ++i) {
+    new_ptr[i] = (*this)[i];
+  }
+  for (int64 i = end, j = begin; i < size(); ++i, ++j) {
     new_ptr[j] = (*this)[i];
   }
 
@@ -85,7 +88,8 @@ void Integer::insert(int64 from, int64 number, uint64 value) {
 }
 
 void Integer::push_back(uint64 value) {
-  resize(size() + 1, value);
+  resize(size() + 1);
+  (*this)[size() - 1] = value;
 }
 
 // static

@@ -58,7 +58,7 @@ TEST(IntegerTest, Mult) {
   a.push_back(0x1234ULL);
   b.push_back(0x1234ULL);
   Integer::Mult(a, b, &c);
-  ASSERT_EQ(1, static_cast<int>(c.size()));
+  ASSERT_EQ(1, c.size());
   EXPECT_EQ(0x1234ULL * 0x1234ULL, c[0]);
 
   // The result is in a limb.

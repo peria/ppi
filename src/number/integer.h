@@ -20,7 +20,7 @@ class Integer {
   int64 size() const { return static_cast<int64>((*this)[-1]); }
 
   uint64 back() const;
-  void resize(int64 size, uint64 value = 0);
+  void resize(int64 size);
   void erase(int64 begin, int64 end);
   void clear();
   void insert(int64 from, int64 number, uint64 value);

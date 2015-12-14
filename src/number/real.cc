@@ -163,7 +163,9 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   int64 c_exp = std::min(a.exponent(), b.exponent());
 
   Real sum;
-  sum.resize(c_lead - c_exp, 0);
+  sum.resize(c_lead - c_exp);
+  for (int64 i  =0; i < c_lead - c_exp; ++i)
+    sum[i] = 0;
   sum.exponent_ = c_exp;
 
   int64 ica = a.exponent() - c_exp;
@@ -218,7 +220,9 @@ void Real::Sub(const Real& a, const Real& b, Real* c) {
   int64 c_exp = std::min(a.exponent(), b.exponent());
 
   Real diff;
-  diff.resize(c_lead - c_exp, 0);
+  diff.resize(c_lead - c_exp);
+  for (int64 i = 0; i < c_lead - c_exp; ++i)
+    diff[i] = 0;
   diff.exponent_ = c_exp;
 
   uint64 borrow = 0;
