@@ -67,11 +67,9 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 na = a.size();
   const int64 nb = b.size();
   const int64 n = MinPow2(na + nb) / 2;
-  IntegerPiece ap(a);
-  IntegerPiece bp(b);
   c->resize(2 * n);
   IntegerPiece cp(*c);
-  double err = IntegerPiece::Mult(ap, bp, &cp);
+  double err = IntegerPiece::Mult(IntegerPiece(a), IntegerPiece(b), &cp);
   c->Normalize();
 
   return err;
