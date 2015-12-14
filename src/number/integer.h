@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <ostream>
 #include "base/base.h"
 
@@ -12,11 +11,20 @@ namespace number {
 // are stored in a uint64 element.
 // size() shows its length counted in uint64. If size() is zero, then
 // it represents a zero. If size() is negative, then it shows NaN.
-class Integer : public std::vector<uint64> {
+class Integer {
  public:
   Integer();
   explicit Integer(uint64 value);
-  int64 ssize() const { return static_cast<int64>(size()); }
+
+  uint64& operator[](int64 i) const { return data_[i]; }
+  int64 size() const { return static_cast<int64>((*this)[-1]); }
+
+  uint64 back() const;
+  void resize(int64 size);
+  void erase(int64 begin, int64 end);
+  void clear();
+  void insert(int64 from, int64 number, uint64 value);
+  void push_back(uint64 value);
 
   // APIs -----------------------------------------------------------
   // Computes c[n] = a[n] + b[n]
@@ -59,6 +67,9 @@ class Integer : public std::vector<uint64> {
   // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then
   // a[2*i] = 0x7000500030001, a[2*i+n] = 0x8000600040002.
   static double Gather4In8(double* da, Integer* a);
+
+ private:
+  uint64* data_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Integer& val);

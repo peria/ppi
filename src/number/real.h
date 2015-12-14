@@ -46,8 +46,7 @@ class Real : public Integer {
 
   int64 exponent() const { return exponent_; }
 
-  // TODO: Implement precision independent from size().
-  size_t precision() const { return precision_; }
+  int64 precision() const { return precision_; }
   void setPrecision(int64 prec);
 
   Real& operator=(double d);

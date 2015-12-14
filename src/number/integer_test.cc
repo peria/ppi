@@ -58,7 +58,7 @@ TEST(IntegerTest, Mult) {
   a.push_back(0x1234ULL);
   b.push_back(0x1234ULL);
   Integer::Mult(a, b, &c);
-  ASSERT_EQ(1, static_cast<int>(c.size()));
+  ASSERT_EQ(1, c.size());
   EXPECT_EQ(0x1234ULL * 0x1234ULL, c[0]);
 
   // The result is in a limb.
@@ -94,9 +94,9 @@ TEST(IntegerTest, LongMult) {
 
 TEST(IntegerTest, Add) {
   Integer a(1ULL << 63);
-  EXPECT_EQ(1, a.ssize());
+  EXPECT_EQ(1, a.size());
   Integer::Add(a, a, &a);
-  ASSERT_EQ(2, a.ssize());
+  ASSERT_EQ(2, a.size());
   EXPECT_EQ(0ULL, a[0]);
   EXPECT_EQ(1ULL, a[1]);
 }
@@ -104,7 +104,7 @@ TEST(IntegerTest, Add) {
 TEST(IntegerTest, MultWithUint32) {
   Integer a(1ULL << 63);
   Integer::Mult(a, 2, &a);
-  ASSERT_EQ(2, a.ssize());
+  ASSERT_EQ(2, a.size());
   EXPECT_EQ(0ULL, a[0]);
   EXPECT_EQ(1ULL, a[1]);
 }
@@ -114,7 +114,7 @@ TEST(IntegerTest, MultWithUint32) {
 TEST(IntegerTest, DISABLD_MultWithUint64) {
   Integer a(1ULL << 32);
   Integer::Mult(a, 1ULL << 32, &a);
-  ASSERT_EQ(2, a.ssize());
+  ASSERT_EQ(2, a.size());
   EXPECT_EQ(0ULL, a[0]);
   EXPECT_EQ(1ULL, a[1]);
 }
