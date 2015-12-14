@@ -30,11 +30,9 @@ void Integer::Normalize() {
 
 // static
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
-  const int64 na = a.size();
-  const int64 nb = b.size();
   c->resize(std::max(a.size(), b.size()));
   IntegerPiece cp(*c);
-  uint64 carry = IntegerPiece::Add(IntegerPiece(a.data(), na), IntegerPiece(b.data(), nb), &cp);
+  uint64 carry = IntegerPiece::Add(IntegerPiece(a), IntegerPiece(b), &cp);
   if (carry) {
     c->push_back(carry);
   }
@@ -43,11 +41,9 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
 
 // static
 void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
-  const int64 na = a.size();
-  const int64 nb = b.size();
   c->resize(a.size());
   IntegerPiece cp(*c);
-  IntegerPiece::Subtract(IntegerPiece(a.data(), na), IntegerPiece(b.data(), nb), &cp);
+  IntegerPiece::Subtract(IntegerPiece(a), IntegerPiece(b), &cp);
   c->Normalize();
 }
 
@@ -71,29 +67,29 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 na = a.size();
   const int64 nb = b.size();
   const int64 n = MinPow2(na + nb) / 2;
+  IntegerPiece ap(a);
+  IntegerPiece bp(b);
   c->resize(2 * n);
   IntegerPiece cp(*c);
-  double err = IntegerPiece::Mult(IntegerPiece(a.data(), na), IntegerPiece(b.data(), nb), &cp);
+  double err = IntegerPiece::Mult(ap, bp, &cp);
   c->Normalize();
 
   return err;
 }
 
 void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
-  const int64 na = a.size();
   c->resize(a.size());
   IntegerPiece cp(*c);
-  uint64 carry = IntegerPiece::Mult(IntegerPiece(a.data(), na), b, &cp);
+  uint64 carry = IntegerPiece::Mult(IntegerPiece(a), b, &cp);
   if (carry) {
     c->push_back(carry);
   }
 }
 
 void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
-  const int64 na = a.size();
   c->resize(a.size());
   IntegerPiece cp(*c);
-  IntegerPiece::Div(IntegerPiece(a.data(), na), b, &cp);
+  IntegerPiece::Div(IntegerPiece(a), b, &cp);
   c->Normalize();
 }
 

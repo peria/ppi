@@ -27,8 +27,8 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 IntegerPiece::IntegerPiece()
     : limbs_(nullptr), size_(0) {}
 
-IntegerPiece::IntegerPiece(const uint64* limbs, int64 size)
-    : limbs_(const_cast<uint64*>(limbs)), size_(size) {}
+IntegerPiece::IntegerPiece(uint64* limbs, int64 size)
+    : limbs_(limbs), size_(size) {}
 
 IntegerPiece::IntegerPiece(const Integer& integer)
     : limbs_(const_cast<uint64*>(integer.data())), size_(integer.size()) {}
@@ -101,7 +101,7 @@ double IntegerPiece::Mult(const IntegerPiece& a, const IntegerPiece& b, IntegerP
   const int64 nb = b.size();
   const int64 n = MinPow2(na + nb) / 2;
   CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
-  CHECK_GE(c->size(), 2 * n) << " Na:" << na << " Nb:" << nb;
+  CHECK_GE(c->size(), 2 * n);
 
   double* da = g_workarea[0];
   double* db = g_workarea[1];
