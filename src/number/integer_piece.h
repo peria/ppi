@@ -12,7 +12,7 @@ class Integer;
 class IntegerPiece {
  public:
   IntegerPiece();
-  IntegerPiece(uint64* limbs, int64 size);
+  IntegerPiece(const uint64* limbs, int64 size);
   IntegerPiece(const Integer& integer);
   IntegerPiece(Integer& integer);
 
