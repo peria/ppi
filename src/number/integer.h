@@ -3,7 +3,6 @@
 #include <vector>
 #include <ostream>
 #include "base/base.h"
-#include "number/integer_piece.h"
 
 namespace ppi {
 namespace number {
@@ -32,10 +31,10 @@ class Integer : public std::vector<uint64> {
   static double Mult(const Integer& a, const Integer& b, Integer* c);
 
   // Computes c[n] = a[n] * b. Returns a carried limb.
-  static void Mult(const Integer& a, const uint64 b, Integer* c);
+  static void Mult(const Integer& a, const uint32 b, Integer* c);
 
   // c[n] = a[n] / b
-  static void Div(const Integer& a, const uint64 b, Integer* c);
+  static void Div(const Integer& a, const uint32 b, Integer* c);
 
   // Outputs hexadecimal representation of this integer to |os|.
   // TODO: Support decimal output
@@ -45,6 +44,21 @@ class Integer : public std::vector<uint64> {
   
  protected:
   void Normalize();
+
+  // static ----------------------------------------------------------
+
+  // Split a[m] into d[4n][2], where m <= 2*n.
+  // If a[i] is 0x1234567890ABCDEF,
+  // da[4*i..4*i+3][0] will be {0xCDEF, 0x90AB, 0x5678, 0x1234},
+  // and a[j+n] is 0x1234567890ABCDEF,
+  // da[4*j..4*j+3][1] will be {0xCDEF, 0x90AB, 0x5678, 0x1234}.
+  // Other valus will be filled with 0.
+  static void Split4In8(const Integer& a, const int64 n, double* da);
+
+  // Gather d[4n*2] into a[2n]. (Length is specified by a.size())
+  // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then
+  // a[2*i] = 0x7000500030001, a[2*i+n] = 0x8000600040002.
+  static double Gather4In8(double* da, Integer* a);
 };
 
 std::ostream& operator<<(std::ostream& os, const Integer& val);
