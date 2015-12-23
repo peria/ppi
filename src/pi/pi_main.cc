@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+#include "base/allocator.h"
 #include "base/base.h"
 #include "pi/pi.h"
 #include "number/real.h"
@@ -31,6 +32,16 @@ int main(int argc, char* argv[]) {
     int64 same = pi.Compare(FLAGS_refer);
     std::cerr << same << " out of " << size << " digits are same.\n";
   }
+
+#if !defined(BUILD_TYPE_release)
+  int64 used_size = ppi::base::Allocator::allocated_size_peak();
+  double used_size_kib = used_size / 1024.0;
+  if (used_size > 1024 * 1024) {
+    LOG(INFO) << "Maximum memory usage: " << used_size_kib / 1024 << " MiB";
+  } else {
+    LOG(INFO) << "Maximum memory usage: " << used_size_kib << " KiB";
+  }
+#endif
   
   return 0;
 }

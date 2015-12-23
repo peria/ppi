@@ -41,6 +41,7 @@ ppi_add_cxx_flags("-Wall -Wextra")
 ppi_add_cxx_flags("-O2")
 ppi_add_cxx_flags("-march=native")
 ppi_add_cxx_flags("-DSRC_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
+ppi_add_cxx_flags("-DBUILD_TYPE_${build_type}=1")
 
 if(${build_type} MATCHES release)
   ppi_add_cxx_flags("-Wno-error=deprecated-declarations")
