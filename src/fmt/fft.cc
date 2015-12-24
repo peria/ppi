@@ -5,13 +5,26 @@
 #include <cstring>
 
 #include "base/base.h"
+#include "base/allocator.h"
 
 namespace ppi {
 namespace fmt {
 
 namespace {
 const int64 kMaxSize = 1 << 21;
-Complex work[kMaxSize];
+Complex* g_work = nullptr;
+int64 g_work_size = 0;
+
+Complex* WorkArea(int64 size) {
+  if (size > g_work_size) {
+    if (g_work)
+      base::Allocator::Deallocate(reinterpret_cast<uint64*>(g_work));
+    g_work = reinterpret_cast<Complex*>(base::Allocator::Allocate(size * 2));
+    g_work_size = size;
+  }
+  return g_work;
+}
+
 }
 
 void Fft::Factor(int64 n, Config* config) {
@@ -41,7 +54,7 @@ void Fft::Transfer(const Config& config, const Type type, Complex a[]) {
   }
 
   Complex* x = a;
-  Complex* y = work;
+  Complex* y = WorkArea(n);
   for (int64 width = 1, height = n; height > 1;) {
     height /= 2;
     double th = -M_PI / width;
