@@ -13,14 +13,12 @@ namespace fmt {
 namespace {
 const int64 kMaxSize = 1 << 21;
 Complex* g_work = nullptr;
-int64 g_work_size = 0;
 
 Complex* WorkArea(int64 size) {
-  if (size > g_work_size) {
+  if (base::Allocator::GetSize(g_work) < size * 2) {
     if (g_work)
       base::Allocator::Deallocate(g_work);
     g_work = base::Allocator::Allocate<Complex>(size * 2);
-    g_work_size = size;
   }
   return g_work;
 }
