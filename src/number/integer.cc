@@ -24,9 +24,9 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 }  // namespace
 
-Integer::Integer() : data_(base::Allocator::Allocate(0)) {}
+Integer::Integer() : data_(base::Allocator::Allocate<uint64>(0)) {}
 
-Integer::Integer(uint64 value) : data_(base::Allocator::Allocate(1)) {
+Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {
   (*this)[0] = value;
 }
 
@@ -44,7 +44,7 @@ uint64 Integer::back() const {
 }
 
 void Integer::resize(int64 sz) {
-  uint64* new_ptr = base::Allocator::Allocate(sz);
+  uint64* new_ptr = base::Allocator::Allocate<uint64>(sz);
   for (int64 i = 0; i < std::min(sz, size()); ++i)
     new_ptr[i] = (*this)[i];
   std::swap(data_, new_ptr);
@@ -56,7 +56,7 @@ void Integer::erase(int64 begin, int64 end) {
     return;
 
   int64 erase_size = end - begin;
-  uint64* new_ptr = base::Allocator::Allocate(size() - erase_size);
+  uint64* new_ptr = base::Allocator::Allocate<uint64>(size() - erase_size);
   for (int64 i = 0; i < begin; ++i) {
     new_ptr[i] = (*this)[i];
   }
@@ -70,11 +70,11 @@ void Integer::erase(int64 begin, int64 end) {
 
 void Integer::clear() {
   base::Allocator::Deallocate(data_);
-  data_ = base::Allocator::Allocate(0);
+  data_ = base::Allocator::Allocate<uint64>(0);
 }
 
 void Integer::insert(int64 from, int64 number, uint64 value) {
-  uint64* new_ptr = base::Allocator::Allocate(size() + number);
+  uint64* new_ptr = base::Allocator::Allocate<uint64>(size() + number);
 
   for (int64 i = 0; i < from; ++i)
     new_ptr[i] = (*this)[i];

@@ -12,7 +12,7 @@ int64 Allocator::allocated_size_ = 0;
 int64 Allocator::allocated_size_peak_ = 0;
 int64 Allocator::allocated_number_ = 0;
 
-uint64* Allocator::Allocate(int64 number) {
+void* Allocator::AllocateInternal(int64 number) {
   uint64* ptr = new uint64[number + 1];
   *ptr = number;
 
