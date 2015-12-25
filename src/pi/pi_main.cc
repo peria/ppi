@@ -3,6 +3,7 @@
 
 #include "base/allocator.h"
 #include "base/base.h"
+#include "base/time.h"
 #include "pi/pi.h"
 #include "number/real.h"
 
@@ -15,6 +16,7 @@ using namespace ppi;
 int main(int argc, char* argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
+  double start = base::Time::Now();
   int64 limbs = FLAGS_digits / 16 + 1;
   ppi::number::Real pi;
   pi.setPrecision(limbs);
@@ -32,7 +34,9 @@ int main(int argc, char* argv[]) {
     int64 same = pi.Compare(FLAGS_refer);
     std::cerr << same << " out of " << size << " digits are same.\n";
   }
-
+  double end = base::Time::Now();
+  LOG(INFO) << "Elapsed Time: " << (end - start) << " sec.";
+  
 #if !defined(BUILD_TYPE_release)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
   double used_size_kib = used_size / 1024.0;

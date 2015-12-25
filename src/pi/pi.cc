@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "base/base.h"
+#include "base/time.h"
 #include "number/real.h"
 
 namespace ppi {
@@ -61,25 +62,31 @@ double Pi::Chudnovsky(Real* pi) {
   LOG(INFO) << "Use " << n << " terms to get " << (length * 16) << " hex digits.";
   Real a, b, c;
 
+  double start_bs = base::Time::Now();
   // Pass a, b, and c as Integer elements into binary split
   ChudnovskyInternal(0, half, &a, &b, &c);
-  VLOG(1) << a;
-  VLOG(1) << b;
-  VLOG(1) << c;
   // c is no longer used.
   c.clear();
+  double end_bs = base::Time::Now();
+  LOG(INFO) << "Binary Split: " << (end_bs - start_bs) << " sec.";
 
   Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
-  VLOG(1) << a;
   int64 len = std::max(a.size(), b.size()) + 1;
   a.setPrecision(len);
   b.setPrecision(len);
   pi->setPrecision(len);
 
+  double start_inverse = base::Time::Now();
   Real::Inverse(b, pi);
   Real::Mult(*pi, a, pi);
+  double end_inverse = base::Time::Now();
+  LOG(INFO) << "Division: " << (end_inverse - start_inverse) << " sec.";
+
+  double start_sqrt = base::Time::Now();
   Real::InverseSqrt(10005, &b);
   Real::Mult(*pi, b, pi);
+  double end_sqrt = base::Time::Now();
+  LOG(INFO) << "Square Root: " << (end_sqrt - start_sqrt) << " sec.";
 
   pi->setPrecision(length);
 
