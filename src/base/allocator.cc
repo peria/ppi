@@ -25,16 +25,22 @@ void* Allocator::AllocateInternal(int64 number) {
   return &ptr[1];
 }
 
-void Allocator::Deallocate(uint64* ptr) {
-  --ptr;
+void Allocator::Deallocate(void* ptr) {
+  uint64* ptr64 = reinterpret_cast<uint64*>(ptr);
+  --ptr64;
 
 #if !defined(BUILD_TYPE_release)
-  int64 size = *ptr;
+  int64 size = *ptr64;
   --allocated_number_;
-  allocated_size_ -= (size + 1) * sizeof(int64);
+  allocated_size_ -= (size + 1) * sizeof(uint64);
 #endif
 
-  delete[] ptr;
+  delete[] ptr64;
+}
+
+int64 GetSize(void* ptr) {
+  int64* ptr64 = reinterpret_cast<int64*>(ptr);
+  return ptr64[-1];
 }
 
 }  // namespace base

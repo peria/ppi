@@ -18,7 +18,7 @@ int64 g_work_size = 0;
 Complex* WorkArea(int64 size) {
   if (size > g_work_size) {
     if (g_work)
-      base::Allocator::Deallocate(reinterpret_cast<uint64*>(g_work));
+      base::Allocator::Deallocate(g_work);
     g_work = base::Allocator::Allocate<Complex>(size * 2);
     g_work_size = size;
   }

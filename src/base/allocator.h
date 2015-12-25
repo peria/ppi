@@ -14,7 +14,8 @@ class Allocator {
   static T* Allocate(int64 number) {
     return reinterpret_cast<T*>(AllocateInternal(number));
   }
-  static void Deallocate(uint64* ptr);
+  static void Deallocate(void* ptr);
+  static int64 GetSize(void* ptr);
 
   static int64 allocated_size() { return allocated_size_; }
   static int64 allocated_size_peak() { return allocated_size_peak_; }
