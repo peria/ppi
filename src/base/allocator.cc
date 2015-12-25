@@ -38,7 +38,9 @@ void Allocator::Deallocate(void* ptr) {
   delete[] ptr64;
 }
 
-int64 GetSize(void* ptr) {
+int64 Allocator::GetSize(void* ptr) {
+  if (!ptr)
+    return 0;
   int64* ptr64 = reinterpret_cast<int64*>(ptr);
   return ptr64[-1];
 }

@@ -15,9 +15,17 @@ namespace {
 
 // kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
 const int64 kMaxLimbsForMult = 1 << 17;
-const int64 kMaxShortLimbsForMult = kMaxLimbsForMult * 4;
-const int64 kMaxComplexsForMult = kMaxShortLimbsForMult * 2;
-double g_workarea[2][kMaxComplexsForMult];
+double* g_workarea[2];
+
+double* WorkArea(int index, int64 size) {
+  double*& workarea = g_workarea[index];
+  if (base::Allocator::GetSize(workarea) < size) {
+    if (workarea)
+      base::Allocator::Deallocate(workarea);
+    workarea = base::Allocator::Allocate<double>(size);
+  }
+  return workarea;
+}
 
 const int kMaskBitSize = 16;
 const uint64 kMask = (1ULL << kMaskBitSize) - 1;
@@ -162,8 +170,8 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = MinPow2(na + nb) / 2;
   CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
 
-  double* da = g_workarea[0];
-  double* db = g_workarea[1];
+  double* da = WorkArea(0, 8 * n);
+  double* db = WorkArea(1, 8 * n);
 
   // Split uint64[na] -> double[4n][2]
   Split4In8(a, n, da);
