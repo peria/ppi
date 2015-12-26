@@ -25,7 +25,7 @@ class Fft {
   static void Factor(int64 n, Config* config);
 
   // Compute DFT of |a|.
-  static void Transfer(const Config& config, const Type type, Complex a[]);
+  static void Transform(const Config& config, const Type type, Complex a[]);
 };
 
 }  // namespace fmt

@@ -28,7 +28,7 @@ void Fmt::Fmt4(const Fft::Type type, const int64 n, double da[]) {
     }
   }
 
-  Fft::Transfer(config, type, a);
+  Fft::Transform(config, type, a);
 
   if (type == Fft::Type::Inverse) {
     double th = -M_PI / (2 * n); // q = 1/4

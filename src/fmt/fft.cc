@@ -42,7 +42,7 @@ void Fft::Factor(int64 n, Config* config) {
   CHECK_LT(0, config->exponent[0]);
 }
 
-void Fft::Transfer(const Config& config, const Type type, Complex a[]) {
+void Fft::Transform(const Config& config, const Type type, Complex a[]) {
   const int64 n = config.n;
   CHECK_GE(kMaxSize, n);
   if (type == Type::Inverse) {

@@ -11,13 +11,13 @@ TEST(FftTest, Fft2ElemTest) {
   Fft::Factor(2, &config);
 
   Complex a[] = {{1, 2}, {3, 4}};
-  Fft::Transfer(config, Fft::Forward, a);
+  Fft::Transform(config, Fft::Forward, a);
   EXPECT_NEAR(4, a[0].real, kEps);
   EXPECT_NEAR(6, a[0].imag, kEps);
   EXPECT_NEAR(-2, a[1].real, kEps);
   EXPECT_NEAR(-2, a[1].imag, kEps);
 
-  Fft::Transfer(config, Fft::Inverse, a);
+  Fft::Transform(config, Fft::Inverse, a);
   EXPECT_NEAR(1, a[0].real, kEps);
   EXPECT_NEAR(2, a[0].imag, kEps);
   EXPECT_NEAR(3, a[1].real, kEps);
@@ -35,8 +35,8 @@ TEST(FftTest, FftTest) {
     a[i].real = i;
     a[i].imag = i + n;
   }    
-  Fft::Transfer(config, Fft::Forward, a);
-  Fft::Transfer(config, Fft::Inverse, a);
+  Fft::Transform(config, Fft::Forward, a);
+  Fft::Transform(config, Fft::Inverse, a);
   for (int i = 0; i < n; ++i) {
     EXPECT_NEAR(i, a[i].real, kEps);
     EXPECT_NEAR(i + n, a[i].imag, kEps);
