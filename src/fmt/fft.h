@@ -30,6 +30,7 @@ class Fft {
  private:
   // Compute 1 step of DFT from |x| into |y|.
   static void Transform2(const Config& config, int64 width, int64 height, Complex x[], Complex y[]);
+  static void Transform4(const Config& config, int64 width, int64 height, Complex x[], Complex y[]);
 };
 
 }  // namespace fmt

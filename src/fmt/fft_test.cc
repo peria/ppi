@@ -27,19 +27,21 @@ TEST(FftTest, Fft2ElemTest) {
 TEST(FftTest, FftTest) {
   const double kEps = 1e-10;
 
-  const int n = 1 << 10;
-  Fft::Config config;
-  Fft::Factor(n, &config);
-  Complex a[n];
-  for (int i = 0; i < n; ++i) {
-    a[i].real = i;
-    a[i].imag = i + n;
-  }    
-  Fft::Transform(config, Fft::Forward, a);
-  Fft::Transform(config, Fft::Inverse, a);
-  for (int i = 0; i < n; ++i) {
-    EXPECT_NEAR(i, a[i].real, kEps);
-    EXPECT_NEAR(i + n, a[i].imag, kEps);
+  for (int64 k = 1; k <= 10; ++k) {
+    const int n = 1 << k;
+    Fft::Config config;
+    Fft::Factor(n, &config);
+    Complex a[n];
+    for (int i = 0; i < n; ++i) {
+      a[i].real = i;
+      a[i].imag = i + n;
+    }    
+    Fft::Transform(config, Fft::Forward, a);
+    Fft::Transform(config, Fft::Inverse, a);
+    for (int i = 0; i < n; ++i) {
+      ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k;
+      ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k;
+    }
   }
 }
 
