@@ -53,39 +53,49 @@ void Fft::Transform(const Config& config, const Type type, Complex a[]) {
 
   Complex* x = a;
   Complex* y = WorkArea(n);
-  for (int64 width = 1, height = n; height > 1;) {
+  int64 height = n;
+  int64 width = 1;
+  for (int64 i = 0, k = config.exponent[0]; i < k; ++i) {
     height /= 2;
-    double th = -M_PI / width;
-    for (int64 j = 0; j < width; ++j) {
-      double wr = std::cos(th * j);
-      double wi = std::sin(th * j);
-      for (int64 k = 0; k < height; ++k) {
-        int64 ix0 = height * 2 * j + k;
-        int64 ix1 = ix0 + height;
-        double x0r = x[ix0].real, x0i = x[ix0].imag;
-        double x1r = x[ix1].real, x1i = x[ix1].imag;
-        double xwr = x1r * wr - x1i * wi;
-        double xwi = x1r * wi + x1i * wr;
-
-        int64 iy0 = height * j + k;
-        int64 iy1 = iy0 + n / 2;
-        y[iy0].real = x0r + xwr;
-        y[iy0].imag = x0i + xwi;
-        y[iy1].real = x0r - xwr;
-        y[iy1].imag = x0i - xwi;
-      }
+    if (i % 2 == 0) {
+      Transform2(config, width, height, x, y);
+    } else {
+      Transform2(config, width, height, y, x);
     }
     width *= 2;
-    std::swap(x, y);
   }
  
-  if (x != a)
-    std::memcpy(a, x, sizeof(Complex) * n);
+  if (config.exponent[0] % 2 == 1)
+    std::memcpy(a, y, sizeof(Complex) * n);
 
   if (type == Type::Inverse) {
     for (int64 i = 0; i < n; ++i) {
       a[i].real *= 1.0 / n;
       a[i].imag *= -1.0 / n;
+    }
+  }
+}
+
+void Fft::Transform2(const Config& config, int64 width, int64 height,
+                     Complex x[], Complex y[]) {
+  double th = -M_PI / width;
+  for (int64 j = 0; j < width; ++j) {
+    double wr = std::cos(th * j);
+    double wi = std::sin(th * j);
+    for (int64 k = 0; k < height; ++k) {
+      int64 ix0 = height * 2 * j + k;
+      int64 ix1 = ix0 + height;
+      double x0r = x[ix0].real, x0i = x[ix0].imag;
+      double x1r = x[ix1].real, x1i = x[ix1].imag;
+      double xwr = x1r * wr - x1i * wi;
+      double xwi = x1r * wi + x1i * wr;
+
+      int64 iy0 = height * j + k;
+      int64 iy1 = iy0 + config.n / 2;
+      y[iy0].real = x0r + xwr;
+      y[iy0].imag = x0i + xwi;
+      y[iy1].real = x0r - xwr;
+      y[iy1].imag = x0i - xwi;
     }
   }
 }

@@ -26,6 +26,10 @@ class Fft {
 
   // Compute DFT of |a|.
   static void Transform(const Config& config, const Type type, Complex a[]);
+
+ private:
+  // Compute 1 step of DFT from |x| into |y|.
+  static void Transform2(const Config& config, int64 width, int64 height, Complex x[], Complex y[]);
 };
 
 }  // namespace fmt
