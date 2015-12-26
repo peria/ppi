@@ -15,6 +15,11 @@ function(ppi_pi_add_executable target)
   target_link_libraries(${target} ppi_pi)
 endfunction()
 
-ppi_pi_add_executable(pi_main pi_main.cc)
+function(ppi_pi_add_benchmark target)
+  ppi_add_benchmark(${target} ${ARGN})
+  target_link_libraries(${target} ppi_pi)
+endfunction()
 
-# ppi_pi_test(pi pi_test.cc)
+ppi_pi_add_executable(pi_main pi_main.cc)
+ppi_pi_add_benchmark(pi_benchmark pi_benchmark.cc)
+

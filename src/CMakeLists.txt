@@ -56,6 +56,9 @@ add_subdirectory(third_party/googletest/googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(${GLOG_INCLUDE_DIRS})
 
+add_subdirectory(third_party/benchmark)
+include_directories(third_party/benchmark/include third_party/benchmark/src)
+
 # ----------------------------------------------------------------------
 # Define test dependencies
 function(ppi_test target)
@@ -91,6 +94,13 @@ function(ppi_add_executable target)
     target_link_libraries(${target} libprofiler.so)
     target_link_libraries(${target} libtcmalloc.so)
   endif()
+endfunction()
+
+function(ppi_add_benchmark target)
+  add_executable(${target} ${ARGN})
+  target_link_libraries(${target} ppi_base)
+  target_link_libraries(${target} benchmark)
+  ppi_target_link_libraries(${target})
 endfunction()
 
 add_subdirectory(base)
