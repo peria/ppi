@@ -210,6 +210,7 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   sum.Normalize();
 
   *c = sum;
+  sum.release();
 }
 
 void Real::Sub(const Real& a, const Real& b, Real* c) {

@@ -15,6 +15,7 @@ class Integer {
  public:
   Integer();
   explicit Integer(uint64 value);
+  ~Integer();
 
   uint64& operator[](int64 i) const { return data_[i]; }
   int64 size() const { return static_cast<int64>((*this)[-1]); }
@@ -25,6 +26,8 @@ class Integer {
   void clear();
   void insert(int64 from, int64 number, uint64 value);
   void push_back(uint64 value);
+
+  void release() { data_ = nullptr; }
 
   // APIs -----------------------------------------------------------
   // Computes c[n] = a[n] + b[n]

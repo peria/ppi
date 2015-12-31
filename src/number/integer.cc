@@ -38,6 +38,11 @@ Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {
   (*this)[0] = value;
 }
 
+Integer::~Integer() {
+  if (data_)
+    base::Allocator::Deallocate(data_);
+}
+
 void Integer::Normalize() {
   int64 i = size() - 1;
   while (i >= 0 && (*this)[i] == 0) {
