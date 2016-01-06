@@ -4,6 +4,7 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "base/time.h"
+#include "pi/drm.h"
 #include "pi/pi.h"
 #include "number/real.h"
 
@@ -22,7 +23,7 @@ int main(int argc, char* argv[]) {
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0:
-    ppi::pi::Pi::Chudnovsky(&pi);
+    ppi::pi::Drm::Chudnovsky(&pi);
     break;
   case 1:
     ppi::pi::Pi::Arctan2(&pi);
