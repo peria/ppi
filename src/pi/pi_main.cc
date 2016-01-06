@@ -20,10 +20,11 @@ int main(int argc, char* argv[]) {
   double start = base::Time::Now();
   int64 limbs = FLAGS_digits / 16 + 1;
   ppi::number::Real pi;
+  double error = 0;
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0:
-    ppi::pi::Drm::Chudnovsky(&pi);
+    error = ppi::pi::Drm::Chudnovsky(&pi);
     break;
   case 1:
     ppi::pi::Pi::Arctan2(&pi);
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
   }
   double end = base::Time::Now();
   LOG(INFO) << "Elapsed Time: " << (end - start) << " sec.";
+  LOG(INFO) << "Maximum error in FFT: " << error;
   
 #if !defined(BUILD_TYPE_release)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
