@@ -124,7 +124,7 @@ double Real::Inverse(const Real& a, Real* val) {
   // TODO: Look for better method.
   // Here, (*val * da) <= 1.
   *val = (1.0 - (1.0 / (1ULL << 52))) / da;
-  val->exponent_ = -(a.exponent() + a.size()) - 1;
+  val->exponent_ = -(a.exponent() + a.size()) - val->size() + 1;
 
   double max_error = 0;
   for (int64 k = 2; k < length * 2; k*= 2) {
@@ -209,6 +209,7 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   sum.setPrecision(prec);
   sum.Normalize();
 
+  c->release();
   *c = sum;
   sum.release();
 }
@@ -271,7 +272,7 @@ void Real::Sub(const Real& a, const Real& b, Real* c) {
 
 double Real::Mult(const Real& a, const Real& b, Real* c) {
   double err = Integer::Mult(a, b, c);
-  c->exponent_ = a.exponent_ + b.exponent_;
+  c->exponent_ = a.exponent() + b.exponent();
   c->Normalize();
   return err;
 }

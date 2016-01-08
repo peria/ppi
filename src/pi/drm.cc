@@ -25,6 +25,7 @@ double Drm::Chudnovsky(Real* pi) {
   c.clear();
   double end_bs = base::Time::Now();
   LOG(INFO) << "Binary Split: " << (end_bs - start_bs) << " sec.";
+  LOG(INFO) << "Sizes: a(" << a.size() << "), b(" << b.size() << ")";
 
   Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
   int64 len = std::max(a.size(), b.size()) + 1;
