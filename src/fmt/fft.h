@@ -5,11 +5,6 @@
 namespace ppi {
 namespace fmt {
 
-struct Complex {
-  double real;
-  double imag;
-};
-
 class Fft {
  public:
   enum Type {

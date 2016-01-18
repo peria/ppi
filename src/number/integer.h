@@ -64,13 +64,13 @@ class Integer {
   // and a[j+n] is 0x1234567890ABCDEF,
   // da[4*j..4*j+3][1] will be {0xCDEF, 0x90AB, 0x5678, 0x1234}.
   // Other valus will be filled with 0.
-  static void Split4In8(const Integer& a, const int64 n, double* da);
+  static void Split4In8(const Integer& a, const int64 n, Complex* ca);
 
   // Gather d[4n*2] into a[2n]. (Length is specified by a.size())
   // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then
   // a[2*i] = 0x7000500030001, a[2*i+n] = 0x8000600040002.
-  static double Gather4In8(double* da, Integer* a);
-
+  static double Gather4In8(Complex* ca, Integer* a);
+  
  private:
   uint64* data_;
 };

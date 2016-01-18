@@ -15,14 +15,14 @@ namespace {
 
 // kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
 const int64 kMaxLimbsForMult = 1 << 17;
-double* g_workarea[2];
+Complex* g_workarea[2];
 
-double* WorkArea(int index, int64 size) {
-  double*& workarea = g_workarea[index];
+Complex* WorkArea(int index, int64 size) {
+  Complex*& workarea = g_workarea[index];
   if (base::Allocator::GetSize(workarea) < size) {
     if (workarea)
       base::Allocator::Deallocate(workarea);
-    workarea = base::Allocator::Allocate<double>(size);
+    workarea = base::Allocator::Allocate<Complex>(size);
   }
   return workarea;
 }
@@ -175,56 +175,66 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = MinPow2(na + nb) / 2;
   CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
 
-  double* da = WorkArea(0, 8 * n);
-  double* db = WorkArea(1, 8 * n);
+  Complex* ca = WorkArea(0, 8 * n);
+  Complex* cb = WorkArea(1, 8 * n);
 
   // Split uint64[na] -> double[4n][2]
-  Split4In8(a, n, da);
+  Split4In8(a, n, ca);
   // FMT it, with q=1/4
-  fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, da);
+  fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, ca);
 
   if (&a == &b) {
-    db = da;
+    cb = ca;
   } else {
-    Split4In8(b, n, db);
-    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, db);
+    Split4In8(b, n, cb);
+    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, cb);
   }
 
   for (int64 i = 0; i < 4 * n; ++i) {
-    double ar = da[2 * i], ai = da[2 * i + 1];
-    double br = db[2 * i], bi = db[2 * i + 1];
-    da[2 * i] = ar * br - ai * bi;
-    da[2 * i + 1] = ar * bi + ai * br;
+    double ar = ca[i].real, ai = ca[i].imag;
+    double br = cb[i].real, bi = cb[i].imag;
+    ca[i].real = ar * br - ai * bi;
+    ca[i].imag = ar * bi + ai * br;
   }
   
-  fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, da);
+  fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, ca);
 
-  // Gather double[8n][2] -> int[2n]
+  // Gather Complex[8n] -> int64[2n]
   c->resize(2 * n);
-  double err = Gather4In8(da, c);
+  double err = Gather4In8(ca, c);
   c->Normalize();
 
   return err;
 }
 
-double Integer::Gather4In8(double* da, Integer* a) {
+namespace {
+
+double Integrate(double* dp) {
+  double d = *dp;
+  *dp = std::floor(d + 0.5);
+  return std::abs(d - *dp);
+}
+
+}  // namespace
+
+double Integer::Gather4In8(Complex* ca, Integer* a) {
   DCHECK_EQ(0, a->size() % 2);
   const int64 n = a->size() / 2;
 
   double err = 0;
   // 1. Dobule -> integral double
-  for (int64 i = 0; i < 8 * n; ++i) {
-    double dd = da[i];
-    da[i] = std::floor(dd + 0.5);
-    double e = std::abs(dd - da[i]);
-    err = std::max(e, err);
+  for (int64 i = 0; i < 4 * n; ++i) {
+    err = std::max(err, Integrate(&(ca[i].real)));
+    err = std::max(err, Integrate(&(ca[i].imag)));
   }
 
   // 2. Normalize & re-alignment
   uint64 carry = 0;
-  double* d = da;
   for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = d[0], ia1 = d[2], ia2 = d[4], ia3 = d[6];
+    uint64 ia0 = ca[4 * i].real;
+    uint64 ia1 = ca[4 * i + 1].real;
+    uint64 ia2 = ca[4 * i + 2].real;
+    uint64 ia3 = ca[4 * i + 3].real;
     ia0 += carry;
     ia1 += ia0 >> kMaskBitSize;
     ia2 += ia1 >> kMaskBitSize;
@@ -234,11 +244,12 @@ double Integer::Gather4In8(double* da, Integer* a) {
     ia1 &= kMask;
     ia2 &= kMask;
     (*a)[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
-    d += 8;
   }
-  d = da;
   for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = d[1], ia1 = d[3], ia2 = d[5], ia3 = d[7];
+    uint64 ia0 = ca[4 * i].imag;
+    uint64 ia1 = ca[4 * i + 1].imag;
+    uint64 ia2 = ca[4 * i + 2].imag;
+    uint64 ia3 = ca[4 * i + 3].imag;
     ia0 += carry;
     ia1 += ia0 >> kMaskBitSize;
     ia2 += ia1 >> kMaskBitSize;
@@ -248,29 +259,31 @@ double Integer::Gather4In8(double* da, Integer* a) {
     ia1 &= kMask;
     ia2 &= kMask;
     (*a)[i + n] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
-    d += 8;
   }
 
   return err;
 }
 
-void Integer::Split4In8(const Integer& a, const int64 n, double* da) {
-  std::fill_n(da, n * 8, 0.0);
+void Integer::Split4In8(const Integer& a, const int64 n, Complex* ca) {
+  for (int64 i = 0; i < 4 * n; ++i) {
+    ca[i].real = 0;
+    ca[i].imag = 0;
+  }
 
   const int64 na = a.size();
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
-    da[8 * i] = ia & kMask;
-    da[8 * i + 2] = (ia >> kMaskBitSize) & kMask;
-    da[8 * i + 4] = (ia >> (kMaskBitSize * 2)) & kMask;
-    da[8 * i + 6] = ia >> (kMaskBitSize * 3);
+    ca[4 * i    ].real = ia & kMask;
+    ca[4 * i + 1].real = (ia >> kMaskBitSize) & kMask;
+    ca[4 * i + 2].real = (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * i + 3].real = ia >> (kMaskBitSize * 3);
   }
   for (int64 i = n, j = 0; i < na; ++i, ++j) {
     uint64 ia = a[i];
-    da[8 * j + 1] = ia & kMask;
-    da[8 * j + 3] = (ia >> kMaskBitSize) & kMask;
-    da[8 * j + 5] = (ia >> (kMaskBitSize * 2)) & kMask;
-    da[8 * j + 7] = ia >> (kMaskBitSize * 3);
+    ca[4 * j    ].imag = ia & kMask;
+    ca[4 * j + 1].imag = (ia >> kMaskBitSize) & kMask;
+    ca[4 * j + 2].imag = (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * j + 3].imag = ia >> (kMaskBitSize * 3);
   }
 }
 

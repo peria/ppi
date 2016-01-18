@@ -30,5 +30,9 @@ T pointer_cast(void* p) {
   return static_cast<T>(p);
 }
 
+struct Complex {
+  double real;
+  double imag;
+};
 
 }  // namespace ppi

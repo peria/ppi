@@ -8,8 +8,8 @@ namespace fmt {
 
 class Fmt {
  public:
-  // Compute DWT of |da| with using q=1/4.
-  static void Fmt4(const Fft::Type type, const int64 n, double da[]);
+  // Compute DWT of |a| with using q=1/4.  Size of a[] is n.
+  static void Fmt4(const Fft::Type type, const int64 n, Complex* a);
 };
 
 }  // namespace fmt
