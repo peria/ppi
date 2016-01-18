@@ -58,18 +58,19 @@ class Integer {
 
   // static ----------------------------------------------------------
 
-  // Split a[m] into d[4n][2], where m <= 2*n.
-  // If a[i] is 0x1234567890ABCDEF,
-  // da[4*i..4*i+3][0] will be {0xCDEF, 0x90AB, 0x5678, 0x1234},
-  // and a[j+n] is 0x1234567890ABCDEF,
-  // da[4*j..4*j+3][1] will be {0xCDEF, 0x90AB, 0x5678, 0x1234}.
-  // Other valus will be filled with 0.
-  static void Split4Round(const Integer& a, const int64 n, Complex* ca);
+  // Split4XXX and Gather4XXX methods convert integers between 64bit
+  // and 16bit * 4.  16bit * 4 data are stored in double format.
+  // In both format, numbers are represented in big endian.
 
-  // Gather d[4n*2] into a[2n]. (Length is specified by a.size())
-  // If d[8*i..8*i+7] represents {1, 2, 3, 4, 5, 6, 7, 8}, then
-  // a[2*i] = 0x7000500030001, a[2*i+n] = 0x8000600040002.
+  // Lower n 64bit integers are stored in real parts of 4n complex numbers,
+  // and upper n integers are stored in imaginal parts of them.
+  static void Split4Round(const Integer& a, const int64 n, Complex* ca);
   static double Gather4Round(Complex* ca, Integer* a);
+
+  // Stored in x[j]+i*x[j+1] style and in nega-cyclic order.
+  // So n 64bit integers can be stored in 2n Complex numbers without cyclic.
+  static void Split4Serial(const Integer& a, const int64 n, Complex* ca);
+  static double Gather4Serial(Complex* ca, Integer* a);
   
  private:
   uint64* data_;

@@ -10,6 +10,8 @@ class IntegerForTest : public Integer {
  public:
   using Integer::Split4Round;
   using Integer::Gather4Round;
+  using Integer::Split4Serial;
+  using Integer::Gather4Serial;
 };
 
 TEST(IntegerTest, ErrorInMult) {
@@ -26,29 +28,35 @@ TEST(IntegerTest, ErrorInMult) {
   EXPECT_GT(1e-2, err);
 }
 
-TEST(IntegerTest, SplitAndGatherRound) {
+TEST(IntegerTest, SplitAndGatherSerial) {
   Integer a;
-  Complex c[4];
+  Complex c[2];
+
+  // Integer -> Complex[2]
   a.push_back(0x1234567890abcdefULL);
-
-  // Integer -> Complex[4]
-  IntegerForTest::Split4Round(a, 1, c);
+  IntegerForTest::Split4Serial(a, 1, c);
   EXPECT_EQ(static_cast<double>(0xcdef), c[0].real);
-  EXPECT_EQ(0.0, c[0].imag);
-  EXPECT_EQ(static_cast<double>(0x90ab), c[1].real);
-  EXPECT_EQ(0.0, c[1].imag);
-  EXPECT_EQ(static_cast<double>(0x5678), c[2].real);
-  EXPECT_EQ(0.0, c[2].imag);
-  EXPECT_EQ(static_cast<double>(0x1234), c[3].real);
-  EXPECT_EQ(0.0, c[3].imag);
+  EXPECT_EQ(static_cast<double>(0x90ab), c[0].imag);
+  EXPECT_EQ(static_cast<double>(0x5678), c[1].real);
+  EXPECT_EQ(static_cast<double>(0x1234), c[1].imag);
 
-  // Complex[4] -> Integer
-  c[0].imag = 3141.0;
+  // Nega-cyclic
+  a.push_back(0xfedcba0987654321ULL);
+  IntegerForTest::Split4Serial(a, 1, c);
+  EXPECT_EQ(static_cast<double>(0xcdef - 0x4321), c[0].real);
+  EXPECT_EQ(static_cast<double>(0x90ab - 0x8765), c[0].imag);
+  EXPECT_EQ(static_cast<double>(0x5678 - 0xba09), c[1].real);
+  EXPECT_EQ(static_cast<double>(0x1234 - 0xfedc), c[1].imag);
+            
+  // Complex[2] -> Integer
   Integer b;
-  b.resize(2);
-  IntegerForTest::Gather4Round(c, &b);
-  EXPECT_EQ(0x1234567890abcdefULL, b[0]);
-  EXPECT_EQ(3141ULL, b[1]);
+  b.resize(1);
+  c[0].real = 0x4444;
+  c[0].imag = 0x3333;
+  c[1].real = 0x2222;
+  c[1].imag = 0x1111;
+  IntegerForTest::Gather4Serial(c, &b);
+  EXPECT_EQ(0x1111222233334444ULL, b[0]);
 }
 
 TEST(IntegerTest, Mult) {
