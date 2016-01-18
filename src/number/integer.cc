@@ -179,14 +179,14 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   Complex* cb = WorkArea(1, 8 * n);
 
   // Split uint64[na] -> double[4n][2]
-  Split4In8(a, n, ca);
+  Split4Round(a, n, ca);
   // FMT it, with q=1/4
   fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, ca);
 
   if (&a == &b) {
     cb = ca;
   } else {
-    Split4In8(b, n, cb);
+    Split4Round(b, n, cb);
     fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, cb);
   }
 
@@ -201,7 +201,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
 
   // Gather Complex[8n] -> int64[2n]
   c->resize(2 * n);
-  double err = Gather4In8(ca, c);
+  double err = Gather4Round(ca, c);
   c->Normalize();
 
   return err;
@@ -217,7 +217,7 @@ double Integrate(double* dp) {
 
 }  // namespace
 
-double Integer::Gather4In8(Complex* ca, Integer* a) {
+double Integer::Gather4Round(Complex* ca, Integer* a) {
   DCHECK_EQ(0, a->size() % 2);
   const int64 n = a->size() / 2;
 
@@ -264,7 +264,7 @@ double Integer::Gather4In8(Complex* ca, Integer* a) {
   return err;
 }
 
-void Integer::Split4In8(const Integer& a, const int64 n, Complex* ca) {
+void Integer::Split4Round(const Integer& a, const int64 n, Complex* ca) {
   for (int64 i = 0; i < 4 * n; ++i) {
     ca[i].real = 0;
     ca[i].imag = 0;

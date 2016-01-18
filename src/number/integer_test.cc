@@ -8,8 +8,8 @@ namespace number {
 
 class IntegerForTest : public Integer {
  public:
-  using Integer::Split4In8;
-  using Integer::Gather4In8;
+  using Integer::Split4Round;
+  using Integer::Gather4Round;
 };
 
 TEST(IntegerTest, ErrorInMult) {
@@ -26,13 +26,13 @@ TEST(IntegerTest, ErrorInMult) {
   EXPECT_GT(1e-2, err);
 }
 
-TEST(IntegerTest, SplitAndGather) {
+TEST(IntegerTest, SplitAndGatherRound) {
   Integer a;
   Complex c[4];
   a.push_back(0x1234567890abcdefULL);
 
   // Integer -> Complex[4]
-  IntegerForTest::Split4In8(a, 1, c);
+  IntegerForTest::Split4Round(a, 1, c);
   EXPECT_EQ(static_cast<double>(0xcdef), c[0].real);
   EXPECT_EQ(0.0, c[0].imag);
   EXPECT_EQ(static_cast<double>(0x90ab), c[1].real);
@@ -46,7 +46,7 @@ TEST(IntegerTest, SplitAndGather) {
   c[0].imag = 3141.0;
   Integer b;
   b.resize(2);
-  IntegerForTest::Gather4In8(c, &b);
+  IntegerForTest::Gather4Round(c, &b);
   EXPECT_EQ(0x1234567890abcdefULL, b[0]);
   EXPECT_EQ(3141ULL, b[1]);
 }
