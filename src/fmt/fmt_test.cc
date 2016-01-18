@@ -66,5 +66,45 @@ TEST(FmtTest, Fmt2ComplexNegaCyclic) {
   }
 }
 
+TEST(FmtTest, Fmt2RealConvolution) {
+  const int64 n = 4;
+  double a[] = {1, 2, 0, 0};
+
+  Fmt::Fmt2Real(Fft::Type::Forward, n, a);
+  for (int i = 0; i < n / 2; ++i) {
+    double ar = a[2*i  ];
+    double ai = a[2*i+1];
+    a[2*i  ] = ar * ar - ai * ai;
+    a[2*i+1] = 2 * ar * ai;
+  }
+  Fmt::Fmt2Real(Fft::Type::Inverse, n, a);
+
+  const double kEps = 1e-10;
+  const double answer[] = {1, 4, 4, 0};
+  for (int64 i = 0; i < n; ++i) {
+    EXPECT_NEAR(answer[i], a[i], kEps) << "index: " << i;
+  }
+}
+
+TEST(FmtTest, Fmt2RealNegaCyclic) {
+  const int64 n = 4;
+  double a[] = {1, 2, 3, 4};
+
+  Fmt::Fmt2Real(Fft::Type::Forward, n, a);
+  for (int i = 0; i < n / 2; ++i) {
+    double ar = a[2*i  ];
+    double ai = a[2*i+1];
+    a[2*i  ] = ar * ar - ai * ai;
+    a[2*i+1] = 2 * ar * ai;
+  }
+  Fmt::Fmt2Real(Fft::Type::Inverse, n, a);
+
+  const double kEps = 1e-10;
+  const double answer[] = {-24, -20, -6, 20};
+  for (int64 i = 0; i < n; ++i) {
+    EXPECT_NEAR(answer[i], a[i], kEps) << "index: " << i;
+  }
+}
+
 }  // namespace fmt
 }  // namespace ppi

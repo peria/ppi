@@ -15,6 +15,7 @@ class Fmt {
   // Compute DWT of |a| with using q=1/2, which is used in nega-cyclic
   // convolutions.  Size of |a| is n.
   static void Fmt2(const Fft::Type type, const int64 n, Complex* a);
+  static void Fmt2Real(const Fft::Type type, const int64 n, double* a);
 };
 
 }  // namespace fmt
