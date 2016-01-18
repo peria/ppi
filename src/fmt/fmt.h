@@ -8,8 +8,13 @@ namespace fmt {
 
 class Fmt {
  public:
-  // Compute DWT of |a| with using q=1/4.  Size of a[] is n.
+  // Compute DWT of |a| with using q=1/4, which is used in right angle
+  // convolutions.  Size of |a| is n.
   static void Fmt4(const Fft::Type type, const int64 n, Complex* a);
+
+  // Compute DWT of |a| with using q=1/2, which is used in nega-cyclic
+  // convolutions.  Size of |a| is n.
+  static void Fmt2(const Fft::Type type, const int64 n, Complex* a);
 };
 
 }  // namespace fmt
