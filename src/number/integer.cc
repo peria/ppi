@@ -287,46 +287,45 @@ double Integer::Gather4Round(Complex* ca, Integer* a) {
   return err;
 }
 
-void Integer::Split4Serial(const Integer& a, const int64 n, Complex* ca) {
+void Integer::Split4Serial(const Integer& a, const int64 n, double* ca) {
   const int64 na = a.size();
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
-    ca[2 * i    ].real = ia & kMask;
-    ca[2 * i    ].imag = (ia >> kMaskBitSize) & kMask;
-    ca[2 * i + 1].real = (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[2 * i + 1].imag = ia >> (kMaskBitSize * 3);
+    ca[4 * i    ] = ia & kMask;
+    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
+    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
   }
-  for (int64 i = 2 * na; i < 2 * n; ++i) {
-    ca[i].real = 0;
-    ca[i].imag = 0;
+  for (int64 i = 4 * na; i < 4 * n; ++i) {
+    ca[i] = 0;
   }
+
   // Nega-cyclic part
   for (int64 i = n, j = 0; i < na; ++i, ++j) {
     uint64 ia = a[i];
-    ca[2 * j    ].real -= ia & kMask;
-    ca[2 * j    ].imag -= (ia >> kMaskBitSize) & kMask;
-    ca[2 * j + 1].real -= (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[2 * j + 1].imag -= ia >> (kMaskBitSize * 3);
+    ca[4 * j    ] -= ia & kMask;
+    ca[4 * j + 1] -= (ia >> kMaskBitSize) & kMask;
+    ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
   }
 }
 
-double Integer::Gather4Serial(Complex* ca, Integer* a) {
+double Integer::Gather4Serial(double* ca, Integer* a) {
   const int64 n = a->size();
 
   double err = 0;
   // 1. Dobule -> integral double
-  for (int64 i = 0; i < 2 * n; ++i) {
-    err = std::max(err, Integrate(&(ca[i].real)));
-    err = std::max(err, Integrate(&(ca[i].imag)));
+  for (int64 i = 0; i < 4 * n; ++i) {
+    err = std::max(err, Integrate(&(ca[i])));
   }
 
   // 2. Normalize & re-alignment
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = ca[2 * i].real;
-    uint64 ia1 = ca[2 * i].imag;
-    uint64 ia2 = ca[2 * i + 1].real;
-    uint64 ia3 = ca[2 * i + 1].imag;
+    uint64 ia0 = ca[4 * i    ];
+    uint64 ia1 = ca[4 * i + 1];
+    uint64 ia2 = ca[4 * i + 2];
+    uint64 ia3 = ca[4 * i + 3];
     ia0 += carry;
     ia1 += ia0 >> kMaskBitSize;
     ia2 += ia1 >> kMaskBitSize;
