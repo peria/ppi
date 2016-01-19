@@ -15,14 +15,14 @@ namespace {
 
 // kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
 const int64 kMaxLimbsForMult = 1 << 17;
-Complex* g_workarea[2];
+double* g_workarea[2];
 
-Complex* WorkArea(int index, int64 size) {
-  Complex*& workarea = g_workarea[index];
+double* WorkArea(int index, int64 size) {
+  double*& workarea = g_workarea[index];
   if (base::Allocator::GetSize(workarea) < size) {
     if (workarea)
       base::Allocator::Deallocate(workarea);
-    workarea = base::Allocator::Allocate<Complex>(size);
+    workarea = base::Allocator::Allocate<double>(size);
   }
   return workarea;
 }
@@ -175,33 +175,34 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = MinPow2(na + nb) / 2;
   CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
 
-  Complex* ca = WorkArea(0, 8 * n);
-  Complex* cb = WorkArea(1, 8 * n);
+  double* da = WorkArea(0, 8 * n);
+  double* db = nullptr;
 
   // Split uint64[na] -> double[4n][2]
-  Split4Round(a, n, ca);
+  Split4Serial(a, 2 * n, da);
   // FMT it, with q=1/4
-  fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, ca);
+  fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, da);
 
   if (&a == &b) {
-    cb = ca;
+    db = da;
   } else {
-    Split4Round(b, n, cb);
-    fmt::Fmt::Fmt4(fmt::Fft::Type::Forward, 4 * n, cb);
+    db = WorkArea(1, 8 * n);
+    Split4Serial(b, 2 * n, db);
+    fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, db);
   }
 
   for (int64 i = 0; i < 4 * n; ++i) {
-    double ar = ca[i].real, ai = ca[i].imag;
-    double br = cb[i].real, bi = cb[i].imag;
-    ca[i].real = ar * br - ai * bi;
-    ca[i].imag = ar * bi + ai * br;
+    double ar = da[2*i], ai = da[2*i+1];
+    double br = db[2*i], bi = db[2*i+1];
+    da[2*i  ] = ar * br - ai * bi;
+    da[2*i+1] = ar * bi + ai * br;
   }
   
-  fmt::Fmt::Fmt4(fmt::Fft::Type::Inverse, 4 * n, ca);
+  fmt::Fmt::Fmt2Real(fmt::Fft::Type::Inverse, 8 * n, da);
 
   // Gather Complex[8n] -> int64[2n]
   c->resize(2 * n);
-  double err = Gather4Round(ca, c);
+  double err = Gather4Serial(da, c);
   c->Normalize();
 
   return err;
