@@ -20,7 +20,8 @@ class Fft {
   static void Factor(int64 n, Config* config);
 
   // Compute DFT of |a|.
-  static void Transform(const Config& config, const Type type, Complex a[]);
+  static void Transform(const Config& config, const Type type, Complex* a);
+  static void TransformReal(const Type type, int64 n, double* a);
 
  private:
   // Compute 1 step of DFT from |x| into |y|.

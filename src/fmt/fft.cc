@@ -87,6 +87,63 @@ void Fft::Transform(const Config& config, const Type type, Complex a[]) {
   }
 }
 
+void Fft::TransformReal(const Type type, int64 n, double* a) {
+  CHECK(n % 2 == 0);
+  Complex* ca = reinterpret_cast<Complex*>(a);
+
+  if (type == Type::Inverse) {
+    double x0r = a[0];
+    double x0i = a[1];
+    a[0] = (x0r + x0i) * 0.5;
+    a[1] = (x0r - x0i) * 0.5;
+    const double th = -2 * M_PI / n;
+    for (int64 i = 1; i < n / 4; ++i) {
+      Complex& x0 = ca[i];
+      Complex& x1 = ca[n / 2 - i];
+      double xr = x0.real - x1.real;
+      double xi = x0.imag + x1.imag;
+      double t = th * i;
+      double wr = 1 + std::sin(t);
+      double wi = std::cos(t);
+      double ar = (xr * wr - xi * wi) * 0.5;
+      double ai = (xr * wi + xi * wr) * 0.5;
+      x0.real -= ar;
+      x0.imag -= ai;
+      x1.real += ar;
+      x1.imag -= ai;
+    }
+    ca[n / 4].imag = -ca[n / 4].imag;
+  }
+
+  Config config;
+  Factor(n / 2, &config);
+  Transform(config, type, ca);
+
+  if (type == Type::Forward) {
+    double x0r = a[0];
+    double x0i = a[1];
+    a[0] = x0r + x0i;
+    a[1] = x0r - x0i;
+    const double th = -2 * M_PI / n;
+    for (int64 i = 1; i < n / 4; ++i) {
+      Complex& x0 = ca[i];
+      Complex& x1 = ca[n / 2 - i];
+      double xr = x0.real - x1.real;
+      double xi = x0.imag + x1.imag;
+      double t = th * i;
+      double wr = 1 - std::sin(t);
+      double wi = std::cos(t);
+      double ar = (xr * wr - xi * wi) * 0.5;
+      double ai = (xr * wi + xi * wr) * 0.5;
+      x0.real -= ar;
+      x0.imag -= ai;
+      x1.real += ar;
+      x1.imag -= ai;
+    }
+    ca[n / 4].imag = -ca[n / 4].imag;
+  }
+}
+
 void Fft::Transform2(const Config& config, int64 width, int64 height,
                      Complex x[], Complex y[]) {
   double th = -M_PI / width;
