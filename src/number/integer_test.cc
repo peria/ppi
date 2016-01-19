@@ -8,10 +8,8 @@ namespace number {
 
 class IntegerForTest : public Integer {
  public:
-  using Integer::Split4Round;
-  using Integer::Gather4Round;
-  using Integer::Split4Serial;
-  using Integer::Gather4Serial;
+  using Integer::Split4;
+  using Integer::Gather4;
 };
 
 TEST(IntegerTest, ErrorInMult) {
@@ -28,19 +26,19 @@ TEST(IntegerTest, ErrorInMult) {
   EXPECT_GT(1e-2, err);
 }
 
-TEST(IntegerTest, SplitAndGatherSerial) {
+TEST(IntegerTest, SplitAndGather) {
   double c[] = {0x4444, 0x3333, 0x2222, 0x1111};
 
   // Complex[2] -> Integer
   Integer a;
   a.resize(1);
-  IntegerForTest::Gather4Serial(c, &a);
+  IntegerForTest::Gather4(c, &a);
   EXPECT_EQ(0x1111222233334444ULL, a[0]);
 
   // Integer -> Complex[2]
   Integer b;
   b.push_back(0x1234567890abcdefULL);
-  IntegerForTest::Split4Serial(b, 1, c);
+  IntegerForTest::Split4(b, 1, c);
   EXPECT_EQ(static_cast<double>(0xcdef), c[0]);
   EXPECT_EQ(static_cast<double>(0x90ab), c[1]);
   EXPECT_EQ(static_cast<double>(0x5678), c[2]);
@@ -48,7 +46,7 @@ TEST(IntegerTest, SplitAndGatherSerial) {
 
   // Nega-cyclic
   b.push_back(0xfedcba0987654321ULL);
-  IntegerForTest::Split4Serial(b, 1, c);
+  IntegerForTest::Split4(b, 1, c);
   EXPECT_EQ(static_cast<double>(0xcdef - 0x4321), c[0]);
   EXPECT_EQ(static_cast<double>(0x90ab - 0x8765), c[1]);
   EXPECT_EQ(static_cast<double>(0x5678 - 0xba09), c[2]);
@@ -112,17 +110,6 @@ TEST(IntegerTest, MultWithUint32) {
   EXPECT_EQ(0ULL, a[0]);
   EXPECT_EQ(1ULL, a[1]);
 }
-
-// Enable after implement Mult(, uint64,)
-/*
-TEST(IntegerTest, DISABLD_MultWithUint64) {
-  Integer a(1ULL << 32);
-  Integer::Mult(a, 1ULL << 32, &a);
-  ASSERT_EQ(2, a.size());
-  EXPECT_EQ(0ULL, a[0]);
-  EXPECT_EQ(1ULL, a[1]);
-}
-*/
 
 }  // namespace number
 }  // namespace ppi

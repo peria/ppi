@@ -179,7 +179,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   double* db = nullptr;
 
   // Split uint64[na] -> double[4n][2]
-  Split4Serial(a, 2 * n, da);
+  Split4(a, 2 * n, da);
   // FMT it, with q=1/4
   fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, da);
 
@@ -187,7 +187,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
     db = da;
   } else {
     db = WorkArea(1, 8 * n);
-    Split4Serial(b, 2 * n, db);
+    Split4(b, 2 * n, db);
     fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, db);
   }
 
@@ -202,93 +202,13 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
 
   // Gather Complex[8n] -> int64[2n]
   c->resize(2 * n);
-  double err = Gather4Serial(da, c);
+  double err = Gather4(da, c);
   c->Normalize();
 
   return err;
 }
 
-namespace {
-
-double Integrate(double* dp) {
-  double d = *dp;
-  *dp = std::floor(d + 0.5);
-  return std::abs(d - *dp);
-}
-
-}  // namespace
-
-void Integer::Split4Round(const Integer& a, const int64 n, Complex* ca) {
-  for (int64 i = 0; i < 4 * n; ++i) {
-    ca[i].real = 0;
-    ca[i].imag = 0;
-  }
-
-  const int64 na = a.size();
-  for (int64 i = 0; i < std::min(n, na); ++i) {
-    uint64 ia = a[i];
-    ca[4 * i    ].real = ia & kMask;
-    ca[4 * i + 1].real = (ia >> kMaskBitSize) & kMask;
-    ca[4 * i + 2].real = (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * i + 3].real = ia >> (kMaskBitSize * 3);
-  }
-  for (int64 i = n, j = 0; i < na; ++i, ++j) {
-    uint64 ia = a[i];
-    ca[4 * j    ].imag = ia & kMask;
-    ca[4 * j + 1].imag = (ia >> kMaskBitSize) & kMask;
-    ca[4 * j + 2].imag = (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * j + 3].imag = ia >> (kMaskBitSize * 3);
-  }
-}
-
-double Integer::Gather4Round(Complex* ca, Integer* a) {
-  DCHECK_EQ(0, a->size() % 2);
-  const int64 n = a->size() / 2;
-
-  double err = 0;
-  // 1. Dobule -> integral double
-  for (int64 i = 0; i < 4 * n; ++i) {
-    err = std::max(err, Integrate(&(ca[i].real)));
-    err = std::max(err, Integrate(&(ca[i].imag)));
-  }
-
-  // 2. Normalize & re-alignment
-  uint64 carry = 0;
-  for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = ca[4 * i].real;
-    uint64 ia1 = ca[4 * i + 1].real;
-    uint64 ia2 = ca[4 * i + 2].real;
-    uint64 ia3 = ca[4 * i + 3].real;
-    ia0 += carry;
-    ia1 += ia0 >> kMaskBitSize;
-    ia2 += ia1 >> kMaskBitSize;
-    ia3 += ia2 >> kMaskBitSize;
-    carry = ia3 >> kMaskBitSize;
-    ia0 &= kMask;
-    ia1 &= kMask;
-    ia2 &= kMask;
-    (*a)[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
-  }
-  for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = ca[4 * i].imag;
-    uint64 ia1 = ca[4 * i + 1].imag;
-    uint64 ia2 = ca[4 * i + 2].imag;
-    uint64 ia3 = ca[4 * i + 3].imag;
-    ia0 += carry;
-    ia1 += ia0 >> kMaskBitSize;
-    ia2 += ia1 >> kMaskBitSize;
-    ia3 += ia2 >> kMaskBitSize;
-    carry = ia3 >> kMaskBitSize;
-    ia0 &= kMask;
-    ia1 &= kMask;
-    ia2 &= kMask;
-    (*a)[i + n] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
-  }
-
-  return err;
-}
-
-void Integer::Split4Serial(const Integer& a, const int64 n, double* ca) {
+void Integer::Split4(const Integer& a, const int64 n, double* ca) {
   const int64 na = a.size();
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
@@ -311,13 +231,15 @@ void Integer::Split4Serial(const Integer& a, const int64 n, double* ca) {
   }
 }
 
-double Integer::Gather4Serial(double* ca, Integer* a) {
+double Integer::Gather4(double* ca, Integer* a) {
   const int64 n = a->size();
 
   double err = 0;
   // 1. Dobule -> integral double
   for (int64 i = 0; i < 4 * n; ++i) {
-    err = std::max(err, Integrate(&(ca[i])));
+    double d = ca[i];
+    ca[i] = std::floor(d + 0.5);
+    err = std::max(err, std::abs(d - ca[i]));
   }
 
   // 2. Normalize & re-alignment

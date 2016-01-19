@@ -59,18 +59,14 @@ class Integer {
   // static ----------------------------------------------------------
 
   // Split4XXX and Gather4XXX methods convert integers between 64bit
-  // and 16bit * 4.  16bit * 4 data are stored in double format.
-  // In both format, numbers are represented in little endian.
-
-  // Lower n 64bit integers are stored in real parts of 4n complex numbers,
-  // and upper n integers are stored in imaginal parts of them.
-  static void Split4Round(const Integer& a, const int64 n, Complex* ca);
-  static double Gather4Round(Complex* ca, Integer* a);
-
-  // Stored in serial and nega-cyclic order.
-  // So n 64bit integers can be stored in 4n double numbers.
-  static void Split4Serial(const Integer& a, const int64 n, double* ca);
-  static double Gather4Serial(double* ca, Integer* a);
+  // and 16bit * 4.
+  // Example:
+  // Split {0x4444333322221111} into 4 * 16bit
+  // --> {0x1111, 0x2222, 0x3333, 0x4444}
+  // Split {0x5555666677778888, 0x4444333322221111} into 4 * 16bit
+  // --> {0x7777, 0x5555, 0x3333, 0x1111} (Nega-cyclic)
+  static void Split4(const Integer& a, const int64 n, double* ca);
+  static double Gather4(double* ca, Integer* a);
   
  private:
   uint64* data_;
