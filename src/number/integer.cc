@@ -172,36 +172,37 @@ int64 MinPow2(int64 n) {
 double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 na = a.size();
   const int64 nb = b.size();
-  const int64 n = MinPow2(na + nb) / 2;
+  const int64 n = MinPow2(na + nb);
   CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
 
-  double* da = WorkArea(0, 8 * n);
+  double* da = WorkArea(0, 4 * n);
   double* db = nullptr;
 
-  // Split uint64[na] -> double[4n][2]
-  Split4(a, 2 * n, da);
-  // FMT it, with q=1/4
-  fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, da);
+  // Split uint64[na] -> double[4n]
+  Split4(a, n, da);
+  fmt::Fft::TransformReal(fmt::Fft::Type::Forward, 4 * n, da);
 
   if (&a == &b) {
     db = da;
   } else {
-    db = WorkArea(1, 8 * n);
-    Split4(b, 2 * n, db);
-    fmt::Fmt::Fmt2Real(fmt::Fft::Type::Forward, 8 * n, db);
+    db = WorkArea(1, 4 * n);
+    Split4(b, n, db);
+    fmt::Fft::TransformReal(fmt::Fft::Type::Forward, 4 * n, db);
   }
 
-  for (int64 i = 0; i < 4 * n; ++i) {
-    double ar = da[2*i], ai = da[2*i+1];
-    double br = db[2*i], bi = db[2*i+1];
-    da[2*i  ] = ar * br - ai * bi;
-    da[2*i+1] = ar * bi + ai * br;
+  da[0] *= db[0];
+  da[1] *= db[1];
+  for (int64 i = 1; i < 2 * n; ++i) {
+    double ar = da[2 * i], ai = da[2 * i + 1];
+    double br = db[2 * i], bi = db[2 * i + 1];
+    da[2 * i    ] = ar * br - ai * bi;
+    da[2 * i + 1] = ar * bi + ai * br;
   }
   
-  fmt::Fmt::Fmt2Real(fmt::Fft::Type::Inverse, 8 * n, da);
+  fmt::Fft::TransformReal(fmt::Fft::Type::Inverse, 4 * n, da);
 
-  // Gather Complex[8n] -> int64[2n]
-  c->resize(2 * n);
+  // Gather Complex[4n] -> int64[n]
+  c->resize(n);
   double err = Gather4(da, c);
   c->Normalize();
 

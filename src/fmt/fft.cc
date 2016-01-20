@@ -102,9 +102,8 @@ void Fft::TransformReal(const Type type, int64 n, double* a) {
       Complex& x1 = ca[n / 2 - i];
       double xr = x0.real - x1.real;
       double xi = x0.imag + x1.imag;
-      double t = th * i;
-      double wr = 1 + std::sin(t);
-      double wi = std::cos(t);
+      double wr = 1 - std::sin(th * i);
+      double wi = -std::cos(th * i);
       double ar = (xr * wr - xi * wi) * 0.5;
       double ai = (xr * wi + xi * wr) * 0.5;
       x0.real -= ar;
@@ -130,9 +129,8 @@ void Fft::TransformReal(const Type type, int64 n, double* a) {
       Complex& x1 = ca[n / 2 - i];
       double xr = x0.real - x1.real;
       double xi = x0.imag + x1.imag;
-      double t = th * i;
-      double wr = 1 - std::sin(t);
-      double wi = std::cos(t);
+      double wr = 1 - std::sin(th * i);
+      double wi = std::cos(th * i);
       double ar = (xr * wr - xi * wi) * 0.5;
       double ai = (xr * wi + xi * wr) * 0.5;
       x0.real -= ar;

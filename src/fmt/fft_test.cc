@@ -45,5 +45,24 @@ TEST(FftTest, FftTest) {
   }
 }
 
+TEST(FftTest, FftRealTest) {
+  const double kEps = 1e-10;
+
+  for (int64 k = 2; k <= 10; ++k) {
+    const int n = 1 << k;
+    Fft::Config config;
+    Fft::Factor(n, &config);
+    double a[n];
+    for (int i = 0; i < n; ++i) {
+      a[i] = i;
+    }
+    Fft::TransformReal(Fft::Forward, n, a);
+    Fft::TransformReal(Fft::Inverse, n, a);
+    for (int i = 0; i < n; ++i) {
+      ASSERT_NEAR(i, a[i], kEps) << "index=" << i << ", n=2^" << k;
+    }
+  }
+}
+
 }  // namespace fmt
 }  // namespace ppi
