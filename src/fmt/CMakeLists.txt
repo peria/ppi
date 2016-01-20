@@ -10,5 +10,12 @@ function(ppi_fmt_test target)
   target_link_libraries(fmt_${target}_test ppi_fmt)
 endfunction()
 
+function(ppi_fmt_add_executable target)
+  ppi_add_executable(${target} ${ARGN})
+  target_link_libraries(${target} ppi_fmt)
+endfunction()
+
 ppi_fmt_test(fmt fmt_test.cc)
 ppi_fmt_test(fft fft_test.cc)
+
+ppi_fmt_add_executable(fft_examine fft_examine.cc)
