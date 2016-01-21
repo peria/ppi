@@ -7,30 +7,10 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "fmt/fmt.h"
+#include "number/integer_core.h"
 
 namespace ppi {
 namespace number {
-
-namespace {
-
-// kMaxComplexsForMult must be equal to kMaxSize in fft.cc.
-const int64 kMaxLimbsForMult = 1 << 17;
-double* g_workarea[2];
-
-double* WorkArea(int index, int64 size) {
-  double*& workarea = g_workarea[index];
-  if (base::Allocator::GetSize(workarea) < size) {
-    if (workarea)
-      base::Allocator::Deallocate(workarea);
-    workarea = base::Allocator::Allocate<double>(size);
-  }
-  return workarea;
-}
-
-const int kMaskBitSize = 16;
-const uint64 kMask = (1ULL << kMaskBitSize) - 1;
-
-}  // namespace
 
 Integer::Integer() : data_(base::Allocator::Allocate<uint64>(0)) {}
 
@@ -173,93 +153,11 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 na = a.size();
   const int64 nb = b.size();
   const int64 n = MinPow2(na + nb);
-  CHECK_GE(kMaxLimbsForMult, n) << " from " << (na + nb);
-
-  double* da = WorkArea(0, 4 * n);
-  double* db = nullptr;
-
-  // Split uint64[na] -> double[4n]
-  Split4(a, n, da);
-  fmt::Fft::TransformReal(fmt::Fft::Type::Forward, 4 * n, da);
-
-  if (&a == &b) {
-    db = da;
-  } else {
-    db = WorkArea(1, 4 * n);
-    Split4(b, n, db);
-    fmt::Fft::TransformReal(fmt::Fft::Type::Forward, 4 * n, db);
-  }
-
-  da[0] *= db[0];
-  da[1] *= db[1];
-  for (int64 i = 1; i < 2 * n; ++i) {
-    double ar = da[2 * i], ai = da[2 * i + 1];
-    double br = db[2 * i], bi = db[2 * i + 1];
-    da[2 * i    ] = ar * br - ai * bi;
-    da[2 * i + 1] = ar * bi + ai * br;
-  }
-  
-  fmt::Fft::TransformReal(fmt::Fft::Type::Inverse, 4 * n, da);
-
-  // Gather Complex[4n] -> int64[n]
   c->resize(n);
-  double err = Gather4(da, c);
+
+  double err = IntegerCore::Mult(a.data_, na, b.data_, nb, n, c->data_);
+
   c->Normalize();
-
-  return err;
-}
-
-void Integer::Split4(const Integer& a, const int64 n, double* ca) {
-  const int64 na = a.size();
-  for (int64 i = 0; i < std::min(n, na); ++i) {
-    uint64 ia = a[i];
-    ca[4 * i    ] = ia & kMask;
-    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
-    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
-  }
-  for (int64 i = 4 * na; i < 4 * n; ++i) {
-    ca[i] = 0;
-  }
-
-  // Nega-cyclic part
-  for (int64 i = n, j = 0; i < na; ++i, ++j) {
-    uint64 ia = a[i];
-    ca[4 * j    ] -= ia & kMask;
-    ca[4 * j + 1] -= (ia >> kMaskBitSize) & kMask;
-    ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
-  }
-}
-
-double Integer::Gather4(double* ca, Integer* a) {
-  const int64 n = a->size();
-
-  double err = 0;
-  // 1. Dobule -> integral double
-  for (int64 i = 0; i < 4 * n; ++i) {
-    double d = ca[i];
-    ca[i] = std::floor(d + 0.5);
-    err = std::max(err, std::abs(d - ca[i]));
-  }
-
-  // 2. Normalize & re-alignment
-  uint64 carry = 0;
-  for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = ca[4 * i    ];
-    uint64 ia1 = ca[4 * i + 1];
-    uint64 ia2 = ca[4 * i + 2];
-    uint64 ia3 = ca[4 * i + 3];
-    ia0 += carry;
-    ia1 += ia0 >> kMaskBitSize;
-    ia2 += ia1 >> kMaskBitSize;
-    ia3 += ia2 >> kMaskBitSize;
-    carry = ia3 >> kMaskBitSize;
-    ia0 &= kMask;
-    ia1 &= kMask;
-    ia2 &= kMask;
-    (*a)[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
-  }
 
   return err;
 }

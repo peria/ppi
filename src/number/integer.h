@@ -55,18 +55,6 @@ class Integer {
   
  protected:
   void Normalize();
-
-  // static ----------------------------------------------------------
-
-  // Split4XXX and Gather4XXX methods convert integers between 64bit
-  // and 16bit * 4.
-  // Example:
-  // Split {0x4444333322221111} into 4 * 16bit
-  // --> {0x1111, 0x2222, 0x3333, 0x4444}
-  // Split {0x5555666677778888, 0x4444333322221111} into 4 * 16bit
-  // --> {0x7777, 0x5555, 0x3333, 0x1111} (Nega-cyclic)
-  static void Split4(const Integer& a, const int64 n, double* ca);
-  static double Gather4(double* ca, Integer* a);
   
  private:
   uint64* data_;

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(ppi_number integer.cc real.cc montgomery.cc)
+add_library(ppi_number
+  integer.cc real.cc montgomery.cc integer_core.cc)
 ppi_target_link_libraries(ppi_number ppi_base ppi_fmt)
 
 # ----------------------------------------------------------------------
@@ -11,4 +12,5 @@ function(ppi_number_test target)
 endfunction()
 
 ppi_number_test(integer integer_test.cc)
+ppi_number_test(integer_core integer_core_test.cc)
 ppi_number_test(real real_test.cc)

@@ -6,12 +6,6 @@
 namespace ppi {
 namespace number {
 
-class IntegerForTest : public Integer {
- public:
-  using Integer::Split4;
-  using Integer::Gather4;
-};
-
 TEST(IntegerTest, ErrorInMult) {
   const int n = 64;
   Integer a, b, c;
@@ -24,33 +18,6 @@ TEST(IntegerTest, ErrorInMult) {
 
   double err = Integer::Mult(a, b, &c);
   EXPECT_GT(1e-2, err);
-}
-
-TEST(IntegerTest, SplitAndGather) {
-  double c[] = {0x4444, 0x3333, 0x2222, 0x1111};
-
-  // Complex[2] -> Integer
-  Integer a;
-  a.resize(1);
-  IntegerForTest::Gather4(c, &a);
-  EXPECT_EQ(0x1111222233334444ULL, a[0]);
-
-  // Integer -> Complex[2]
-  Integer b;
-  b.push_back(0x1234567890abcdefULL);
-  IntegerForTest::Split4(b, 1, c);
-  EXPECT_EQ(static_cast<double>(0xcdef), c[0]);
-  EXPECT_EQ(static_cast<double>(0x90ab), c[1]);
-  EXPECT_EQ(static_cast<double>(0x5678), c[2]);
-  EXPECT_EQ(static_cast<double>(0x1234), c[3]);
-
-  // Nega-cyclic
-  b.push_back(0xfedcba0987654321ULL);
-  IntegerForTest::Split4(b, 1, c);
-  EXPECT_EQ(static_cast<double>(0xcdef - 0x4321), c[0]);
-  EXPECT_EQ(static_cast<double>(0x90ab - 0x8765), c[1]);
-  EXPECT_EQ(static_cast<double>(0x5678 - 0xba09), c[2]);
-  EXPECT_EQ(static_cast<double>(0x1234 - 0xfedc), c[3]);
 }
 
 TEST(IntegerTest, Mult) {
