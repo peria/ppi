@@ -87,29 +87,18 @@ void Integer::push_back(uint64 value) {
 
 // static
 void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
-  const int64 n = std::min(a.size(), b.size());
-  c->resize(std::max(a.size(), b.size()));
+  const int64 na = a.size();
+  const int64 nb = b.size();
+  const int64 n = std::min(na, nb);
+  c->resize(std::max(na, nb));
 
-  uint64 carry = 0;
-  int64 i = 0;
-  for (i = 0; i < n; ++i) {
-    uint64 s = b[i] + carry;
-    carry = (s < b[i]) ? 1 : 0;
-    (*c)[i] = a[i] + s;
-    carry += ((*c)[i] < s) ? 1 : 0;
-  }
-  for (; i < a.size(); ++i) {
-    (*c)[i] = a[i] + carry;
-    carry = ((*c)[i] < carry) ? 1 : 0;
-  }
-  for (; i < b.size(); ++i) {
-    (*c)[i] = b[i] + carry;
-    carry = ((*c)[i] < carry) ? 1 : 0;
-  }
+  uint64 carry = IntegerCore::Add(a.data_, b.data_, n, c->data_);
+  carry = IntegerCore::Add(a.data_ + n, carry, na - n, c->data_ + n);
+  carry = IntegerCore::Add(b.data_ + n, carry, nb - n, c->data_ + n);
+
   if (carry) {
     c->push_back(carry);
   }
-
   c->Normalize();
 }
 

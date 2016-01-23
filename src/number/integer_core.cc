@@ -30,6 +30,26 @@ const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
 }  // namespace
 
+uint64 IntegerCore::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+  uint64 carry = 0;
+  for (int64 i = 0; i < n; ++i) {
+    uint64 s = b[i] + carry;
+    carry = (s < b[i]) ? 1 : 0;
+    c[i] = a[i] + s;
+    carry += (c[i] < s) ? 1 : 0;
+  }
+  return carry;
+}
+
+uint64 IntegerCore::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
+  for (int64 i = 0; i < n; ++i) {
+    uint64 s = a[i] + b;
+    b = (s < a[i]) ? 1 : 0;
+    c[i] = s;
+  }
+  return b;
+}
+
 double IntegerCore::Mult(const uint64* a, const int64 na,
                          const uint64* b, const int64 nb,
                          const int64 nc, uint64* c) {
