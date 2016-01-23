@@ -42,10 +42,38 @@ uint64 IntegerCore::Add(const uint64* a, const uint64* b, const int64 n, uint64*
 }
 
 uint64 IntegerCore::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
-  for (int64 i = 0; i < n; ++i) {
+  int64 i;
+  for (i = 0; i < n && b; ++i) {
     uint64 s = a[i] + b;
     b = (s < a[i]) ? 1 : 0;
     c[i] = s;
+  }
+  for (; i < n; ++i) {
+    c[i] = a[i];
+  }
+  return b;
+}
+
+uint64 IntegerCore::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+  uint64 carry = 0;
+  for (int64 i = 0; i < n; ++i) {
+    uint64 s = a[i] - carry;
+    carry = (s > a[i]) ? 1 : 0;
+    c[i] = s - b[i];
+    carry += (c[i] > s) ? 1 : 0;
+  }
+  return carry;
+}
+
+uint64 IntegerCore::Subtract(const uint64* a, uint64 b, const int64 n, uint64* c) {
+  int64 i;
+  for (i = 0; i < n && b; ++i) {
+    uint64 s = a[i] - b;
+    b = (s > a[i]) ? 1 : 0;
+    c[i] = s;
+  }
+  for (; i < n; ++i) {
+    c[i] = a[i];
   }
   return b;
 }

@@ -104,21 +104,15 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
 
 // static
 void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
-  c->resize(a.size());
+  const int64 na = a.size();
+  const int64 nb = b.size();
+  CHECK_GE(na, nb);
+  c->resize(na);
 
-  uint64 carry = 0;
-  for (int64 i = 0; i < b.size(); ++i) {
-    uint64 s = a[i] - carry;
-    carry = (s > a[i]) ? 1 : 0;
-    (*c)[i] = s - b[i];
-    carry += ((*c)[i] > s) ? 1 : 0;
-  }
-  for (int64 i = b.size(); i < a.size(); ++i) {
-    uint64 s = a[i] - carry;
-    carry = (s > a[i]) ? 1 : 0;
-    (*c)[i] = s;
-  }
-
+  uint64 carry = IntegerCore::Subtract(a.data_, b.data_, nb, c->data_);
+  carry = IntegerCore::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
+  CHECK_EQ(0, carry);
+  
   c->Normalize();
 }
 

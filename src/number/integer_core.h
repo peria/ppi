@@ -11,6 +11,8 @@ class IntegerCore {
  public:
   static uint64 Add(const uint64* a, const uint64* b, const int64 n, uint64* c);
   static uint64 Add(const uint64* a, uint64 b, const int64 n, uint64* c);
+  static uint64 Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c);
+  static uint64 Subtract(const uint64* a, uint64 b, const int64 n, uint64* c);
   static double Mult(const uint64* a, const int64 na, const uint64* b, const int64 nb, const int64 nc, uint64* c);
 
  protected:
