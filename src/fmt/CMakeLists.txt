@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(ppi_fmt fmt.cc fft.cc)
+add_library(ppi_fmt dwt.cc fft.cc)
 ppi_target_link_libraries(ppi_fmt ppi_base)
 
 # ----------------------------------------------------------------------

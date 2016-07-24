@@ -1,4 +1,4 @@
-#include "fmt/fmt.h"
+#include "fmt/dwt.h"
 
 #include <algorithm>
 #include <cmath>
@@ -10,7 +10,7 @@
 namespace ppi {
 namespace fmt {
 
-void Fmt::Fmt4(const Fft::Type type, const int64 n, Complex* a) {
+void Dwt::Dwt4(const Fft::Type type, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
   Fft::Config config;
   Fft::Factor(n, &config);
@@ -42,7 +42,7 @@ void Fmt::Fmt4(const Fft::Type type, const int64 n, Complex* a) {
   }
 }
 
-void Fmt::Fmt2(const Fft::Type type, const int64 n, Complex* a) {
+void Dwt::Dwt2(const Fft::Type type, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
   Fft::Config config;
   Fft::Factor(n, &config);
@@ -74,7 +74,7 @@ void Fmt::Fmt2(const Fft::Type type, const int64 n, Complex* a) {
   }
 }
 
-void Fmt::Fmt2Real(const Fft::Type type, const int64 n, double* a) {
+void Dwt::Dwt2Real(const Fft::Type type, const int64 n, double* a) {
   CHECK(n % 2 == 0);
   Complex* ca = reinterpret_cast<Complex*>(a);
 
@@ -97,7 +97,7 @@ void Fmt::Fmt2Real(const Fft::Type type, const int64 n, double* a) {
     }
   }
   
-  Fmt2(type, n / 2, ca);
+  Dwt2(type, n / 2, ca);
 
   if (type == Fft::Type::Forward) {
     const double th = -2 * M_PI / n;

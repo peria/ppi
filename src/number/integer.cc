@@ -6,7 +6,7 @@
 
 #include "base/allocator.h"
 #include "base/base.h"
-#include "fmt/fmt.h"
+#include "fmt/dwt.h"
 #include "number/integer_core.h"
 
 namespace ppi {
