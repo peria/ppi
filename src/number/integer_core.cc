@@ -7,6 +7,7 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "fmt/dwt.h"
+#include "fmt/fmt.h"
 
 namespace ppi {
 namespace number {
@@ -88,14 +89,14 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
 
   // Split uint64[na] -> double[4n]
   Split4(a, na, n, da);
-  fmt::Fft::TransformReal(fmt::Fft::Type::Forward, nd, da);
+  fmt::Fft::TransformReal(fmt::Direction::Forward, nd, da);
 
   if (a == b) {
     db = da;
   } else {
     db = WorkArea(1, 4 * n);
     Split4(b, nb, n, db);
-    fmt::Fft::TransformReal(fmt::Fft::Type::Forward, nd, db);
+    fmt::Fft::TransformReal(fmt::Direction::Forward, nd, db);
   }
 
   da[0] *= db[0];
@@ -107,7 +108,7 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
     da[2 * i + 1] = ar * bi + ai * br;
   }
   
-  fmt::Fft::TransformReal(fmt::Fft::Type::Inverse, nd, da);
+  fmt::Fft::TransformReal(fmt::Direction::Backward, nd, da);
 
   // Gather Complex[4n] -> uint64[n]
   return Gather4(da, n, c);

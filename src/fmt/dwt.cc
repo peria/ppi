@@ -6,16 +6,17 @@
 
 #include "base/base.h"
 #include "fmt/fft.h"
+#include "fmt/fmt.h"
 
 namespace ppi {
 namespace fmt {
 
-void Dwt::Dwt4(const Fft::Type type, const int64 n, Complex* a) {
+void Dwt::Dwt4(const Direction dir, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
   Fft::Config config;
   Fft::Factor(n, &config);
 
-  if (type == Fft::Type::Forward) {
+  if (dir == Direction::Forward) {
     double th = M_PI / (2 * n); // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -27,9 +28,9 @@ void Dwt::Dwt4(const Fft::Type type, const int64 n, Complex* a) {
     }
   }
 
-  Fft::Transform(config, type, a);
+  Fft::Transform(config, dir, a);
 
-  if (type == Fft::Type::Inverse) {
+  if (dir == Direction::Backward) {
     double th = -M_PI / (2 * n); // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -42,12 +43,12 @@ void Dwt::Dwt4(const Fft::Type type, const int64 n, Complex* a) {
   }
 }
 
-void Dwt::Dwt2(const Fft::Type type, const int64 n, Complex* a) {
+void Dwt::Dwt2(const Direction dir, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
   Fft::Config config;
   Fft::Factor(n, &config);
 
-  if (type == Fft::Type::Forward) {
+  if (dir == Direction::Forward) {
     double th = - M_PI / n;
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -59,9 +60,9 @@ void Dwt::Dwt2(const Fft::Type type, const int64 n, Complex* a) {
     }
   }
 
-  Fft::Transform(config, type, a);
+  Fft::Transform(config, dir, a);
 
-  if (type == Fft::Type::Inverse) {
+  if (dir == Direction::Backward) {
     double th = M_PI / n;
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -74,11 +75,11 @@ void Dwt::Dwt2(const Fft::Type type, const int64 n, Complex* a) {
   }
 }
 
-void Dwt::Dwt2Real(const Fft::Type type, const int64 n, double* a) {
+void Dwt::Dwt2Real(const Direction dir, const int64 n, double* a) {
   CHECK(n % 2 == 0);
   Complex* ca = reinterpret_cast<Complex*>(a);
 
-  if (type == Fft::Type::Inverse) {
+  if (dir == Direction::Backward) {
     const double th = -2 * M_PI / n;
     for (int64 i = 0; i < n / 4; ++i) {
       Complex& x0 = ca[i];
@@ -97,9 +98,9 @@ void Dwt::Dwt2Real(const Fft::Type type, const int64 n, double* a) {
     }
   }
   
-  Dwt2(type, n / 2, ca);
+  Dwt2(dir, n / 2, ca);
 
-  if (type == Fft::Type::Forward) {
+  if (dir == Direction::Forward) {
     const double th = -2 * M_PI / n;
     for (int64 i = 0; i < n / 4; ++i) {
       Complex& x0 = ca[i];

@@ -6,6 +6,7 @@
 
 #include "base/base.h"
 #include "base/allocator.h"
+#include "fmt/fmt.h"
 
 namespace ppi {
 namespace fmt {
@@ -44,10 +45,10 @@ void Fft::Factor(int64 n, Config* config) {
   CHECK_LT(0, config->exponent[0]);
 }
 
-void Fft::Transform(const Config& config, const Type type, Complex a[]) {
+void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   const int64 n = config.n;
   CHECK_GE(kMaxSize, n);
-  if (type == Type::Inverse) {
+  if (dir == Direction::Backward) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;
     }
@@ -79,7 +80,7 @@ void Fft::Transform(const Config& config, const Type type, Complex a[]) {
     std::memcpy(x, y, sizeof(Complex) * n);
   }
 
-  if (type == Type::Inverse) {
+  if (dir == Direction::Backward) {
     for (int64 i = 0; i < n; ++i) {
       a[i].real *= 1.0 / n;
       a[i].imag *= -1.0 / n;
@@ -87,11 +88,11 @@ void Fft::Transform(const Config& config, const Type type, Complex a[]) {
   }
 }
 
-void Fft::TransformReal(const Type type, int64 n, double* a) {
+void Fft::TransformReal(const Direction dir, int64 n, double* a) {
   CHECK(n % 2 == 0);
   Complex* ca = reinterpret_cast<Complex*>(a);
 
-  if (type == Type::Inverse) {
+  if (dir == Direction::Backward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = (x0r + x0i) * 0.5;
@@ -116,9 +117,9 @@ void Fft::TransformReal(const Type type, int64 n, double* a) {
 
   Config config;
   Factor(n / 2, &config);
-  Transform(config, type, ca);
+  Transform(config, dir, ca);
 
-  if (type == Type::Forward) {
+  if (dir == Direction::Forward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = x0r + x0i;

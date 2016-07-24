@@ -6,8 +6,7 @@
 #include <random>
 
 #include "base/base.h"
-
-using ppi::int64;
+#include "fmt/fmt.h"
 
 namespace ppi {
 namespace fmt {
@@ -22,8 +21,8 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     b[i] = rng() & kMask15Bits;
   }
 
-  Fft::TransformReal(Fft::Forward, k, a);
-  Fft::TransformReal(Fft::Forward, k, b);
+  Fft::TransformReal(Direction::Forward, k, a);
+  Fft::TransformReal(Direction::Forward, k, b);
   a[0] *= b[0];
   a[1] *= b[1];
   for (int64 i = 1; i < k / 2; ++i) {
@@ -32,7 +31,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     a[2 * i    ] = ar * br - ai * bi;
     a[2 * i + 1] = ar * bi + ai * br;
   }
-  Fft::TransformReal(Fft::Inverse, k, a);
+  Fft::TransformReal(Direction::Backward, k, a);
 
   double err = 0;
   for (int64 i = 0; i < k; ++i) {
@@ -48,6 +47,8 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
 
 }  // namespace fmt
 }  // namespace ppi
+
+using ppi::int64;
 
 int main(int, char*[]) {
   std::mt19937_64 rng;

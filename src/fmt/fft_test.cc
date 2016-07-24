@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include "fmt/fmt.h"
+
 namespace ppi {
 namespace fmt {
 
@@ -11,13 +13,13 @@ TEST(FftTest, Fft2ElemTest) {
   Fft::Factor(2, &config);
 
   Complex a[] = {{1, 2}, {3, 4}};
-  Fft::Transform(config, Fft::Forward, a);
+  Fft::Transform(config, Direction::Forward, a);
   EXPECT_NEAR(4, a[0].real, kEps);
   EXPECT_NEAR(6, a[0].imag, kEps);
   EXPECT_NEAR(-2, a[1].real, kEps);
   EXPECT_NEAR(-2, a[1].imag, kEps);
 
-  Fft::Transform(config, Fft::Inverse, a);
+  Fft::Transform(config, Direction::Backward, a);
   EXPECT_NEAR(1, a[0].real, kEps);
   EXPECT_NEAR(2, a[0].imag, kEps);
   EXPECT_NEAR(3, a[1].real, kEps);
@@ -36,8 +38,8 @@ TEST(FftTest, FftTest) {
       a[i].real = i;
       a[i].imag = i + n;
     }    
-    Fft::Transform(config, Fft::Forward, a);
-    Fft::Transform(config, Fft::Inverse, a);
+    Fft::Transform(config, Direction::Forward, a);
+    Fft::Transform(config, Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k;
       ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k;
@@ -56,8 +58,8 @@ TEST(FftTest, FftRealTest) {
     for (int i = 0; i < n; ++i) {
       a[i] = i;
     }
-    Fft::TransformReal(Fft::Forward, n, a);
-    Fft::TransformReal(Fft::Inverse, n, a);
+    Fft::TransformReal(Direction::Forward, n, a);
+    Fft::TransformReal(Direction::Backward, n, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i], kEps) << "index=" << i << ", n=2^" << k;
     }
