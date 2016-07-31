@@ -15,7 +15,7 @@ class Ntt {
   // of length |n|, and the size of |a| is also |n|.
   static void Transfer(const Direction dir, const int64 n, uint64* a);
 
- private:
+ protected:
   static void Forward(const int64 n, uint64* a);
   static void Backward(const int64 n, uint64* a);
 
