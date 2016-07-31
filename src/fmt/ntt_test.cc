@@ -34,6 +34,7 @@ TEST_F(NttTest, ShiftRightBits) {
   } datas[] = {
     { {1 << 4, 0}, 2, {1 << 2, 0} },
     { {1, 0}, 2, {1, 0xc000000000000000ULL} },
+    { {1, 0}, 3, {1, 0xe000000000000000ULL} },
     { {0xffffffffffffffff, 0}, 2, {1ULL << 62, 1ULL << 62} },
     { {0x7fffffffffffffff, 0}, 2, {1ULL << 61, 1ULL << 62} },
   };
