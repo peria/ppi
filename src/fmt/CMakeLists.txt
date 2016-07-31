@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(ppi_fmt dwt.cc fft.cc)
+add_library(ppi_fmt dwt.cc fft.cc ntt.cc)
 ppi_target_link_libraries(ppi_fmt ppi_base)
 
 # ----------------------------------------------------------------------
@@ -15,7 +15,8 @@ function(ppi_fmt_add_executable target)
   target_link_libraries(${target} ppi_fmt)
 endfunction()
 
-ppi_fmt_test(fmt dwt_test.cc)
+ppi_fmt_test(dwt dwt_test.cc)
 ppi_fmt_test(fft fft_test.cc)
+ppi_fmt_test(ntt ntt_test.cc)
 
 ppi_fmt_add_executable(fft_examine fft_examine.cc)
