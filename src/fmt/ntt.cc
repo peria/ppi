@@ -71,7 +71,7 @@ void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* 
 
 void Ntt::ShiftRightBits(const uint64* a, const int64 k, const int64 n, uint64* b) {
   DCHECK_LT(0, k);
-  DCHECK_GT(k, 64);
+  DCHECK_LT(k, 64);
 
   const uint64 mask = (1ULL << k) - 1;
   uint64 word = a[0];
