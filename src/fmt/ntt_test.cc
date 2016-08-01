@@ -23,6 +23,27 @@ class NttTest : public testing::Test {
 };
 
 TEST_F(NttTest, ShiftLeftWords) {
+  const int kSize = 4;
+  const uint64 kFullBits = 0xffffffffffffffff;
+
+  struct TestData {
+    uint64 value[kSize];
+    int64 shift;
+    uint64 expect[kSize];
+  } datas[] = {
+    { {1, 0, 0, 0}, 2, {0, 0, 1, 0} },
+    { {1, 0, 0, 0}, 4, {kFullBits, kFullBits, kFullBits, kFullBits} },
+  };
+
+  for (auto& data : datas) {
+    uint64 output[kSize];
+    ShiftLeftWords(data.value, data.shift, kSize, output);
+    for (int64 i = 0; i < kSize; ++i) {
+      EXPECT_EQ(data.expect[i], output[i])
+          << "[" << i << "]: "
+          << std::hex << data.expect[i] << " - " << output[i];
+    }
+  }
 }
 
 TEST_F(NttTest, ShiftRightBits) {
