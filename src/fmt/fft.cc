@@ -64,9 +64,9 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   for (int64 i = 0; i < loop4; ++i) {
     height /= 4;
     if (i % 2 == 0) {
-      Transform4(config, width, height, x, y);
+      Radix4(config, width, height, x, y);
     } else {
-      Transform4(config, width, height, y, x);
+      Radix4(config, width, height, y, x);
     }
     width *= 4;
   }
@@ -76,7 +76,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   // Radix-2
   if (config.exponent[0] % 2) {
     height /= 2;
-    Transform2(config, width, height, x, y);
+    Radix2(config, width, height, x, y);
     std::memcpy(x, y, sizeof(Complex) * n);
   }
 
@@ -143,8 +143,8 @@ void Fft::TransformReal(const Direction dir, int64 n, double* a) {
   }
 }
 
-void Fft::Transform2(const Config& config, int64 width, int64 height,
-                     Complex x[], Complex y[]) {
+void Fft::Radix2(const Config& config, int64 width, int64 height,
+                 Complex x[], Complex y[]) {
   double th = -M_PI / width;
   for (int64 j = 0; j < width; ++j) {
     double wr = std::cos(th * j);
@@ -167,8 +167,8 @@ void Fft::Transform2(const Config& config, int64 width, int64 height,
   }
 }
 
-void Fft::Transform4(const Config& config, int64 width, int64 height,
-                     Complex x[], Complex y[]) {
+void Fft::Radix4(const Config& config, int64 width, int64 height,
+                 Complex x[], Complex y[]) {
   const int64& n = config.n;
   Complex* z = base::Allocator::Allocate<Complex>(n * 2);
 
