@@ -1,7 +1,6 @@
 language: cpp
 
-compiler:
-  - clang
+compiler: clang
 
 cache: apt
 
@@ -13,5 +12,13 @@ before_script:
   - sudo apt-get install -y ninja-build
   - sudo apt-get install -y cmake
 
+install:
+  - PATH=~/.local/bin:${PATH}
+  - pip install --user --upgrade pip
+  - pip install --user cpp-coveralls
+
 script:
   - ./build/travis.sh
+
+after_success:
+  - coveralls --include src --include include --gcov-options '\-lp' --root .. --build-root .
