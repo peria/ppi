@@ -77,7 +77,6 @@ void Ntt::ShiftRightBits(const uint64* a, const int64 k, const int64 n, uint64* 
   uint64 word = a[0];
   uint64 add = (-word) & mask;
   word = (word >> k) + (add ? 1 : 0);
-  // TODO: check if |word| carrys up.
 
   for (int64 i = 0; i < n - 1; ++i) {
     uint64 next = a[i + 1];
