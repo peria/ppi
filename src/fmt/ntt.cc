@@ -24,9 +24,14 @@ void Ntt::Forward(const int64 n, uint64* a) {
   // n must be a power of 2.
   CHECK_EQ(0, (n & (n - 1)));
 
+  // We assume that the primitive root w is to shift 2 words, so we compute in
+  // a ring N/(w^(n/2)+1)N.  It means that the size of each element is also
+  // |n|, if the number of elements is |n|.
+
   uint64* x0 = base::Allocator::Allocate<uint64>(n);
   uint64* x1 = base::Allocator::Allocate<uint64>(n);
   uint64* x2 = base::Allocator::Allocate<uint64>(n);
+
   for (int64 m = n / 2; m >= 1; m /= 2) {
     int64 shift = n / 2 / m;
     for (int64 j = 0; j < n; j += 2 * m) {
@@ -46,7 +51,59 @@ void Ntt::Forward(const int64 n, uint64* a) {
   base::Allocator::Deallocate(x2);
 }
 
-void Ntt::Backward(const int64 /*n*/, uint64* /*a*/) {
+void Ntt::Backward(const int64 n, uint64* a) {
+  // n must be a power of 2.
+  CHECK_EQ(0, (n & (n - 1)));
+
+  uint64* x0 = base::Allocator::Allocate<uint64>(n);
+  uint64* x1 = base::Allocator::Allocate<uint64>(n);
+
+  for (int64 m = 1; m < n; m *= 2) {
+    int64 shift = -(n / 2 / m);
+    for (int64 j = 0; j < n; j += 2 * m) {
+      for (int64 k = 0; k < m; ++k) {
+        int64 w = (shift * k) & (n - 1);
+        std::copy_n(&a[(j + k) * n], n, x0);
+        ShiftLeftWords(&a[(j + k + m) * n], w, n, x1);
+        number::IntegerCore::Add(x0, x1, n, &a[(j + k) * n]);
+        number::IntegerCore::Subtract(x0, x1, n, &a[(j + k + m) * n]);
+      }
+    }
+  }
+
+  int64 k = 0;
+  while ((1LL << k) < n)
+    ++k;
+
+  for (int64 i = 0; i < n; ++i) {
+    std::copy_n(&a[i * n], n, x0);
+    ShiftRightBits(x0, k, n, &a[i * n]); 
+  }
+
+  base::Allocator::Deallocate(x0);
+  base::Allocator::Deallocate(x1);
+}
+
+void Ntt::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+  if (number::IntegerCore::Add(a, b, n, c) == 0)
+    return;
+
+  for (int64 i = 0; i < n; ++i) {
+    --c[i];
+    if (~c[i])
+      break;
+  }
+}
+
+void Ntt::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+  if (number::IntegerCore::Add(a, b, n, c) == 0)
+    return;
+
+  for (int64 i = 0; i < n; ++i) {
+    ++c[i];
+    if (c[i])
+      break;
+  }
 }
 
 void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b) {

@@ -19,6 +19,9 @@ class Ntt {
   static void Forward(const int64 n, uint64* a);
   static void Backward(const int64 n, uint64* a);
 
+  // Basic operations in a ring N/(w^n+1)N.
+  static void Add(const uint64* a, const uint64* b, const int64 n, uint64* c);
+  static void Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c);
   // Shift |a| for |w| words to left in nega-cyclic ring of size |n|.
   static void ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b);
   // Shift |a| for |k| bits to right in nega-cyclic ring of size |n|.

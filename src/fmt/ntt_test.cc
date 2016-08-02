@@ -22,6 +22,21 @@ class NttTest : public testing::Test {
   }
 };
 
+TEST_F(NttTest, DISABLED_Transfer) {
+  const int kElementSize = 1 << 1;
+  const int kTotalSize = kElementSize * kElementSize;
+  uint64 value[kTotalSize];
+  for (int i = 0; i < kTotalSize; ++i) {
+    value[i] = i + 1;
+  }
+  Ntt::Transfer(Direction::Forward, kElementSize, value);
+  Ntt::Transfer(Direction::Backward, kElementSize, value);
+  for (int i = 0; i < kTotalSize; ++i) {
+    EXPECT_EQ(static_cast<uint64>(i + 1), value[i])
+      << "[" << i << "] " << std::hex << (i + 1) << " - " << value[i];
+  }
+}
+
 TEST_F(NttTest, ShiftLeftWords) {
   const int kSize = 4;
   const uint64 kFullBits = 0xffffffffffffffff;
