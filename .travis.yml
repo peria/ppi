@@ -16,6 +16,8 @@ before_script:
   - sudo apt-get update -qq
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
       sudo apt-get -qq install g++-4.8;
+      sudo apt-get -qq install gcov;
+      sudo apt-get -qq install lcov;
       sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-4.8 90;
       sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-4.8 90;
       sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 90;
@@ -42,5 +44,5 @@ script:
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
       cd ../../;
-      coveralls --include src --gcov-options '\-lp' --root out/${BUILD_TYPE};
+      coveralls --include src --gcov-options '\-lp' --root . --build-root out/${BUILD_TYPE};
     fi
