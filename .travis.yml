@@ -35,6 +35,6 @@ script:
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
-      cd ../../
+      cd ../../;
       coveralls --include src --gcov-options '\-lp' --root src --build-root out/${BUILD_TYPE};
     fi
