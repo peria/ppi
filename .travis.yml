@@ -29,12 +29,12 @@ install:
 script:
   - mkdir -p out/${BUILD_TYPE}
   - cd out/${BUILD_TYPE}
-  - cmake -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug ../../src
+  - cmake -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../src
   - ninja -j 4
   - CTEST_OUTPUT_ON_FAILURE=1 ninja test
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
       cd ../../;
-      coveralls --include src --gcov-options '\-lp' --root src --build-root out/${BUILD_TYPE};
+      coveralls --include src --gcov-options '\-lp' --root out/${BUILD_TYPE};
     fi

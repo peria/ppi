@@ -50,6 +50,29 @@ if(${build_type} MATCHES release)
   ppi_add_cxx_flags("-DNOINLINE_UNLESS_RELEASE=")
 endif()
 
+# Set up coverage build type.
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
+    "Flags used by the C++ compiler during coverage builds."
+    FORCE)
+  set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
+    "Flags used for linking binaries during coverage builds."
+    FORCE)
+  set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
+    "Flags used by the shared libraries linker during coverage builds."
+    FORCE)
+  mark_as_advanced(
+    CMAKE_CXX_FLAGS_COVERAGE
+    CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    CMAKE_SHARED_LINKER_FLAGS_COVERAGE)
+  set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
+    FORCE)
+  ppi_add_cxx_flags(--coverage COVERAGE)
+endif()
+
 include_directories(.)
 
 add_subdirectory(third_party/googletest/googletest)
