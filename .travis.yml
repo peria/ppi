@@ -1,6 +1,13 @@
+sudo: required
+dist: trusty
 language: cpp
 
-compiler: clang
+matrix:
+  include:
+    - compiler clang
+      env: BUILD_TYPE=Coverage
+    - compiler clang
+      env: BUILD_TYPE=Debug
 
 cache: apt
 
@@ -13,12 +20,20 @@ before_script:
   - sudo apt-get install -y cmake
 
 install:
-  - PATH=~/.local/bin:${PATH}
-  - pip install --user --upgrade pip
-  - pip install --user cpp-coveralls
+  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
+      PATH=~/.local/bin:${PATH};
+      pip install --user --upgrade pip;
+      pip install --user cpp-coveralls;
+    fi
 
 script:
-  - ./build/travis.sh
+  - mkdir -p out/${BUILD_TYPE}
+  - cd out/${BUILD_TYPE}
+  - cmake -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug ../../src
+  - ninja -j 4
+  - CTEST_OUTPUT_ON_FAILURE=1 ninja test
 
 after_success:
-  - coveralls --include src --include include --gcov-options '\-lp' --root .. --build-root .
+  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
+      coveralls --include src --gcov-options '\-lp' --root src --build-root src;
+    fi
