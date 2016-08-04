@@ -4,7 +4,7 @@ language: cpp
 
 matrix:
   include:
-    - compiler: clang
+    - compiler: gcc
       env: BUILD_TYPE=Coverage
     - compiler: clang
       env: BUILD_TYPE=Debug
@@ -14,10 +14,18 @@ cache: apt
 before_script:
   - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty main universe"
   - sudo apt-get update -qq
+  - if [ "${BUILD_TYPE}" == "Coverage" ]; then
+      sudo apt-get -qq install g++-4.8;
+      sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-4.8 90;
+      sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-4.8 90;
+      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 90;
+    fi
   - sudo apt-get install -y libgflags-dev libgoogle-glog-dev
   - sudo apt-get install -y libstdc++-4.8-dev
   - sudo apt-get install -y ninja-build
   - sudo apt-get install -y cmake
+  - mkdir -p out/${BUILD_TYPE}
+  - cd out/${BUILD_TYPE}
 
 install:
   - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
@@ -27,9 +35,7 @@ install:
     fi
 
 script:
-  - mkdir -p out/${BUILD_TYPE}
-  - cd out/${BUILD_TYPE}
-  - cmake -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../src
+  - cmake -GNinja -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../src
   - ninja -j 4
   - CTEST_OUTPUT_ON_FAILURE=1 ninja test
 
