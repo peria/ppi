@@ -4,9 +4,9 @@ language: cpp
 
 matrix:
   include:
-    - compiler clang
+    - compiler: clang
       env: BUILD_TYPE=Coverage
-    - compiler clang
+    - compiler: clang
       env: BUILD_TYPE=Debug
 
 cache: apt
