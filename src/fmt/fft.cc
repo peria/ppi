@@ -6,6 +6,7 @@
 
 #include "base/base.h"
 #include "base/allocator.h"
+#include "base/util.h"
 #include "fmt/fmt.h"
 
 namespace ppi {
@@ -28,21 +29,10 @@ Complex* WorkArea(int64 size) {
 }  // namespace
 
 void Fft::Factor(int64 n, Config* config) {
-  const int64 kPrimes[] = {2};
-  static_assert(sizeof(kPrimes) != sizeof(Config::exponent),
-                "config may have unknown exponents.");
+  DCHECK_EQ(0, n & (n - 1));
 
   config->n = n;
-  for (size_t i = 0; i < ARRAY_SIZE(kPrimes); ++i) {
-    const int64 p = kPrimes[i];
-    int64 e = 0;
-    for (; n % p == 0; n /= p) {
-      ++e;
-    }
-    config->exponent[i] = e;
-  }
-
-  CHECK_LT(0, config->exponent[0]);
+  config->exp2 = PopCount(n - 1);
 }
 
 void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
@@ -60,7 +50,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   int64 width = 1;
 
   // Radix-4
-  const int64 loop4 = config.exponent[0] / 2;
+  const int64 loop4 = config.exp2 / 2;
   for (int64 i = 0; i < loop4; ++i) {
     height /= 4;
     if (i % 2 == 0) {
@@ -74,7 +64,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
     std::memcpy(x, y, sizeof(Complex) * n);
 
   // Radix-2
-  if (config.exponent[0] % 2) {
+  if (config.exp2 % 2) {
     height /= 2;
     Radix2(config, width, height, x, y);
     std::memcpy(x, y, sizeof(Complex) * n);

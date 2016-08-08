@@ -10,7 +10,7 @@ class Fft {
  public:
   struct Config {
     int64 n;
-    int exponent[3];
+    int exp2;
   };
 
   // Factor n with 2, 3, and 5.
