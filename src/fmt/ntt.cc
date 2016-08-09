@@ -12,6 +12,14 @@
 namespace ppi {
 namespace fmt {
 
+namespace {
+
+inline uint64* element(uint64* a, const int64 n, int64 id) {
+  return &a[n * id];
+}
+
+}  // namespace
+
 void Ntt::Transfer(const Direction dir, const int64 n, uint64* a) {
   if (dir == Direction::Forward) {
     Forward(n, a);
@@ -37,11 +45,11 @@ void Ntt::Forward(const int64 n, uint64* a) {
     for (int64 j = 0; j < n; j += 2 * m) {
       for (int64 k = 0; k < m; ++k) {
         int64 w = (shift * k) % n;
-        std::copy_n(&a[(j + k) * n], n, x0);
-        std::copy_n(&a[(j + m + k) * n], n, x1);
-        number::IntegerCore::Add(x0, x1, n, &a[(j + k) * n]);
+        std::copy_n(element(a, n, j + k), n, x0);
+        std::copy_n(element(a, n, j + m + k), n, x1);
+        number::IntegerCore::Add(x0, x1, n, element(a, n, j + k));
         number::IntegerCore::Subtract(x0, x1, n, x2);
-        ShiftLeftWords(x2, w, n, &a[(j + k + m) * n]);
+        ShiftLeftWords(x2, w, n, element(a, n, j + k + m));
       }
     }
   }
@@ -63,10 +71,10 @@ void Ntt::Backward(const int64 n, uint64* a) {
     for (int64 j = 0; j < n; j += 2 * m) {
       for (int64 k = 0; k < m; ++k) {
         int64 w = (shift * k) & (n - 1);
-        std::copy_n(&a[(j + k) * n], n, x0);
-        ShiftLeftWords(&a[(j + k + m) * n], w, n, x1);
-        number::IntegerCore::Add(x0, x1, n, &a[(j + k) * n]);
-        number::IntegerCore::Subtract(x0, x1, n, &a[(j + k + m) * n]);
+        std::copy_n(element(a, n, j + k), n, x0);
+        ShiftLeftWords(element(a, n, j + k + m), w, n, x1);
+        number::IntegerCore::Add(x0, x1, n, element(a, n, j + k));
+        number::IntegerCore::Subtract(x0, x1, n, element(a, n, j + k + m));
       }
     }
   }
@@ -76,8 +84,8 @@ void Ntt::Backward(const int64 n, uint64* a) {
     ++k;
 
   for (int64 i = 0; i < n; ++i) {
-    std::copy_n(&a[i * n], n, x0);
-    ShiftRightBits(x0, k, n, &a[i * n]); 
+    std::copy_n(element(a, n, i), n, x0);
+    ShiftRightBits(x0, k, n, element(a, n, i)); 
   }
 
   base::Allocator::Deallocate(x0);
