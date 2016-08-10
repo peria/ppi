@@ -23,22 +23,28 @@ class NttTest : public testing::Test {
 };
 
 TEST_F(NttTest, DISABLED_Transfer) {
-  const int kElementSize = 1 << 1;
-  const int kTotalSize = kElementSize * kElementSize;
+  const int64 kNumElements = 1 << 1;
+  const int64 kElementSize = kNumElements + 1;
+  const int64 kTotalSize = kNumElements * kElementSize;
   uint64 value[kTotalSize];
-  for (int i = 0; i < kTotalSize; ++i) {
-    value[i] = i + 1;
+  for (int64 i = 0; i < kNumElements; ++i) {
+    value[i] = i;
   }
-  Ntt::Transfer(Direction::Forward, kElementSize, value);
-  Ntt::Transfer(Direction::Backward, kElementSize, value);
-  for (int i = 0; i < kTotalSize; ++i) {
-    EXPECT_EQ(static_cast<uint64>(i + 1), value[i])
-      << "[" << i << "] " << std::hex << (i + 1) << " - " << value[i];
+  for (int64 i = 0; i < kNumElements; ++i) {
+    value[i * kElementSize] = 0;
+  }
+  Ntt::Transfer(Direction::Forward, kNumElements, value);
+  Ntt::Transfer(Direction::Backward, kNumElements, value);
+  for (int64 i = 0; i < kTotalSize; ++i) {
+    uint64 expected = ((i + 1) % kElementSize == 0) ? 0 : (i + 1);
+    EXPECT_EQ(expected, value[i])
+        << "[" << i << "] " << std::hex << expected << " - " << value[i];
   }
 }
 
 TEST_F(NttTest, ShiftLeftWords) {
-  const int kSize = 4;
+  const int64 N = 4;
+  const int64 kSize = N + 1;
   const uint64 kFullBits = 0xffffffffffffffff;
 
   struct TestData {
@@ -46,38 +52,41 @@ TEST_F(NttTest, ShiftLeftWords) {
     int64 shift;
     uint64 expect[kSize];
   } datas[] = {
-    { {1, 0, 0, 0}, 2, {0, 0, 1, 0} },
-    { {1, 0, 0, 0}, 4, {kFullBits, kFullBits, kFullBits, kFullBits} },
+    { {1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0} },
+    { {0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1} },
+    { {0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits} },
   };
 
   for (auto& data : datas) {
     uint64 output[kSize];
-    ShiftLeftWords(data.value, data.shift, kSize, output);
+    ShiftLeftWords(data.value, data.shift, N, output);
     for (int64 i = 0; i < kSize; ++i) {
       EXPECT_EQ(data.expect[i], output[i])
-          << "[" << i << "]: "
+          << "[" << i << "] w = " << data.shift << " : "
           << std::hex << data.expect[i] << " - " << output[i];
     }
   }
 }
 
 TEST_F(NttTest, ShiftRightBits) {
-  const int kSize = 2;
+  const int64 N = 2;
+  const int64 kSize = N + 1;
+
   struct TestData {
     uint64 value[kSize];
     int64 shift;
     uint64 expect[kSize];
   } datas[] = {
-    { {1 << 4, 0}, 2, {1 << 2, 0} },
-    { {1, 0}, 2, {1, 0xc000000000000000ULL} },
-    { {1, 0}, 3, {1, 0xe000000000000000ULL} },
-    { {0xffffffffffffffff, 0}, 2, {1ULL << 62, 1ULL << 62} },
-    { {0x7fffffffffffffff, 0}, 2, {1ULL << 61, 1ULL << 62} },
+    { {1 << 4, 0, 0}, 2, {1 << 2, 0, 0} },
+    { {1, 0, 0}, 2, {1, 0xc000000000000000ULL, 0} },
+    { {1, 0, 0}, 3, {1, 0xe000000000000000ULL, 0} },
+    { {0xffffffffffffffff, 0, 0}, 2, {1ULL << 62, 1ULL << 62, 0} },
+    { {0x7fffffffffffffff, 0, 0}, 2, {1ULL << 61, 1ULL << 62, 0} },
   };
 
   for (auto& data : datas) {
     uint64 output[kSize];
-    ShiftRightBits(data.value, data.shift, kSize, output);
+    ShiftRightBits(data.value, data.shift, N, output);
     EXPECT_EQ(data.expect[0], output[0])
         << std::hex << data.expect[0] << " - " << output[0];
     EXPECT_EQ(data.expect[1], output[1])

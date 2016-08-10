@@ -15,7 +15,7 @@ namespace fmt {
 namespace {
 
 inline uint64* element(uint64* a, const int64 n, int64 id) {
-  return &a[n * id];
+  return &a[(n + 1) * id];
 }
 
 }  // namespace
@@ -36,9 +36,9 @@ void Ntt::Forward(const int64 n, uint64* a) {
   // a ring N/(w^(n/2)+1)N.  It means that the size of each element is also
   // |n|, if the number of elements is |n|.
 
-  uint64* x0 = base::Allocator::Allocate<uint64>(n);
-  uint64* x1 = base::Allocator::Allocate<uint64>(n);
-  uint64* x2 = base::Allocator::Allocate<uint64>(n);
+  uint64* x0 = base::Allocator::Allocate<uint64>(n + 1);
+  uint64* x1 = base::Allocator::Allocate<uint64>(n + 1);
+  uint64* x2 = base::Allocator::Allocate<uint64>(n + 1);
 
   for (int64 m = n / 2; m >= 1; m /= 2) {
     int64 shift = n / 2 / m;
@@ -63,8 +63,8 @@ void Ntt::Backward(const int64 n, uint64* a) {
   // n must be a power of 2.
   CHECK_EQ(0, (n & (n - 1)));
 
-  uint64* x0 = base::Allocator::Allocate<uint64>(n);
-  uint64* x1 = base::Allocator::Allocate<uint64>(n);
+  uint64* x0 = base::Allocator::Allocate<uint64>(n + 1);
+  uint64* x1 = base::Allocator::Allocate<uint64>(n + 1);
 
   for (int64 m = 1; m < n; m *= 2) {
     int64 shift = -(n / 2 / m);
@@ -115,22 +115,72 @@ void Ntt::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
 }
 
 void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b) {
-  for (int64 i = 0, j = w; j < n; ++i, ++j) {
-    b[j] = a[i];
-  }
-  for (int64 i = n - w, j = 0; i < n; ++i, ++j) {
-    b[j] = ~a[i];
-  }
+  DCHECK_LT(w, 2 * n);
 
-  ++b[0];
-  for (int64 i = 0; i < w; ++i) {
-    if (b[i])
-      break;
-    ++b[i + 1];
+  // TODO: want to remove this edge case handling.
+  if (a[n] == 1) {
+#if !NDEBUG
+    for (int64 i = 0; i < n; ++i)
+      DCHECK_EQ(0, a[i]);
+#endif
+    if (w == 0) {
+      std::memcpy(b, a, sizeof(uint64) * (n + 1));
+      return;
+    }
+    if (w < n) {
+      b[0] = 1;
+      for (int64 i = 1; i < w; ++i)
+        b[i] = 0;
+      for (int64 i = w; i < n; ++i)
+        b[i] = ~0ULL;
+      b[n] = 0;
+      return;
+    }
+    for (int64 i = 0; i < n; ++i)
+      b[i] = 0;
+    b[w - n] = 1;
+    return;
   }
-
-  if (w != 0) {
-    --b[w];
+  
+  b[n] = 0;
+  if (w < n) {
+    for (int64 i = 0, j = w; j < n; ++i, ++j)
+      b[j] = a[i];
+    for (int64 i = n - w, j = 0; i < n; ++i, ++j)
+      b[j] = ~a[i];
+    for (int64 i = 0; i <= n; ++i) {
+      ++b[i];
+      if (b[i])
+        break;
+    }
+    for (int64 i = w; i <= n; ++i) {
+      --b[i];
+      if (~b[i])
+        break;
+    }
+    if (~b[n] == 0) {
+      b[n] = 0;
+      for (int64 i = 0; i <= n; ++i) {
+        ++b[i];
+        if (b[i])
+          break;
+      }
+    }
+  } else {
+    for (int64 i = 0, j = w - n; j < n; ++i, ++j)
+      b[j] = ~a[i];
+    for (int64 i = 2 * n - w, j = 0; i < n; ++i, ++j)
+      b[j] = a[i];
+    for (int64 i = w - n; i <= n; ++i) {
+      ++b[i];
+      if (b[i])
+        break;
+    }
+    for (int64 i = 0; i <= n; ++i) {
+      ++b[i];
+      if (b[i])
+        break;
+    }
   }
 }
 

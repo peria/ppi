@@ -11,8 +11,10 @@ namespace fmt {
 class Ntt {
   static const int kOmega = 2;
  public:
-  // Compute NTT of |a|, assuming each element of |a| is a long precision number
-  // of length |n|, and the size of |a| is also |n|.
+  // Processes NTT (number theorem transfer) on an array |a|, which has
+  // |n| element.  Computations on those elements will be done in a nega-cyclic
+  // ring N/(w^(n+1)+1)N, where w is 2^64.  It means each element is like
+  // uint64[n+1], and carried up values will be substracted from [0].
   static void Transfer(const Direction dir, const int64 n, uint64* a);
 
  protected:
