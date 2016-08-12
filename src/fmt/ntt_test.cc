@@ -23,15 +23,12 @@ class NttTest : public testing::Test {
 };
 
 TEST_F(NttTest, DISABLED_Transfer) {
-  const int64 kNumElements = 1 << 1;
+  const int64 kNumElements = 1 << 2;
   const int64 kElementSize = kNumElements + 1;
   const int64 kTotalSize = kNumElements * kElementSize;
   uint64 value[kTotalSize];
-  for (int64 i = 0; i < kNumElements; ++i) {
-    value[i] = i;
-  }
-  for (int64 i = 0; i < kNumElements; ++i) {
-    value[i * kElementSize] = 0;
+  for (int64 i = 0; i < kTotalSize; ++i) {
+    value[i] = ((i + 1) % kElementSize == 0) ? 0 : (i + 1);
   }
   Ntt::Transfer(Direction::Forward, kNumElements, value);
   Ntt::Transfer(Direction::Backward, kNumElements, value);
@@ -54,7 +51,8 @@ TEST_F(NttTest, ShiftLeftWords) {
   } datas[] = {
     { {1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0} },
     { {0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1} },
-    { {0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits} },
+    { {0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits, 0} },
+    { {1, 0, 0, 0, 0}, 5, {1, kFullBits, kFullBits, kFullBits, 0} },
   };
 
   for (auto& data : datas) {
