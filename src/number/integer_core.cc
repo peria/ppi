@@ -29,6 +29,34 @@ double* WorkArea(int index, int64 size) {
 const int kMaskBitSize = 16;
 const uint64 kMask = (1ULL << kMaskBitSize) - 1;
 
+int64 LeadingZeros(uint64 x) {
+  if (x == 0)
+    return 64;
+
+  int64 n = 1;
+  if ((x >> 32) == 0) {
+    n += 32;
+    x <<= 32;
+  }
+  if ((x >> (32 + 16)) == 0) {
+    n += 16;
+    x <<= 16;
+  }
+  if ((x >> (32 + 16 + 8)) == 0) {
+    n += 8;
+    x <<= 8;
+  }
+  if ((x >> (32 + 16 + 8 + 4)) == 0) {
+    n += 4;
+    x <<= 4;
+  }
+  if ((x >> (32 + 16 + 8 + 4 + 2)) == 0) {
+    n += 2;
+    x <<= 2;
+  }
+  return n - (x >> 63);
+}
+
 }  // namespace
 
 uint64 IntegerCore::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
@@ -107,11 +135,56 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
     da[2 * i    ] = ar * br - ai * bi;
     da[2 * i + 1] = ar * bi + ai * br;
   }
-  
+
   fmt::Fft::TransformReal(fmt::Direction::Backward, nd, da);
 
   // Gather Complex[4n] -> uint64[n]
   return Gather4(da, n, c);
+}
+
+uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
+  // Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
+  constexpr uint64 kShortBase = 1ULL << 32;
+  constexpr uint64 kHalfMask = kShortBase - 1;
+  DCHECK_LT(a[1], b);
+
+  int64 shift = LeadingZeros(b);
+  uint64 bn = b << shift;
+  uint64 bn1 = bn >> 32;
+  uint64 bn0 = bn & kHalfMask;
+  uint64 an32 = (a[1] << shift) | ((a[0] >> (64 - shift)) & (-shift >> 63));
+  uint64 an10 = a[0] << shift;
+
+  uint64 an1 = an10 >> 32;
+  uint64 an0 = an10 & kHalfMask;
+
+  uint64 q1 = an32 / bn1;
+  uint64 rhat = an32 - q1 * bn1;
+
+again1:
+  if (q1 >= kShortBase || q1 * bn0 > kShortBase + an1) {
+    --q1;
+    rhat += bn1;
+    if (rhat < bn)
+      goto again1;
+  }
+
+  uint64 an21 = an32* kShortBase + an1 - q1 * bn;
+
+  uint64 q0 = an21 / bn1;
+  rhat = an21 - q0 * bn1;
+
+again2:
+  if (q0 >= kShortBase || q0 * bn0 > kShortBase + an0) {
+    --q0;
+    rhat += bn1;
+    if (rhat < bn)
+      goto again2;
+  }
+
+  if (c)
+    *c = (an21 * kShortBase + an0 - q0 * bn) >> shift;
+  return q1 * kShortBase + q0;
 }
 
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {

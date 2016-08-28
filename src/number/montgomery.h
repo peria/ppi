@@ -12,7 +12,7 @@ class Montgomery {
   Montgomery(uint64 value, uint64 mod);
 
   operator uint64() const { return value_; }
-  
+
   static uint64 Power(uint64 a, uint64 e, uint64 m);
   static Montgomery Mult(const Montgomery& lhs, const Montgomery& rhs, uint64 mod, uint64 inverse);
 
