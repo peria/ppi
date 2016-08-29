@@ -8,12 +8,18 @@
 using ppi::int64;
 
 void BM_PiChudnovsky(benchmark::State& state) {
-  ppi::number::Real pi;
-  int64 limbs = state.range_x() / 16 + 1;
-  pi.setPrecision(limbs);
-  ppi::pi::Drm::Chudnovsky(&pi);
+  while (state.KeepRunning()) {
+    ppi::number::Real pi;
+    int64 limbs = state.range_x() / 16 + 1;
+    pi.setPrecision(limbs);
+    ppi::pi::Drm::Chudnovsky(&pi);
+  }
 }
 
 BENCHMARK(BM_PiChudnovsky)->Arg(100000)->Arg(1000000);
 
-BENCHMARK_MAIN();
+int main(int argc, char** argv) {
+  benchmark::Initialize(&argc, argv);
+  benchmark::RunSpecifiedBenchmarks();
+  return 0;
+}
