@@ -148,8 +148,10 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
   constexpr uint64 kHalfMask = kShortBase - 1;
   DCHECK_LT(a[1], b);
 
+  // Normalize numbers to set divisor to have the MSB.
   int64 shift = LeadingZeros(b);
   uint64 bn = b << shift;
+
   uint64 bn1 = bn >> 32;
   uint64 bn0 = bn & kHalfMask;
   uint64 an32 = (a[1] << shift) | ((a[0] >> (64 - shift)) & (-shift >> 63));
@@ -161,25 +163,22 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
   uint64 q1 = an32 / bn1;
   uint64 rhat = an32 - q1 * bn1;
 
-again1:
-  if (q1 >= kShortBase || q1 * bn0 > kShortBase + an1) {
+  while (q1 >= kShortBase || q1 * bn0 > rhat * kShortBase + an1) {
     --q1;
     rhat += bn1;
-    if (rhat < bn)
-      goto again1;
+    if (rhat >= bn)
+      break;
   }
 
-  uint64 an21 = an32* kShortBase + an1 - q1 * bn;
+  uint64 an21 = an32 * kShortBase + an1 - q1 * bn;
 
   uint64 q0 = an21 / bn1;
   rhat = an21 - q0 * bn1;
-
-again2:
-  if (q0 >= kShortBase || q0 * bn0 > kShortBase + an0) {
+  while (q0 >= kShortBase || q0 * bn0 > rhat * kShortBase + an0) {
     --q0;
     rhat += bn1;
-    if (rhat < bn)
-      goto again2;
+    if (rhat >= bn)
+      break;
   }
 
   if (c)
