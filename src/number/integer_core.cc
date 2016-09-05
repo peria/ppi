@@ -26,8 +26,11 @@ double* WorkArea(int index, int64 size) {
   return workarea;
 }
 
-const int kMaskBitSize = 16;
-const uint64 kMask = (1ULL << kMaskBitSize) - 1;
+// TODO: Rename these constants
+constexpr int kMaskBitSize = 16;
+constexpr uint64 kMask = (1ULL << kMaskBitSize) - 1;
+constexpr uint64 kShortBase = 1ULL << 32;
+constexpr uint64 kHalfMask = kShortBase - 1;
 
 int64 LeadingZeros(uint64 x) {
   if (x == 0)
@@ -55,6 +58,54 @@ int64 LeadingZeros(uint64 x) {
     x <<= 2;
   }
   return n - (x >> 63);
+}
+
+// Core part of Div routines to compute an[4] / bn, assuming an[3]*R+an[2] < bn.
+// Returns the quotient, and stores the "normalized" reminder in cn (if not null).
+// It requires some conditions written in DCHECK()s.
+inline uint64 DivCore(const uint64* an,
+                      const uint64 bn, const uint64 bn0, const uint64 bn1,
+                      uint64* cn) {
+  // Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
+
+  DCHECK_EQ(bn, bn1 * kShortBase + bn0);
+  DCHECK_EQ(1, bn >> 63);
+  DCHECK_LT(bn0, kShortBase);
+  DCHECK_LT(bn1, kShortBase);
+  DCHECK_LT(an[0], kShortBase);
+  DCHECK_LT(an[1], kShortBase);
+  DCHECK_LT(an[2], kShortBase);
+  DCHECK_LT(an[3], kShortBase);
+
+  uint64 an32 = an[3] * kShortBase + an[2];
+  uint64 q1 = an32 / bn1;
+  uint64 rhat = an32 - q1 * bn1;
+  const uint64 an1 = an[1];
+  if (q1 * bn0 > rhat * kShortBase + an1) {
+    --q1;
+    rhat += bn1;
+    if (q1 * bn0 > rhat * kShortBase + an1) {
+      --q1;
+      rhat += bn1;
+    }
+  }
+
+  uint64 an21 = an[2] * kShortBase + an1 - q1 * bn;
+  uint64 q0 = an21 / bn1;
+  rhat = an21 - q0 * bn1;
+  const uint64 an0 = an[0];
+  if (q0 * bn0 > rhat * kShortBase + an0) {
+    --q0;
+    rhat += bn1;
+    if (q0 * bn0 > rhat * kShortBase + an0) {
+      --q0;
+      rhat += bn1;
+    }
+  }
+
+  if (cn)
+    *cn = an21 * kShortBase + an0 - q0 * bn;
+  return q1 * kShortBase + q0;
 }
 
 }  // namespace
@@ -143,47 +194,31 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
 }
 
 uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
-  // Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
-  constexpr uint64 kShortBase = 1ULL << 32;
-  constexpr uint64 kHalfMask = kShortBase - 1;
   DCHECK_LT(a[1], b);
 
   // Normalize numbers to set divisor to have the MSB.
   int64 shift = LeadingZeros(b);
-  uint64 bn = b << shift;
 
+  uint64 an0 = a[0];
+  uint64 an1 = a[1];
+  if (shift) {
+    an1 = (a[1] << shift) + (a[0] >> (64 - shift));
+    an0 = a[0] << shift;
+  }
+  uint64 an[4];
+  an[0] = an0 & kHalfMask;
+  an[1] = an0 >> 32;
+  an[2] = an1 & kHalfMask;
+  an[3] = an1 >> 32;
+
+  uint64 bn = b << shift;
   uint64 bn1 = bn >> 32;
   uint64 bn0 = bn & kHalfMask;
-  uint64 an32 = (a[1] << shift) | ((a[0] >> (64 - shift)) & (-shift >> 63));
-  uint64 an10 = a[0] << shift;
 
-  uint64 an1 = an10 >> 32;
-  uint64 an0 = an10 & kHalfMask;
-
-  uint64 q1 = an32 / bn1;
-  uint64 rhat = an32 - q1 * bn1;
-
-  while (q1 >= kShortBase || q1 * bn0 > rhat * kShortBase + an1) {
-    --q1;
-    rhat += bn1;
-    if (rhat >= bn)
-      break;
-  }
-
-  uint64 an21 = an32 * kShortBase + an1 - q1 * bn;
-
-  uint64 q0 = an21 / bn1;
-  rhat = an21 - q0 * bn1;
-  while (q0 >= kShortBase || q0 * bn0 > rhat * kShortBase + an0) {
-    --q0;
-    rhat += bn1;
-    if (rhat >= bn)
-      break;
-  }
-
+  uint64 q = DivCore(an, bn, bn0, bn1, c);
   if (c)
-    *c = (an21 * kShortBase + an0 - q0 * bn) >> shift;
-  return q1 * kShortBase + q0;
+    *c >>= shift;
+  return q;
 }
 
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {
