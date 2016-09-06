@@ -21,6 +21,8 @@ TEST(IntegerCoreTest, Div2By1) {
   } datas[] = {
     {{0, 1ULL << 63}, (1ULL << 63) + 1, 0xfffffffffffffffe, 2},
     {{0, 1ULL << 62}, (1ULL << 63) - 1, (1ULL << 63) + 1, 1},
+    {{0, (1ULL << 63) + (1ULL << 32) - 1}, (1ULL << 63) + (1ULL << 32),
+     0xfffffffffffffffe, 1ULL << 33},
   };
   for (auto data : datas) {
     uint64 rem;
