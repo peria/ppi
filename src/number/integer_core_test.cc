@@ -1,10 +1,54 @@
 #include "number/integer_core.h"
 
 #include <gtest/gtest.h>
+
+#include <random>
+
 #include "base/base.h"
 
 namespace ppi {
 namespace number {
+
+namespace {
+
+void CreateProd(const uint64 a, const uint64 b, const uint64 r, uint64* c) {
+  constexpr uint64 kMask = (1ULL << 32) - 1;
+  // Compute a product
+  uint64 a0 = a & kMask;
+  uint64 a1 = a >> 32;
+  uint64 b0 = b & kMask;
+  uint64 b1 = b >> 32;
+
+  uint64 c0 = a0 * b0;
+  uint64 c1 = a1 * b0;
+  uint64 c2 = a1 * b1;
+
+  uint64 u = c1 + (a0 * b1);
+  if (u < c1) {
+    c2 += 1ULL << 32;
+  }
+
+  uint64 v = c0 + (u << 32);
+  if (v < c0) {
+    ++c2;
+  }
+
+  // Add reminder
+  v += r;
+  if (v < r) {
+    ++c2;
+  }
+
+  // |<-- c[1] -->||<-- c[0] -->|
+  // |<--  c2  -->|
+  //        |<-- c1,u -->|
+  //               |<-- c0,v -->|
+
+  c[0] = v;
+  c[1] = c2;
+}
+
+}  // namespace
 
 class IntegerCoreForTest : public IntegerCore {
  public:
@@ -29,6 +73,23 @@ TEST(IntegerCoreTest, Div2By1) {
     uint64 quot = IntegerCore::Div(data.a, data.b, &rem);
     EXPECT_EQ(data.expect_rem, rem);
     EXPECT_EQ(data.expect_quot, quot);
+  }
+
+  constexpr int64 kTestTimes = 100000;
+  std::mt19937 mt(19937);  // Fixed seed
+  for (int64 i = 0; i < kTestTimes; ++i) {
+    const uint64 b = mt();
+    if (b == 0)
+      continue;
+    const uint64 a = mt();
+    const uint64 c = mt() % b;
+    uint64 prod[2];
+    CreateProd(a, b, c, prod);
+
+    uint64 r;
+    uint64 q = IntegerCore::Div(prod, b, &r);
+    EXPECT_EQ(a, q);
+    EXPECT_EQ(c, r);
   }
 }
 
