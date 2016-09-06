@@ -81,6 +81,10 @@ inline uint64 DivCore(const uint64* an,
   uint64 q1 = an32 / bn1;
   uint64 rhat = an32 - q1 * bn1;
   const uint64 an1 = an[1];
+  if (q1 >= kShortBase) {
+    --q1;
+    rhat += bn1;
+  }
   if (q1 * bn0 > rhat * kShortBase + an1) {
     --q1;
     rhat += bn1;
@@ -94,6 +98,10 @@ inline uint64 DivCore(const uint64* an,
   uint64 q0 = an21 / bn1;
   rhat = an21 - q0 * bn1;
   const uint64 an0 = an[0];
+  if (q0 >= kShortBase) {
+    --q0;
+    rhat += bn1;
+  }
   if (q0 * bn0 > rhat * kShortBase + an0) {
     --q0;
     rhat += bn1;

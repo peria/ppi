@@ -12,7 +12,25 @@ class IntegerCoreForTest : public IntegerCore {
   using IntegerCore::Gather4;
 };
 
-TEST(IntegerTest, SplitAndGather) {
+TEST(IntegerCoreTest, Div2By1) {
+  struct {
+    uint64 a[2];
+    uint64 b;
+    uint64 expect_quot;
+    uint64 expect_rem;
+  } datas[] = {
+    {{0, 1ULL << 63}, (1ULL << 63) + 1, 0xfffffffffffffffe, 2},
+    {{0, 1ULL << 62}, (1ULL << 63) - 1, (1ULL << 63) + 1, 1},
+  };
+  for (auto data : datas) {
+    uint64 rem;
+    uint64 quot = IntegerCore::Div(data.a, data.b, &rem);
+    EXPECT_EQ(data.expect_rem, rem);
+    EXPECT_EQ(data.expect_quot, quot);
+  }
+}
+
+TEST(IntegerCoreTest, SplitAndGather) {
   double c[] = {0x4444, 0x3333, 0x2222, 0x1111};
 
   // Complex[2] -> Integer
