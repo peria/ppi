@@ -229,6 +229,54 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
   return q;
 }
 
+uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
+  DCHECK_LT(a, b);
+
+  // Normalize numbers to set divisor to have the MSB.
+  const int64 shift = LeadingZeros(b);
+  const uint64 bn = b << shift;
+  const uint64 bn1 = bn >> 32;
+  const uint64 bn0 = bn & kHalfMask;
+
+  uint64 an = a << shift;
+  for (int64 i = n - 1; i >= 0; --i) {
+    uint64 q1 = an / bn1;
+    uint64 rhat = an - q1 * bn1;
+    if (q1 >= kShortBase) {
+      --q1;
+      rhat += bn1;
+    }
+    if (q1 * bn0 > rhat * kShortBase) {
+      --q1;
+      rhat += bn1;
+      if (q1 * bn0 > rhat * kShortBase) {
+        --q1;
+        rhat += bn1;
+      }
+    }
+
+    uint64 ans = an * kShortBase - q1 * bn;
+    uint64 q0 = ans / bn1;
+    rhat = ans - q0 * bn1;
+    if (q0 >= kShortBase) {
+      --q0;
+      rhat += bn1;
+    }
+    if (q0 * bn0 > rhat * kShortBase) {
+      --q0;
+      rhat += bn1;
+      if (q0 * bn0 > rhat * kShortBase) {
+        --q0;
+        rhat += bn1;
+      }
+    }
+
+    c[i] = q1 * kShortBase + q0;
+    an = ans * kShortBase - q0 * bn;
+  }
+  return an >> shift;
+}
+
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];

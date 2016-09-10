@@ -21,6 +21,9 @@ class IntegerCore {
   // Computes a[n] / b, assuming a[n-1] < b.  It means the quotient is storable in uint64.
   // Returns the quotient and stores the remainder in c.
   static uint64 Div(const uint64* a, const uint64 b, const int64 n, uint64* c);
+  // Computes (a << (n * 64)) / b, assuming a < b.
+  // Stores the quotient into c, and returns the remainder.
+  static uint64 Div(const uint64 a, const uint64 b, const int64 n, uint64* c);
 
  protected:
   static void Split4(const uint64* a, const int64 na, const int64 n, double* ca);
