@@ -5,10 +5,10 @@
 #include "base/base.h"
 #include "base/time.h"
 #include "pi/drm.h"
-#include "pi/pi.h"
+#include "pi/arctan.h"
 #include "number/real.h"
 
-DEFINE_int32(type, 0, "0:Chudnovsky, 1:arctan");
+DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
 DEFINE_string(refer, "", "file name which has another computing result");
 
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     error = ppi::pi::Drm::Chudnovsky(&pi);
     break;
   case 1:
-    ppi::pi::Pi::Arctan2(&pi);
+    ppi::pi::Arctan::Machin(&pi);
     break;
   }
   std::cout << pi << "\n";
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   double end = base::Time::Now();
   LOG(INFO) << "Elapsed Time: " << (end - start) << " sec.";
   LOG(INFO) << "Maximum error in FFT: " << error;
-  
+
 #if !defined(BUILD_TYPE_release)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
   double used_size_kib = used_size / 1024.0;
@@ -49,6 +49,6 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Maximum memory usage: " << used_size_kib << " KiB";
   }
 #endif
-  
+
   return 0;
 }

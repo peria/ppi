@@ -1,4 +1,4 @@
-#include "pi/pi.h"
+#include "pi/arctan.h"
 
 #include <cmath>
 
@@ -9,7 +9,7 @@
 namespace ppi {
 namespace pi {
 
-double Pi::Arctan2(Real* pi) {
+double Arctan::Machin(Real* pi) {
   int64 length = pi->precision();
   (*pi) = 0.0;
   pi->setPrecision(length);
