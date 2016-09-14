@@ -4,31 +4,33 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "base/time.h"
-#include "pi/drm.h"
-#include "pi/arctan.h"
 #include "number/real.h"
+#include "pi/arctan.h"
+#include "pi/drm.h"
 
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
 DEFINE_string(refer, "", "file name which has another computing result");
 
-using namespace ppi;
+using ppi::int64;
 
 int main(int argc, char* argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
-  double start = base::Time::Now();
+  double start = ppi::base::Time::Now();
   int64 limbs = FLAGS_digits / 16 + 1;
+
   ppi::number::Real pi;
-  double error = 0;
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
-  case 0:
-    error = ppi::pi::Drm::Chudnovsky(&pi);
-    break;
-  case 1:
-    ppi::pi::Arctan::Machin(&pi);
-    break;
+    case 0: {
+      double error = ppi::pi::Drm::Chudnovsky(&pi);
+      LOG(INFO) << "Maximum error in FFT: " << error;
+      break;
+    }
+    case 1:
+      ppi::pi::Arctan::Machin(&pi);
+      break;
   }
   std::cout << pi << "\n";
   if (!FLAGS_refer.empty()) {
@@ -36,9 +38,9 @@ int main(int argc, char* argv[]) {
     int64 same = pi.Compare(FLAGS_refer);
     std::cerr << same << " out of " << size << " digits are same.\n";
   }
-  double end = base::Time::Now();
+
+  double end = ppi::base::Time::Now();
   LOG(INFO) << "Elapsed Time: " << (end - start) << " sec.";
-  LOG(INFO) << "Maximum error in FFT: " << error;
 
 #if !defined(BUILD_TYPE_release)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
