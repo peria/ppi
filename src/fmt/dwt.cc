@@ -13,8 +13,7 @@ namespace fmt {
 
 void Dwt::Dwt4(const Direction dir, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
-  Fft::Config config;
-  Fft::Factor(n, &config);
+  Config config(n);
 
   if (dir == Direction::Forward) {
     double th = M_PI / (2 * n); // q = 1/4
@@ -45,8 +44,7 @@ void Dwt::Dwt4(const Direction dir, const int64 n, Complex* a) {
 
 void Dwt::Dwt2(const Direction dir, const int64 n, Complex* a) {
   // TODO: Move config to out side of this method.
-  Fft::Config config;
-  Fft::Factor(n, &config);
+  Config config(n);
 
   if (dir == Direction::Forward) {
     double th = - M_PI / n;

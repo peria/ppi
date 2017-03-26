@@ -10,5 +10,13 @@ enum class Direction {
   Backward,
 };
 
+struct Config {
+ public:
+  explicit Config(int64 n);
+
+  int64 n;
+  int64 log2n;
+};
+
 }  // namespace fmt
 }  // namespace ppi

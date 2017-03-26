@@ -3,14 +3,14 @@
 #include <gtest/gtest.h>
 
 #include "fmt/fmt.h"
+#include "fmt/rft.h"
 
 namespace ppi {
 namespace fmt {
 
 TEST(FftTest, Fft2ElemTest) {
   const double kEps = 1e-10;
-  Fft::Config config;
-  Fft::Factor(2, &config);
+  Config config(2);
 
   Complex a[] = {{1, 2}, {3, 4}};
   Fft::Transform(config, Direction::Forward, a);
@@ -31,13 +31,12 @@ TEST(FftTest, FftTest) {
 
   for (int64 k = 1; k <= 10; ++k) {
     const int n = 1 << k;
-    Fft::Config config;
-    Fft::Factor(n, &config);
+    Config config(n);
     Complex a[n];
     for (int i = 0; i < n; ++i) {
       a[i].real = i;
       a[i].imag = i + n;
-    }    
+    }
     Fft::Transform(config, Direction::Forward, a);
     Fft::Transform(config, Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
@@ -47,19 +46,18 @@ TEST(FftTest, FftTest) {
   }
 }
 
-TEST(FftTest, FftRealTest) {
+TEST(FftTest, RftTest) {
   const double kEps = 1e-10;
 
   for (int64 k = 2; k <= 10; ++k) {
     const int n = 1 << k;
-    Fft::Config config;
-    Fft::Factor(n, &config);
+    Config config(n);
     double a[n];
     for (int i = 0; i < n; ++i) {
       a[i] = i;
     }
-    Fft::TransformReal(Direction::Forward, n, a);
-    Fft::TransformReal(Direction::Backward, n, a);
+    Rft::Transform(Direction::Forward, n, a);
+    Rft::Transform(Direction::Backward, n, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i], kEps) << "index=" << i << ", n=2^" << k;
     }

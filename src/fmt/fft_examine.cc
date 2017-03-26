@@ -7,6 +7,7 @@
 
 #include "base/base.h"
 #include "fmt/fmt.h"
+#include "fmt/rft.h"
 
 namespace ppi {
 namespace fmt {
@@ -21,8 +22,8 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     b[i] = rng() & kMask15Bits;
   }
 
-  Fft::TransformReal(Direction::Forward, k, a);
-  Fft::TransformReal(Direction::Forward, k, b);
+  Rft::Transform(Direction::Forward, k, a);
+  Rft::Transform(Direction::Forward, k, b);
   a[0] *= b[0];
   a[1] *= b[1];
   for (int64 i = 1; i < k / 2; ++i) {
@@ -31,7 +32,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     a[2 * i    ] = ar * br - ai * bi;
     a[2 * i + 1] = ar * bi + ai * br;
   }
-  Fft::TransformReal(Direction::Backward, k, a);
+  Rft::Transform(Direction::Backward, k, a);
 
   double err = 0;
   for (int64 i = 0; i < k; ++i) {
@@ -57,7 +58,7 @@ int main(int, char*[]) {
     int64 n = (1 << 24) / k;
     for (int64 i = 0; i < n; ++i)
       err += ppi::fmt::GetRoundingError(k / 2, rng);
-    
+
     std::printf("%10ld\t%.3e\n", k, err / n);
   }
   return 0;
