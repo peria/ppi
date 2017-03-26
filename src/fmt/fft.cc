@@ -56,7 +56,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
     std::memcpy(x, y, sizeof(Complex) * n);
 
   // Radix-2
-  if (config.log2n % 2) {
+  if (config.log2n % 2 == 1) {
     height /= 2;
     Radix2(width, height, x, y);
     std::memcpy(x, y, sizeof(Complex) * n);
@@ -73,20 +73,21 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
 
 void Fft::Radix2(const int64 width, const int64 height,
                  Complex x[], Complex y[]) {
+  const int64 n2 = width * height;
   double th = -M_PI / width;
   for (int64 j = 0; j < width; ++j) {
     double wr = std::cos(th * j);
     double wi = std::sin(th * j);
     for (int64 k = 0; k < height; ++k) {
-      int64 ix0 = height * 2 * j + k;
-      int64 ix1 = ix0 + height;
+      int64 ix0 = k * width + j;
+      int64 ix1 = ix0 + n2;
       double x0r = x[ix0].real, x0i = x[ix0].imag;
       double x1r = x[ix1].real, x1i = x[ix1].imag;
       double xwr = x1r * wr - x1i * wi;
       double xwi = x1r * wi + x1i * wr;
 
-      int64 iy0 = height * j + k;
-      int64 iy1 = iy0 + width * height;
+      int64 iy0 = k * width * 2 + j;
+      int64 iy1 = iy0 + width;
       y[iy0].real = x0r + xwr;
       y[iy0].imag = x0i + xwi;
       y[iy1].real = x0r - xwr;
@@ -98,55 +99,47 @@ void Fft::Radix2(const int64 width, const int64 height,
 void Fft::Radix4(const int64 width, const int64 height,
                  Complex x[], Complex y[]) {
   const int64 n4 = width * height;
-
-  double th = -M_PI / (width * 2);
+  double th = -M_PI / (2 * width);
   for (int64 j = 0; j < width; ++j) {
     double w1r = std::cos(th * j);
     double w1i = std::sin(th * j);
     double w2r = w1r * w1r - w1i * w1i;
     double w2i = 2 * w1r * w1i;
     double w3r = w2r * w1r - w2i * w1i;
-    double w3i = w2r * w1i + w2i * w1r;
+    double w3i = w2r * w1i + w1r * w2i;
     for (int64 k = 0; k < height; ++k) {
-      int64 ix0 = height * 4 * j + k;
-      int64 ix1 = ix0 + height;
-      int64 ix2 = ix0 + height * 2;
-      int64 ix3 = ix0 + height * 3;
+      int64 ix0 = k * width + j;
+      int64 ix1 = ix0 + n4;
+      int64 ix2 = ix0 + n4 * 2;
+      int64 ix3 = ix0 + n4 * 3;
 
       double x0r = x[ix0].real, x0i = x[ix0].imag;
       double x1r = x[ix1].real, x1i = x[ix1].imag;
       double x2r = x[ix2].real, x2i = x[ix2].imag;
       double x3r = x[ix3].real, x3i = x[ix3].imag;
 
-      double x1w1r = x1r * w1r - x1i * w1i;
-      double x1w1i = x1r * w1i + x1i * w1r;
-      double x2w2r = x2r * w2r - x2i * w2i;
-      double x2w2i = x2r * w2i + x2i * w2r;
-      double x3w3r = x3r * w3r - x3i * w3i;
-      double x3w3i = x3r * w3i + x3i * w3r;
+      double x1wr = x1r * w1r - x1i * w1i, x1wi = x1r * w1i + x1i * w1r;
+      double x2wr = x2r * w2r - x2i * w2i, x2wi = x2r * w2i + x2i * w2r;
+      double x3wr = x3r * w3r - x3i * w3i, x3wi = x3r * w3i + x3i * w3r;
 
-      double z0p2r = x0r + x2w2r;
-      double z0p2i = x0i + x2w2i;
-      double z0m2r = x0r - x2w2r;
-      double z0m2i = x0i - x2w2i;
-      double z1p3r = x1w1r + x3w3r;
-      double z1p3i = x1w1i + x3w3i;
-      double z1m3r = x1w1i - x3w3i;
-      double z1m3i = -(x1w1r - x3w3r);
+      double x0p2r = x0r + x2wr, x0p2i = x0i + x2wi;
+      double x0m2r = x0r - x2wr, x0m2i = x0i - x2wi;
+      double x1p3r = x1wr + x3wr, x1p3i = x1wi + x3wi;
+      double x1m3r = -x1wi + x3wi, x1m3i = x1wr - x3wr;
 
-      int64 iy0 = height * j + k;
-      int64 iy1 = height * j + k + n4;
-      int64 iy2 = height * j + k + n4 * 2;
-      int64 iy3 = height * j + k + n4 * 3;
+      int64 iy0 = k * width * 4 + j;
+      int64 iy1 = iy0 + width;
+      int64 iy2 = iy0 + width * 2;
+      int64 iy3 = iy0 + width * 3;
 
-      y[iy0].real = z0p2r + z1p3r;
-      y[iy0].imag = z0p2i + z1p3i;
-      y[iy1].real = z0m2r + z1m3r;
-      y[iy1].imag = z0m2i + z1m3i;
-      y[iy2].real = z0p2r - z1p3r;
-      y[iy2].imag = z0p2i - z1p3i;
-      y[iy3].real = z0m2r - z1m3r;
-      y[iy3].imag = z0m2i - z1m3i;
+      y[iy0].real = x0p2r + x1p3r;
+      y[iy0].imag = x0p2i + x1p3i;
+      y[iy1].real = x0m2r - x1m3r;
+      y[iy1].imag = x0m2i - x1m3i;
+      y[iy2].real = x0p2r - x1p3r;
+      y[iy2].imag = x0p2i - x1p3i;
+      y[iy3].real = x0m2r + x1m3r;
+      y[iy3].imag = x0m2i + x1m3i;
     }
   }
 }
