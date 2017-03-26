@@ -42,35 +42,36 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   int64 width = 1;
 
   // Radix-4
-  const int64 loop4 = config.log2n / 2;
-  for (int64 i = 0; i < loop4; ++i) {
+  const int64 log4n = config.log2n / 2;
+  for (int64 i = 0; i < log4n; ++i) {
     height /= 4;
     if (i % 2 == 0) {
-      Radix4(config, width, height, x, y);
+      Radix4(width, height, x, y);
     } else {
-      Radix4(config, width, height, y, x);
+      Radix4(width, height, y, x);
     }
     width *= 4;
   }
-  if (loop4 % 2 == 1)
+  if (log4n % 2 == 1)
     std::memcpy(x, y, sizeof(Complex) * n);
 
   // Radix-2
   if (config.log2n % 2) {
     height /= 2;
-    Radix2(config, width, height, x, y);
+    Radix2(width, height, x, y);
     std::memcpy(x, y, sizeof(Complex) * n);
   }
 
   if (dir == Direction::Backward) {
+    double inverse = 1.0 / n;
     for (int64 i = 0; i < n; ++i) {
-      a[i].real *= 1.0 / n;
-      a[i].imag *= -1.0 / n;
+      a[i].real *= inverse;
+      a[i].imag *= -inverse;
     }
   }
 }
 
-void Fft::Radix2(const Config& config, int64 width, int64 height,
+void Fft::Radix2(const int64 width, const int64 height,
                  Complex x[], Complex y[]) {
   double th = -M_PI / width;
   for (int64 j = 0; j < width; ++j) {
@@ -85,7 +86,7 @@ void Fft::Radix2(const Config& config, int64 width, int64 height,
       double xwi = x1r * wi + x1i * wr;
 
       int64 iy0 = height * j + k;
-      int64 iy1 = iy0 + config.n / 2;
+      int64 iy1 = iy0 + width * height;
       y[iy0].real = x0r + xwr;
       y[iy0].imag = x0i + xwi;
       y[iy1].real = x0r - xwr;
@@ -94,10 +95,9 @@ void Fft::Radix2(const Config& config, int64 width, int64 height,
   }
 }
 
-void Fft::Radix4(const Config& config, int64 width, int64 height,
+void Fft::Radix4(const int64 width, const int64 height,
                  Complex x[], Complex y[]) {
-  const int64& n = config.n;
-  Complex* z = base::Allocator::Allocate<Complex>(n * 2);
+  const int64 n4 = width * height;
 
   double th = -M_PI / (width * 2);
   for (int64 j = 0; j < width; ++j) {
@@ -135,9 +135,9 @@ void Fft::Radix4(const Config& config, int64 width, int64 height,
       double z1m3i = -(x1w1r - x3w3r);
 
       int64 iy0 = height * j + k;
-      int64 iy1 = height * j + k + n / 4;
-      int64 iy2 = height * j + k + n / 2;
-      int64 iy3 = height * j + k + n / 4 + n / 2;
+      int64 iy1 = height * j + k + n4;
+      int64 iy2 = height * j + k + n4 * 2;
+      int64 iy3 = height * j + k + n4 * 3;
 
       y[iy0].real = z0p2r + z1p3r;
       y[iy0].imag = z0p2i + z1p3i;
@@ -149,8 +149,6 @@ void Fft::Radix4(const Config& config, int64 width, int64 height,
       y[iy3].imag = z0m2i - z1m3i;
     }
   }
-
-  base::Allocator::Deallocate(z);
 }
 
 }  // namespace fmt
