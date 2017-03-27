@@ -38,6 +38,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
 
   Complex* x = a;
   Complex* y = WorkArea(n);
+  Complex* ptr = config.table;
   int64 height = n;
   int64 width = 1;
 
@@ -46,10 +47,11 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   for (int64 i = 0; i < log4n; ++i) {
     height /= 4;
     if (i % 2 == 0) {
-      Radix4(width, height, x, y);
+      Radix4(width, height, ptr, x, y);
     } else {
-      Radix4(width, height, y, x);
+      Radix4(width, height, ptr, y, x);
     }
+    ptr += 3 * width;
     width *= 4;
   }
   if (log4n % 2 == 1)
@@ -58,7 +60,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   // Radix-2
   if (config.log2n % 2 == 1) {
     height /= 2;
-    Radix2(width, height, x, y);
+    Radix2(width, height, ptr, x, y);
     std::memcpy(x, y, sizeof(Complex) * n);
   }
 
@@ -72,13 +74,13 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
 }
 
 void Fft::Radix2(const int64 width, const int64 height,
-                 Complex x[], Complex y[]) {
+                 Complex* table, Complex x[], Complex y[]) {
   const int64 n2 = width * height;
-  double th = -M_PI / width;
-  for (int64 j = 0; j < width; ++j) {
-    double wr = std::cos(th * j);
-    double wi = std::sin(th * j);
-    for (int64 k = 0; k < height; ++k) {
+  for (int64 k = 0; k < height; ++k) {
+    for (int64 j = 0; j < width; ++j) {
+      double wr = table[j].real;
+      double wi = table[j].imag;
+
       int64 ix0 = k * width + j;
       int64 ix1 = ix0 + n2;
       double x0r = x[ix0].real, x0i = x[ix0].imag;
@@ -97,17 +99,17 @@ void Fft::Radix2(const int64 width, const int64 height,
 }
 
 void Fft::Radix4(const int64 width, const int64 height,
-                 Complex x[], Complex y[]) {
+                 Complex table[], Complex x[], Complex y[]) {
   const int64 n4 = width * height;
-  double th = -M_PI / (2 * width);
-  for (int64 j = 0; j < width; ++j) {
-    double w1r = std::cos(th * j);
-    double w1i = std::sin(th * j);
-    double w2r = w1r * w1r - w1i * w1i;
-    double w2i = 2 * w1r * w1i;
-    double w3r = w2r * w1r - w2i * w1i;
-    double w3i = w2r * w1i + w1r * w2i;
-    for (int64 k = 0; k < height; ++k) {
+  for (int64 k = 0; k < height; ++k) {
+    for (int64 j = 0; j < width; ++j) {
+      double w1r = table[3*j].real;
+      double w1i = table[3*j].imag;
+      double w2r = table[3*j+1].real;
+      double w2i = table[3*j+1].imag;
+      double w3r = table[3*j+2].real;
+      double w3i = table[3*j+2].imag;
+
       int64 ix0 = k * width + j;
       int64 ix1 = ix0 + n4;
       int64 ix2 = ix0 + n4 * 2;
