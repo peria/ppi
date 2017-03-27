@@ -12,8 +12,8 @@
 namespace ppi {
 namespace fmt {
 
-void Rft::Transform(const Direction dir, int64 n, double* a) {
-  CHECK(n % 2 == 0);
+void Rft::Transform(const Config& config, const Direction dir, double* a) {
+  const int64 n = config.n * 2;
   Complex* ca = reinterpret_cast<Complex*>(a);
 
   if (dir == Direction::Backward) {
@@ -39,7 +39,6 @@ void Rft::Transform(const Direction dir, int64 n, double* a) {
     ca[n / 4].imag = -ca[n / 4].imag;
   }
 
-  Config config(n / 2);
   Fft::Transform(config, dir, ca);
 
   if (dir == Direction::Forward) {

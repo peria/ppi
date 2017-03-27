@@ -174,16 +174,18 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
   double* da = WorkArea(0, nd);
   double* db = nullptr;
 
+  fmt::Config config(nd / 2);
+
   // Split uint64[na] -> double[4n]
   Split4(a, na, n, da);
-  fmt::Rft::Transform(fmt::Direction::Forward, nd, da);
+  fmt::Rft::Transform(config, fmt::Direction::Forward, da);
 
   if (a == b) {
     db = da;
   } else {
     db = WorkArea(1, 4 * n);
     Split4(b, nb, n, db);
-    fmt::Rft::Transform(fmt::Direction::Forward, nd, db);
+    fmt::Rft::Transform(config, fmt::Direction::Forward, db);
   }
 
   da[0] *= db[0];
@@ -195,7 +197,7 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
     da[2 * i + 1] = ar * bi + ai * br;
   }
 
-  fmt::Rft::Transform(fmt::Direction::Backward, nd, da);
+  fmt::Rft::Transform(config, fmt::Direction::Backward, da);
 
   // Gather Complex[4n] -> uint64[n]
   return Gather4(da, n, c);
