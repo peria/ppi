@@ -6,16 +6,20 @@
 #include <random>
 
 #include "base/base.h"
+#include "base/time.h"
 #include "fmt/fmt.h"
 #include "fmt/rft.h"
+
+namespace {
+double* a = nullptr;
+double* b = nullptr;
+}
 
 namespace ppi {
 namespace fmt {
 
 double GetRoundingError(int64 k, std::mt19937_64& rng) {
-  static const int64 kMask15Bits = (1 << 16) - 1;
-  double* a = new double[k];
-  double* b = new double[k];
+  static const int64 kMask15Bits = (1 << 15) - 1;
 
   for (int64 i = 0; i < k; ++i) {
     a[i] = rng() & kMask15Bits;
@@ -41,9 +45,6 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     err = std::max(err, std::abs(a[i] - d));
   }
 
-  delete[] a;
-  delete[] b;
-
   return err;
 }
 
@@ -54,13 +55,18 @@ using ppi::int64;
 
 int main(int, char*[]) {
   std::mt19937_64 rng;
+  const int64 kMaxK = 1 << 21;
+  a = new double[kMaxK];
+  b = new double[kMaxK];
   for (int64 k = 8; k <= 1 << 21; k *= 2) {
+    double start = ppi::base::Time::Now();
     double err = 0;
-    int64 n = (1 << 24) / k;
+    const int64 n = (kMaxK * 8) / k;
     for (int64 i = 0; i < n; ++i)
       err += ppi::fmt::GetRoundingError(k / 2, rng);
+    double end = ppi::base::Time::Now();
 
-    std::printf("%10ld\t%.3e\n", k, err / n);
+    std::printf("%10ld\t%.3e\t%.3f ms\n", k, err / n, (end - start) * 1e+3 / n);
   }
   return 0;
 }

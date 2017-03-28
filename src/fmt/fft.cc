@@ -46,22 +46,19 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   const int64 log4n = config.log2n / 2;
   for (int64 i = 0; i < log4n; ++i) {
     height /= 4;
-    if (i % 2 == 0) {
-      Radix4(width, height, ptr, x, y);
-    } else {
+    if (i % 2) {
       Radix4(width, height, ptr, y, x);
+    } else {
+      Radix4(width, height, ptr, x, ((i + 1) * 2 == config.log2n) ? x : y);
     }
     ptr += 3 * width;
     width *= 4;
   }
-  if (log4n % 2 == 1)
-    std::memcpy(x, y, sizeof(Complex) * n);
 
   // Radix-2
   if (config.log2n % 2 == 1) {
     height /= 2;
-    Radix2(width, height, ptr, x, y);
-    std::memcpy(x, y, sizeof(Complex) * n);
+    Radix2(width, height, ptr, (log4n % 2) ? y : x, x);
   }
 
   if (dir == Direction::Backward) {
