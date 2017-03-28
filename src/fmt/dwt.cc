@@ -11,9 +11,8 @@
 namespace ppi {
 namespace fmt {
 
-void Dwt::Dwt4(const Direction dir, const int64 n, Complex* a) {
-  // TODO: Move config to out side of this method.
-  Config config(n);
+void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
+  const int64 n = config.n;
 
   if (dir == Direction::Forward) {
     double th = M_PI / (2 * n); // q = 1/4
@@ -42,9 +41,8 @@ void Dwt::Dwt4(const Direction dir, const int64 n, Complex* a) {
   }
 }
 
-void Dwt::Dwt2(const Direction dir, const int64 n, Complex* a) {
-  // TODO: Move config to out side of this method.
-  Config config(n);
+void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
+  const int64 n = config.n;
 
   if (dir == Direction::Forward) {
     double th = - M_PI / n;
@@ -73,8 +71,8 @@ void Dwt::Dwt2(const Direction dir, const int64 n, Complex* a) {
   }
 }
 
-void Dwt::Dwt2Real(const Direction dir, const int64 n, double* a) {
-  CHECK(n % 2 == 0);
+void Dwt::Dwt2Real(const Config& config, const Direction dir, double* a) {
+  const int64 n = config.n * 2;
   Complex* ca = reinterpret_cast<Complex*>(a);
 
   if (dir == Direction::Backward) {
@@ -95,8 +93,8 @@ void Dwt::Dwt2Real(const Direction dir, const int64 n, double* a) {
       x1.imag -= ai;
     }
   }
-  
-  Dwt2(dir, n / 2, ca);
+
+  Dwt2(config, dir, ca);
 
   if (dir == Direction::Forward) {
     const double th = -2 * M_PI / n;
