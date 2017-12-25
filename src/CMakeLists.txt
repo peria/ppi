@@ -14,11 +14,9 @@ enable_testing()
 # ----------------------------------------------------------------------
 # Check packages, libraries, etc.
 
-find_package(Threads   REQUIRED)
-#find_package(PkgConfig REQUIRED)
-find_package(glog      REQUIRED)
-
-find_library(LIB_GFLAGS gflags)
+find_package(Threads REQUIRED)
+find_package(gflags REQUIRED)
+find_package(glog REQUIRED)
 
 add_subdirectory(third_party/googletest/googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
@@ -96,7 +94,6 @@ endfunction()
 
 function(ppi_target_link_libraries target)
   target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
-  target_link_libraries(${target} ${LIB_GFLAGS})
   target_link_libraries(${target} glog::glog)
   target_link_libraries(${target} ${ARGN})
 endfunction()
