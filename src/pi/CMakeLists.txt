@@ -16,8 +16,10 @@ function(ppi_pi_add_executable target)
 endfunction()
 
 function(ppi_pi_add_benchmark target)
-  ppi_add_benchmark(${target} ${ARGN})
-  target_link_libraries(${target} ppi_pi)
+  if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+    ppi_add_benchmark(${target} ${ARGN})
+    target_link_libraries(${target} ppi_pi)
+  endif()
 endfunction()
 
 ppi_pi_add_executable(pi_main pi_main.cc)
