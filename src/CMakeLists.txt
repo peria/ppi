@@ -3,7 +3,7 @@ project(ppi)
 # ----------------------------------------------------------------------
 # cmake settings
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
@@ -22,9 +22,11 @@ set(gtest_build_tests FALSE)
 add_subdirectory(third_party/googletest/googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-set(BENCHMARK_ENABLE_TESTING FALSE)
-add_subdirectory(third_party/benchmark)
-include_directories(third_party/benchmark/include third_party/benchmark/src)
+if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+  set(BENCHMARK_ENABLE_TESTING FALSE)
+  add_subdirectory(third_party/benchmark)
+  include_directories(third_party/benchmark/include third_party/benchmark/src)
+endif()
 
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
@@ -118,10 +120,12 @@ function(ppi_add_executable target)
 endfunction()
 
 function(ppi_add_benchmark target)
-  add_executable(${target} ${ARGN})
-  target_link_libraries(${target} ppi_base)
-  target_link_libraries(${target} benchmark)
-  ppi_target_link_libraries(${target})
+  if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_executable(${target} ${ARGN})
+    target_link_libraries(${target} ppi_base)
+    target_link_libraries(${target} benchmark)
+    ppi_target_link_libraries(${target})
+  endif()
 endfunction()
 
 add_subdirectory(base)
