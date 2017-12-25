@@ -9,6 +9,11 @@ matrix:
     - compiler: clang
       env: BUILD_TYPE=Debug
 
+addons:
+  apt:
+    packages:
+      - cmake
+
 cache: apt
 
 before_install:
