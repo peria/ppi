@@ -11,14 +11,27 @@ matrix:
 
 cache: apt
 
-before_script:
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.7
+      - george-edison55-precise-backports
+    packages:
+      - clang-3.7
+      - cmake
+      - cmake-data
+
+before_install:
   - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty main universe"
   - sudo apt-get update -qq
-  - wget https://cmake.org/files/v3.9/cmake-3.9.6-Linux-x86_64.sh
-  - sudo sh cmake-3.9.6-Linux-x86_64.sh
-  - sudo apt-get install -y libstdc++-4.8-dev
+
+install:
   - sudo apt-get install -y ninja-build
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
+      PATH=~/.local/bin:${PATH};
+      pip install --user --upgrade pip;
+      pip install --user cpp-coveralls;
       sudo apt-get -qq install g++-4.8;
       sudo apt-get -qq install gcov;
       sudo apt-get -qq install lcov;
@@ -27,15 +40,10 @@ before_script:
       sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 90;
     fi
   - sudo build/install_libraries.sh
+
+before_script:
   - mkdir -p out/${BUILD_TYPE}
   - cd out/${BUILD_TYPE}
-
-install:
-  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
-      PATH=~/.local/bin:${PATH};
-      pip install --user --upgrade pip;
-      pip install --user cpp-coveralls;
-    fi
 
 script:
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../src
