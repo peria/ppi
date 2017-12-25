@@ -14,9 +14,6 @@ addons:
     packages:
       - build-essential
 
-before_install:
-  - eval "${MATRIX_EVAL}"
-
 install:
   - sudo apt-get install -qq -y ninja-build
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then

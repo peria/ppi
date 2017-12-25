@@ -18,9 +18,11 @@ find_package(Threads REQUIRED)
 find_package(gflags REQUIRED)
 find_package(glog REQUIRED)
 
+set(gtest_build_tests FALSE)
 add_subdirectory(third_party/googletest/googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
+set(BENCHMARK_ENABLE_TESTING FALSE)
 add_subdirectory(third_party/benchmark)
 include_directories(third_party/benchmark/include third_party/benchmark/src)
 
