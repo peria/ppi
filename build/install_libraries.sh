@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 root_dir="$(cd $(dirname "$0")/..; pwd)"
 src_dir="${root_dir}/src"
