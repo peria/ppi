@@ -14,16 +14,20 @@ enable_testing()
 # ----------------------------------------------------------------------
 # Check packages, libraries, etc.
 
-find_package(Threads)
-find_package(PkgConfig)
+find_package(Threads   REQUIRED)
+#find_package(PkgConfig REQUIRED)
+find_package(glog      REQUIRED)
 
 find_library(LIB_GFLAGS gflags)
-pkg_search_module(GLOG REQUIRED libglog)
+
+add_subdirectory(third_party/googletest/googletest)
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+add_subdirectory(third_party/benchmark)
+include_directories(third_party/benchmark/include third_party/benchmark/src)
 
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
-
-string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
 
 function(ppi_add_cxx_flags flags)
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
@@ -41,9 +45,9 @@ else()
 endif()
 ppi_add_cxx_flags("-march=native")
 ppi_add_cxx_flags("-DSRC_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
-ppi_add_cxx_flags("-DBUILD_TYPE_${build_type}=1")
+ppi_add_cxx_flags("-DBUILD_TYPE_${CMAKE_BUILD_TYPE}=1")
 
-if(${build_type} MATCHES release)
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   ppi_add_cxx_flags("-Wno-error=deprecated-declarations")
   ppi_add_cxx_flags("-Wno-error=missing-field-initializers")
   ppi_add_cxx_flags("-Wno-error=sign-compare")
@@ -77,13 +81,6 @@ endif()
 
 include_directories(.)
 
-add_subdirectory(third_party/googletest/googletest)
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-include_directories(${GLOG_INCLUDE_DIRS})
-
-add_subdirectory(third_party/benchmark)
-include_directories(third_party/benchmark/include third_party/benchmark/src)
-
 # ----------------------------------------------------------------------
 # Define test dependencies
 function(ppi_test target)
@@ -100,7 +97,7 @@ endfunction()
 function(ppi_target_link_libraries target)
   target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
   target_link_libraries(${target} ${LIB_GFLAGS})
-  target_link_libraries(${target} ${GLOG_LIBRARIES})
+  target_link_libraries(${target} glog::glog)
   target_link_libraries(${target} ${ARGN})
 endfunction()
 
@@ -108,8 +105,8 @@ function(ppi_add_executable target)
   add_executable(${target} ${ARGN})
   target_link_libraries(${target} ppi_base)
   ppi_target_link_libraries(${target})
-  if(${build_type} MATCHES "relwithdebinfo")
-    # if you want to profile CPU usage or memory usage, set CPUPROFILE
+  if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    # If you want to profile CPU usage or memory usage, set CPUPROFILE
     # or HEAPPROFILE environment to figure an output file.
     # e.g. $ CPUPROFILE=cpu.prof /path/to/execute_file
     #      $ HEAPPROFILE=heap.prof /path/to/execute_file
@@ -135,4 +132,4 @@ add_subdirectory(pi)
 
 # ----------------------------------------------------------------------
 # Display settings
-message(STATUS "Build type:" ${build_type})
+message(STATUS "Build type:" ${CMAKE_BUILD_TYPE})
