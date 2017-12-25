@@ -16,13 +16,12 @@ addons:
     packages:
       - cmake
       - cmake-data
+      - ninja-build
 
 cache: apt
 
 before_install:
   - eval "${MATRIX_EVAL}"
-  - sudo apt-get update -qq
-  - sudo apt-get install -y ninja-build
 
 install:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
