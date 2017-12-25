@@ -26,7 +26,20 @@ install:
       sudo apt-get -qq install gcov;
       sudo apt-get -qq install lcov;
     fi
-  - sudo build/install_libraries.sh
+  - cd src/third_party/gflags;
+    mkdir -p out/Release;
+    cd out/Release;
+    cmake -DCMAKE_BUILD_TYPE=Release ../..;
+    make;
+    sudo make install;
+    cd ../../../../../
+  - cd src/third_party/glog;
+    mkdir -p out/Release;
+    cd out/Release;
+    cmake -DCMAKE_BUILD_TYPE=Release ../..;
+    make;
+    sudo make install;
+    cd ../../../../../
 
 before_script:
   - mkdir -p out/${BUILD_TYPE}
