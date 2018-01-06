@@ -20,6 +20,9 @@ find_package(glog REQUIRED)
 
 set(gtest_build_tests FALSE)
 add_subdirectory(third_party/googletest/googletest)
+if(NOT GTEST_INCLUDE_DIR)
+  set(GTEST_INCLUDE_DIR ${gtest_SOURCE_DIR}/include)
+endif()
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -84,27 +87,25 @@ endif()
 include_directories(.)
 
 # ----------------------------------------------------------------------
-# Define test dependencies
+# Define CMake functions
+
+function(ppi_target_link_libraries target)
+  target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${target} ${ARGN})
+endfunction()
+
 function(ppi_test target)
   add_executable(${target}_test ${ARGN})
   target_link_libraries(${target}_test gtest gtest_main)
-  target_link_libraries(${target}_test ppi_base)
+  target_link_libraries(${target}_test glog)
   ppi_target_link_libraries(${target}_test)
   add_test(${target}_test ${target}_test)
 endfunction()
 
-# ----------------------------------------------------------------------
-# Add subdirectories
-
-function(ppi_target_link_libraries target)
-  target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
-  target_link_libraries(${target} glog::glog)
-  target_link_libraries(${target} ${ARGN})
-endfunction()
-
 function(ppi_add_executable target)
   add_executable(${target} ${ARGN})
-  target_link_libraries(${target} ppi_base)
+  target_link_libraries(${target} gflags)
+  target_link_libraries(${target} glog)
   ppi_target_link_libraries(${target})
   if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
     # If you want to profile CPU usage or memory usage, set CPUPROFILE
@@ -124,9 +125,13 @@ function(ppi_add_benchmark target)
     add_executable(${target} ${ARGN})
     target_link_libraries(${target} ppi_base)
     target_link_libraries(${target} benchmark)
+    target_link_libraries(${target} glog)
     ppi_target_link_libraries(${target})
   endif()
 endfunction()
+
+# ----------------------------------------------------------------------
+# Add subdirectories
 
 add_subdirectory(base)
 add_subdirectory(fmt)
