@@ -15,13 +15,6 @@ function(ppi_pi_add_executable target)
   target_link_libraries(${target} ppi_pi)
 endfunction()
 
-function(ppi_pi_add_benchmark target)
-  if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-    ppi_add_benchmark(${target} ${ARGN})
-    target_link_libraries(${target} ppi_pi)
-  endif()
-endfunction()
-
 ppi_pi_add_executable(pi_main pi_main.cc)
-ppi_pi_add_benchmark(pi_benchmark pi_benchmark.cc)
+# ppi_pi_add_executable(pi_benchmark pi_benchmark.cc)
 

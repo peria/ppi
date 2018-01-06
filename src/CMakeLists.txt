@@ -19,17 +19,11 @@ find_package(gflags REQUIRED)
 find_package(glog REQUIRED)
 
 set(gtest_build_tests FALSE)
-add_subdirectory(third_party/googletest/googletest)
-if(NOT GTEST_INCLUDE_DIR)
-  set(GTEST_INCLUDE_DIR ${gtest_SOURCE_DIR}/include)
-endif()
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+set(gtest_root third_party/googletest/googletest)
+add_subdirectory(${gtest_root})
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-  set(BENCHMARK_ENABLE_TESTING FALSE)
-  add_subdirectory(third_party/benchmark)
-  include_directories(third_party/benchmark/include third_party/benchmark/src)
-endif()
+set(GTEST_INCLUDE_DIR ${gtest_SOURCE_DIR}/include)
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
@@ -117,16 +111,6 @@ function(ppi_add_executable target)
     #      $ pprof --text /path/to/execute_file heap.prof.0001.heap
     target_link_libraries(${target} libprofiler.so)
     target_link_libraries(${target} libtcmalloc.so)
-  endif()
-endfunction()
-
-function(ppi_add_benchmark target)
-  if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-    add_executable(${target} ${ARGN})
-    target_link_libraries(${target} ppi_base)
-    target_link_libraries(${target} benchmark)
-    target_link_libraries(${target} glog)
-    ppi_target_link_libraries(${target})
   endif()
 endfunction()
 
