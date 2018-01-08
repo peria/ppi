@@ -30,7 +30,6 @@ script:
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
-      cd ../../../;
       pwd;
       ls;
       coveralls --root .
