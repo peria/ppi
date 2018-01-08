@@ -3,20 +3,20 @@ project(ppi)
 # ----------------------------------------------------------------------
 # cmake settings
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
-enable_testing()
-
 # ----------------------------------------------------------------------
 # Check packages, libraries, etc.
 
 find_package(Threads REQUIRED)
-find_package(gflags REQUIRED)
-find_package(glog REQUIRED)
+find_package(PkgConfig)
+
+find_library(LIB_GFLAGS gflags)
+pkg_search_module(GLOG REQUIRED libglog)
 
 set(gtest_build_tests FALSE)
 set(gtest_root third_party/googletest/googletest)
@@ -116,6 +116,8 @@ endfunction()
 
 # ----------------------------------------------------------------------
 # Add subdirectories
+
+enable_testing()
 
 add_subdirectory(base)
 add_subdirectory(fmt)

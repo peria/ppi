@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 dist: trusty
 language: cpp
 
@@ -6,37 +6,28 @@ matrix:
   include:
     - compiler: gcc
       env: BUILD_TYPE=Coverage
+      addons:
+        apt:
+          packages:
+            - gcov
+            - lcov
     - compiler: clang
       env: BUILD_TYPE=Debug
 
 addons:
   apt:
     packages:
-      - build-essential
+      - cmake
+      - libgflags-dev
+      - libgoogle-glog-dev
+      - ninja-build
 
 install:
-  - sudo apt-get install -qq -y ninja-build
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
       PATH=~/.local/bin:${PATH};
       pip install --user --upgrade pip;
       pip install --user cpp-coveralls;
-      sudo apt-get -qq install gcov;
-      sudo apt-get -qq install lcov;
     fi
-  - cd src/third_party/gflags;
-    mkdir -p out/Release;
-    cd out/Release;
-    cmake -DCMAKE_BUILD_TYPE=Release ../..;
-    make;
-    sudo make install;
-    cd ../../../../../
-  - cd src/third_party/glog;
-    mkdir -p out/Release;
-    cd out/Release;
-    cmake -DCMAKE_BUILD_TYPE=Release ../..;
-    make;
-    sudo make install;
-    cd ../../../../../
 
 before_script:
   - mkdir -p out/${BUILD_TYPE}
@@ -48,7 +39,7 @@ script:
   - CTEST_OUTPUT_ON_FAILURE=1 ninja test
 
 after_success:
-  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
+  - if [ "${BUILD_TYPE}" == "Coverage" ]; then
       cd ../../;
       coveralls --include src --exclude src/third_party --exclude-pattern "_test\\.cc" --exclude-pattern "\\.h" --gcov-options '\-lp' --root . --build-root out/${BUILD_TYPE};
     fi
