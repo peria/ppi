@@ -30,14 +30,12 @@ script:
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
-      pwd;
-      ls;
+      ls out/${BUILD_TYPE};
       coveralls --root .
                 --build-root out/${BUILD_TYPE}
                 --include src
                 --exclude src/third_party
                 --exclude-pattern "_test\\.cc"
-                --exclude-pattern "\\.git"
                 --exclude-pattern "\\.h"
                 --gcov-options "\\-lp"
       ;
