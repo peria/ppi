@@ -6,10 +6,6 @@ matrix:
   include:
     - compiler: gcc
       env: BUILD_TYPE=Coverage
-      addons:
-        apt:
-          packages:
-            - lcov
     - compiler: clang
       env: BUILD_TYPE=Debug
 
@@ -17,6 +13,7 @@ addons:
   apt:
     packages:
       - cmake
+      - lcov
       - libgflags-dev
       - libgoogle-glog-dev
       - ninja-build
