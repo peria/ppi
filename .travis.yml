@@ -30,10 +30,13 @@ script:
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
-      cd ../../;
-      coveralls --root src
+      cd ../../../;
+      pwd;
+      ls;
+      coveralls --root .
                 --build-root out/${BUILD_TYPE}
-                --exclude third_party
+                --include src
+                --exclude src/third_party
                 --exclude-pattern "_test\\.cc"
                 --exclude-pattern "\\.git"
                 --exclude-pattern "\\.h"
