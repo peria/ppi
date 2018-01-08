@@ -31,10 +31,9 @@ script:
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
       cd ../../;
-      coveralls --root .
+      coveralls --root src
                 --build-root out/${BUILD_TYPE}
-                --include src
-                --exclude src/third_party
+                --exclude third_party
                 --exclude-pattern "_test\\.cc"
                 --exclude-pattern "\\.git"
                 --exclude-pattern "\\.h"
