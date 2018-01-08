@@ -31,12 +31,12 @@ script:
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
       cd ../../;
-      coveralls --include src \
-                --exclude src/third_party \
-                --exclude-pattern '_test\.cc$' \
-                --exclude-pattern '^\.' \
-                --exclude-pattern '\.h$' \
-                --gcov-options '\-lp' \
-                --root . \
+      coveralls --root .
+                --include src
+                --exclude src/third_party
+                --exclude-pattern "_test\\.cc"
+                --exclude-pattern "\\.git"
+                --exclude-pattern "\\.h"
+                --gcov-options "-lp"
                 --build-root out/${BUILD_TYPE};
     fi
