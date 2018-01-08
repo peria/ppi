@@ -27,16 +27,16 @@ install:
 
 before_script:
   - mkdir -p out/${BUILD_TYPE}
-  - cd out/${BUILD_TYPE}
 
 script:
+  - cd out/${BUILD_TYPE}
   - cmake -GNinja -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../src
   - ninja -j 4
   - CTEST_OUTPUT_ON_FAILURE=1 ninja test
+  - cd ../../
 
 after_success:
   - if [ "${BUILD_TYPE}" == "Coverage" ]; then
-      ls out/${BUILD_TYPE};
       coveralls --root .
                 --build-root out/${BUILD_TYPE}
                 --include src
