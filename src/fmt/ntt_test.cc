@@ -58,6 +58,8 @@ TEST_F(NttTest, ShiftLeftWords) {
 
   for (auto& data : datas) {
     uint64 output[kSize];
+    for (int64 i = 0; i < kSize; ++i)
+      output[i] = 0xdeadbeef;  // random data
     ShiftLeftWords(data.value, data.shift, N, output);
     for (int64 i = 0; i < kSize; ++i) {
       EXPECT_EQ(data.expect[i], output[i])
