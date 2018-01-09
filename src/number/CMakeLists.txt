@@ -8,6 +8,8 @@ ppi_target_link_libraries(ppi_number ppi_base ppi_fmt)
 function(ppi_number_test target)
   ppi_test(number_${target} ${ARGN})
   target_link_libraries(number_${target}_test ppi_number)
+  target_link_libraries(number_${target}_test ${LIB_GFLAGS})
+  target_link_libraries(number_${target}_test ${GLOG_LIBRARIES})
 endfunction()
 
 ppi_number_test(integer integer_test.cc)

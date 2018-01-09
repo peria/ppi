@@ -85,10 +85,8 @@ endfunction()
 
 function(ppi_test target)
   add_executable(${target}_test ${ARGN})
-  target_link_libraries(${target}_test gtest gtest_main)
-  target_link_libraries(${target}_test ${LIB_GFLAGS})
-  target_link_libraries(${target}_test ${GLOG_LIBRARIES})
   ppi_target_link_libraries(${target}_test)
+  target_link_libraries(${target}_test gtest gtest_main)
   add_test(${target}_test ${target}_test)
 endfunction()
 
