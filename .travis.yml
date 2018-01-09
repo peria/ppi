@@ -12,6 +12,7 @@ matrix:
 addons:
   apt:
     packages:
+      - build-essential
       - cmake
       - lcov
       - libgflags-dev
