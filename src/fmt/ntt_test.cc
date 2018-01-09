@@ -49,10 +49,11 @@ TEST_F(NttTest, ShiftLeftWords) {
     int64 shift;
     uint64 expect[kSize];
   } datas[] = {
-    { {1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0} },
-    { {0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1} },
-    { {0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits, 0} },
-    { {1, 0, 0, 0, 0}, 5, {1, kFullBits, kFullBits, kFullBits, 0} },
+    {{1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0}},
+    {{0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1}},
+    {{0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits, 0}},
+    {{0, 0, 0, 0, 1}, 6, {0, 0, 1, 0, 0}},
+    {{1, 0, 0, 0, 0}, 5, {1, kFullBits, kFullBits, kFullBits, 0}},
   };
 
   for (auto& data : datas) {

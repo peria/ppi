@@ -117,16 +117,13 @@ void Ntt::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
 void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b) {
   DCHECK_LT(w, 2 * n);
 
-  // TODO: want to remove this edge case handling.
+  if (w == 0) {
+    std::memcpy(b, a, sizeof(uint64) * (n + 1));
+    return;
+  }
+
+  // TODO: Remove this edge case handling.
   if (a[n] == 1) {
-#if !NDEBUG
-    for (int64 i = 0; i < n; ++i)
-      DCHECK_EQ(0, a[i]);
-#endif
-    if (w == 0) {
-      std::memcpy(b, a, sizeof(uint64) * (n + 1));
-      return;
-    }
     if (w < n) {
       b[0] = 1;
       for (int64 i = 1; i < w; ++i)
@@ -136,7 +133,7 @@ void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* 
       b[n] = 0;
       return;
     }
-    for (int64 i = 0; i < n; ++i)
+    for (int64 i = 0; i <= n; ++i)
       b[i] = 0;
     b[w - n] = 1;
     return;
