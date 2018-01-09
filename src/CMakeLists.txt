@@ -18,23 +18,20 @@ find_package(PkgConfig)
 find_library(LIB_GFLAGS gflags)
 pkg_search_module(GLOG REQUIRED libglog)
 
-
 set(gtest_build_tests FALSE)
 set(gtest_root third_party/googletest/googletest)
 add_subdirectory(${gtest_root})
 
+# ----------------------------------------------------------------------
+# Set include directories, c++ options, etc.
+
+include_directories(.)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(${gflags_INCLUDE_DIR})
 include_directories(${glog_INCLUDE_DIRS})
 
-# ----------------------------------------------------------------------
-# Set include directories, c++ options, etc.
-
 function(ppi_add_cxx_flags flags)
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-  else()
-    set(CMAKE_CXX_FLAGS "${flags} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
-  endif()
+  set(CMAKE_CXX_FLAGS "${flags} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
 endfunction()
 
 ppi_add_cxx_flags("-std=c++11")
@@ -56,31 +53,27 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 endif()
 
 # Set up coverage build type.
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  if (${CMAKE_BUILD_TYPE} STREQUAL "Coverage")
-    set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
-      "Flags used by the C++ compiler during coverage builds."
-      FORCE)
-    set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-      "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
-      "Flags used for linking binaries during coverage builds."
-      FORCE)
-    set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-      "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
-      "Flags used by the shared libraries linker during coverage builds."
-      FORCE)
-    mark_as_advanced(
-      CMAKE_CXX_FLAGS_COVERAGE
-      CMAKE_EXE_LINKER_FLAGS_COVERAGE
-      CMAKE_SHARED_LINKER_FLAGS_COVERAGE)
-    set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
-      FORCE)
-    ppi_add_cxx_flags(--coverage COVERAGE)
-  endif()
+if (${CMAKE_BUILD_TYPE} MATCHES "Coverage")
+  set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
+    "Flags used by the C++ compiler during coverage builds."
+    FORCE)
+  set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
+    "Flags used for linking binaries during coverage builds."
+    FORCE)
+  set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
+    "Flags used by the shared libraries linker during coverage builds."
+    FORCE)
+  mark_as_advanced(
+    CMAKE_CXX_FLAGS_COVERAGE
+    CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    CMAKE_SHARED_LINKER_FLAGS_COVERAGE)
+  set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
+    FORCE)
+  ppi_add_cxx_flags(--coverage COVERAGE)
 endif()
-
-include_directories(.)
 
 # ----------------------------------------------------------------------
 # Define CMake functions
