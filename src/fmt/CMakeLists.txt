@@ -13,6 +13,8 @@ endfunction()
 function(ppi_fmt_add_executable target)
   ppi_add_executable(${target} ${ARGN})
   target_link_libraries(${target} ppi_fmt)
+  target_link_libraries(${target} ${LIB_GFLAGS})
+  target_link_libraries(${target} ${GLOG_LIBRARIES})
 endfunction()
 
 ppi_fmt_test(dwt dwt_test.cc)
