@@ -282,10 +282,10 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
-    ca[4 * i    ] = ia & kMask;
-    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
-    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
+    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
+    ca[4 * i    ] = ia & kMask;
   }
   for (int64 i = 4 * na; i < 4 * n; ++i) {
     ca[i] = 0;
@@ -299,32 +299,47 @@ void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double*
     ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
   }
+
+  static constexpr double kBase = 1 << kMaskBitSize;
+  static constexpr double kHalf = kBase * 0.5;
+  for (int64 i = 0; i < 4 * n - 1; ++i) {
+    if (ca[i] >= kHalf) {
+      ca[i] -= kBase;
+      ca[i + 1] += 1;
+    }
+  }
 }
 
 double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
+  static constexpr double kBase = 1 << kMaskBitSize;
+
   double err = 0;
-  // 1. dobule -> integral double
+  double carry = 0;
+  // 1. double -> normalized integral double
   for (int64 i = 0; i < 4 * n; ++i) {
-    double d = ca[i];
-    ca[i] = std::floor(d + 0.5);
+    double d = std::floor(ca[i] + 0.5);
     err = std::max(err, std::abs(d - ca[i]));
+    d += carry;
+    carry = std::floor(d / kBase);
+    ca[i] = d - carry * kBase;
   }
 
-  // 2. Normalize & re-alignment
-  uint64 carry = 0;
+  // Normalize, second
+  for (int64 i = 0; i < 4 * n; ++i) {
+    if (ca[i] < 0) {
+      ca[i] += kBase;
+      ca[i + 1] -= 1;
+    }
+    DCHECK_LT(ca[i], kBase);
+    DCHECK_GE(ca[i], 0);
+  }
+
+  // 2. Re-alignment
   for (int64 i = 0; i < n; ++i) {
     uint64 ia0 = ca[4 * i    ];
     uint64 ia1 = ca[4 * i + 1];
     uint64 ia2 = ca[4 * i + 2];
     uint64 ia3 = ca[4 * i + 3];
-    ia0 += carry;
-    ia1 += ia0 >> kMaskBitSize;
-    ia2 += ia1 >> kMaskBitSize;
-    ia3 += ia2 >> kMaskBitSize;
-    carry = ia3 >> kMaskBitSize;
-    ia0 &= kMask;
-    ia1 &= kMask;
-    ia2 &= kMask;
     a[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
   }
 
