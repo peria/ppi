@@ -60,59 +60,50 @@ int64 LeadingZeros(uint64 x) {
   return n - (x >> 63);
 }
 
-// Core part of Div routines to compute an[4] / bn, assuming an[3]*R+an[2] < bn.
+// Core part of Div routines to compute an[3] / bn, assuming an[2] < bn.
 // Returns the quotient, and stores the "normalized" reminder in cn (if not null).
 // It requires some conditions written in DCHECK()s.
+// Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
 inline uint64 DivCore(const uint64* an,
-                      const uint64 bn, const uint64 bn0, const uint64 bn1,
+                      const uint64 bn0, const uint64 bn1,
                       uint64* cn) {
-  // Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
-
-  DCHECK_EQ(bn, bn1 * kShortBase + bn0);
-  DCHECK_EQ(1, bn >> 63);
+  DCHECK_EQ(1, bn1 >> 31);
   DCHECK_LT(bn0, kShortBase);
-  DCHECK_LT(bn1, kShortBase);
   DCHECK_LT(an[0], kShortBase);
   DCHECK_LT(an[1], kShortBase);
-  DCHECK_LT(an[2], kShortBase);
-  DCHECK_LT(an[3], kShortBase);
 
-  uint64 an32 = an[3] * kShortBase + an[2];
-  uint64 q1 = an32 / bn1;
-  uint64 rhat = an32 - q1 * bn1;
-  const uint64 an1 = an[1];
+  uint64 rem = an[2];
+  uint64 q1 = rem / bn1;
   if (q1 >= kShortBase) {
-    --q1;
-    rhat += bn1;
+    q1 = kShortBase - 1;
   }
-  if (q1 * bn0 > rhat * kShortBase + an1) {
+  rem = (rem - q1 * bn1) * kShortBase + an[1];
+  if (rem < q1 * bn0) {
     --q1;
-    rhat += bn1;
-    if (q1 * bn0 > rhat * kShortBase + an1) {
+    rem += bn1 * kShortBase;
+    if (rem < q1 * bn0) {
       --q1;
-      rhat += bn1;
+      rem += bn1 * kShortBase;
     }
   }
+  rem -= q1 * bn0;
 
-  uint64 an21 = an[2] * kShortBase + an1 - q1 * bn;
-  uint64 q0 = an21 / bn1;
-  rhat = an21 - q0 * bn1;
-  const uint64 an0 = an[0];
+  uint64 q0 = rem / bn1;
   if (q0 >= kShortBase) {
-    --q0;
-    rhat += bn1;
+    q0 = kShortBase - 1;
   }
-  if (q0 * bn0 > rhat * kShortBase + an0) {
+  rem = (rem - q0 * bn1) * kShortBase + an[0];
+  if (rem < q0 * bn0) {
     --q0;
-    rhat += bn1;
-    if (q0 * bn0 > rhat * kShortBase + an0) {
+    rem += bn1 * kShortBase;
+    if (rem < q0 * bn0) {
       --q0;
-      rhat += bn1;
+      rem += bn1 * kShortBase;
     }
   }
 
   if (cn)
-    *cn = an21 * kShortBase + an0 - q0 * bn;
+    *cn = rem - q0 * bn0;
   return q1 * kShortBase + q0;
 }
 
@@ -215,37 +206,32 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
     an1 = (a[1] << shift) + (a[0] >> (64 - shift));
     an0 = a[0] << shift;
   }
-  uint64 an[4];
-  an[0] = an0 & kHalfMask;
-  an[1] = an0 >> 32;
-  an[2] = an1 & kHalfMask;
-  an[3] = an1 >> 32;
+  uint64 an[] {an0 & kHalfMask, an0 >> 32, an1};
 
   uint64 bn = b << shift;
   uint64 bn1 = bn >> 32;
   uint64 bn0 = bn & kHalfMask;
 
-  uint64 q = DivCore(an, bn, bn0, bn1, c);
+  uint64 q = DivCore(an, bn0, bn1, c);
   if (c)
     *c >>= shift;
   return q;
 }
 
 uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* c) {
-  DCHECK_LT(a[n - 1], b);
-
   // Normalize numbers to set the divisor to have the MSB.
   const int64 shift = LeadingZeros(b);
   const uint64 bn = b << shift;
   const uint64 bn1 = bn >> 32;
   const uint64 bn0 = bn & kHalfMask;
 
-  uint64 rem = 0;
-  for (int64 i = n - 1; i >= 0; --i) {
-    uint64 an0 = a[i] << shift;
+  c[n - 1] = a[n - 1] / b;
+  uint64 rem = (a[n - 1] % b) << shift;
+  for (int64 i = n - 2; i >= 0; --i) {
     uint64 an1 = rem + (a[i] >> (64 - shift));
+    uint64 an0 = a[i] << shift;
     uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1 & kHalfMask, an1 >> 32};
-    c[i] = DivCore(an, bn, bn0, bn1, &rem);
+    c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
 }
@@ -259,16 +245,10 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
   const uint64 bn1 = bn >> 32;
   const uint64 bn0 = bn & kHalfMask;
 
-  uint64 an0 = a << shift;
-  uint64 an1 = a >> (64 - shift);
-  uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1 & kHalfMask, an1 >> 32};
-  uint64 rem = 0;
+  uint64 rem = a << shift;
   for (int64 i = n - 1; i >= 0; --i) {
-    c[i] = DivCore(an, bn, bn0, bn1, &rem);
-    an[0] = 0;
-    an[1] = 0;
-    an[2] = rem & kHalfMask;
-    an[3] = rem >> 32;
+    uint64 an[4] {0, 0, rem & kHalfMask, rem >> 32};
+    c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
 }
