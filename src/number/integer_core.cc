@@ -231,6 +231,25 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
   return q;
 }
 
+uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* c) {
+  DCHECK_LT(a[n - 1], b);
+
+  // Normalize numbers to set the divisor to have the MSB.
+  const int64 shift = LeadingZeros(b);
+  const uint64 bn = b << shift;
+  const uint64 bn1 = bn >> 32;
+  const uint64 bn0 = bn & kHalfMask;
+
+  uint64 rem = 0;
+  for (int64 i = n - 1; i >= 0; --i) {
+    uint64 an0 = a[i] << shift;
+    uint64 an1 = rem + (a[i] >> (64 - shift));
+    uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1 & kHalfMask, an1 >> 32};
+    c[i] = DivCore(an, bn, bn0, bn1, &rem);
+  }
+  return rem >> shift;
+}
+
 uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
   DCHECK_LT(a, b);
 
@@ -240,43 +259,18 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
   const uint64 bn1 = bn >> 32;
   const uint64 bn0 = bn & kHalfMask;
 
-  uint64 an = a << shift;
+  uint64 an0 = a << shift;
+  uint64 an1 = a >> (64 - shift);
+  uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1 & kHalfMask, an1 >> 32};
+  uint64 rem = 0;
   for (int64 i = n - 1; i >= 0; --i) {
-    uint64 q1 = an / bn1;
-    uint64 rhat = an - q1 * bn1;
-    if (q1 >= kShortBase) {
-      --q1;
-      rhat += bn1;
-    }
-    if (q1 * bn0 > rhat * kShortBase) {
-      --q1;
-      rhat += bn1;
-      if (q1 * bn0 > rhat * kShortBase) {
-        --q1;
-        rhat += bn1;
-      }
-    }
-
-    uint64 ans = an * kShortBase - q1 * bn;
-    uint64 q0 = ans / bn1;
-    rhat = ans - q0 * bn1;
-    if (q0 >= kShortBase) {
-      --q0;
-      rhat += bn1;
-    }
-    if (q0 * bn0 > rhat * kShortBase) {
-      --q0;
-      rhat += bn1;
-      if (q0 * bn0 > rhat * kShortBase) {
-        --q0;
-        rhat += bn1;
-      }
-    }
-
-    c[i] = q1 * kShortBase + q0;
-    an = ans * kShortBase - q0 * bn;
+    c[i] = DivCore(an, bn, bn0, bn1, &rem);
+    an[0] = 0;
+    an[1] = 0;
+    an[2] = rem & kHalfMask;
+    an[3] = rem >> 32;
   }
-  return an >> shift;
+  return rem >> shift;
 }
 
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {

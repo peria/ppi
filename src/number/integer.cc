@@ -151,38 +151,42 @@ const int64 kHalfSize = 32;
 const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 }
 
-// TODO: Accept uint64 as a second argument.
-void Integer::Mult(const Integer& a, const uint32 b, Integer* c) {
+void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
   uint64 carry = 0;
+  uint64 bl = b & kHalfBitMask;
+  uint64 bh = b >> kHalfSize;
   for (int64 i = 0; i < a.size(); ++i) {
-    uint64 a_low = a[i] & kHalfBitMask;
-    uint64 a_high = a[i] >> kHalfSize;
-    uint64 c_low = a_low * b + carry;
-    uint64 c_high = a_high * b;
-    (*c)[i] = c_low + (c_high << kHalfSize);
-    carry = c_high >> kHalfSize;
-    if ((*c)[i] < c_low)
-      ++carry;
+    uint64 al = a[i] & kHalfBitMask;
+    uint64 ah = a[i] >> kHalfSize;
+    uint64 c00 = al * bl;
+    uint64 c01 = al * bh;
+    uint64 c10 = ah * bl;
+    uint64 c11 = ah * bh;
+    c01 += c10;
+    if (c01 < c10) {
+      c11 += 1ULL << kHalfSize;
+    }
+    c11 += c10 >> kHalfSize;
+    uint64 cl = c00 + (c01 << kHalfSize);
+    if (cl < c00) {
+      ++c11;
+    }
+
+    (*c)[i] = cl + carry;
+    if ((*c)[i] < cl) {
+      ++c11;
+    }
+    carry = c11;
   }
   if (carry) {
     c->push_back(carry);
   }
 }
 
-void Integer::Div(const Integer& a, const uint32 b, Integer* c) {
-  uint64 limb = 0;
-  for (int64 i = a.size() - 1; i >= 0; --i) {
-    uint64 ia = a[i];
-    limb = (limb << kHalfSize) + (ia >> kHalfSize);
-    uint64 ic = limb / b;
-    limb %= b;
-    limb = (limb << kHalfSize) + (ia & kHalfBitMask);
-    ic = (ic << kHalfSize) + limb / b;
-    limb %= b;
-    (*c)[i] = ic;
-  }
+void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
+  IntegerCore::Div(a.data_, b, a.size(), c->data_);
   c->Normalize();
 }
 

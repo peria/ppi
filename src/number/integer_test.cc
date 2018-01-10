@@ -70,7 +70,7 @@ TEST(IntegerTest, Add) {
   EXPECT_EQ(1ULL, a[1]);
 }
 
-TEST(IntegerTest, MultWithUint32) {
+TEST(IntegerTest, MultWithUint64) {
   Integer a(1ULL << 63);
   Integer::Mult(a, 2, &a);
   ASSERT_EQ(2, a.size());

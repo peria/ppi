@@ -42,10 +42,10 @@ class Integer {
   static double Mult(const Integer& a, const Integer& b, Integer* c);
 
   // Computes c[n] = a[n] * b. Returns a carried limb.
-  static void Mult(const Integer& a, const uint32 b, Integer* c);
+  static void Mult(const Integer& a, const uint64 b, Integer* c);
 
   // c[n] = a[n] / b
-  static void Div(const Integer& a, const uint32 b, Integer* c);
+  static void Div(const Integer& a, const uint64 b, Integer* c);
 
   // Outputs hexadecimal representation of this integer to |os|.
   // TODO: Support decimal output
