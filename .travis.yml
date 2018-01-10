@@ -34,8 +34,8 @@ after_success:
                 --build-root out/${BUILD_TYPE}
                 --include src
                 --exclude src/third_party
-                --exclude-pattern "_test\\.cc"
-                --exclude-pattern "\\.h"
+                --exclude-pattern ".*_test\\.cc"
+                --exclude-pattern ".*\\.h"
                 --gcov-options "\\-lp"
       ;
     fi
