@@ -199,6 +199,9 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
 
   // Normalize numbers to set divisor to have the MSB.
   int64 shift = LeadingZeros(b);
+  uint64 bn = b << shift;
+  uint64 bn1 = bn >> 32;
+  uint64 bn0 = bn & kHalfMask;
 
   uint64 an0 = a[0];
   uint64 an1 = a[1];
@@ -206,12 +209,8 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
     an1 = (a[1] << shift) + (a[0] >> (64 - shift));
     an0 = a[0] << shift;
   }
+
   uint64 an[] {an0 & kHalfMask, an0 >> 32, an1};
-
-  uint64 bn = b << shift;
-  uint64 bn1 = bn >> 32;
-  uint64 bn0 = bn & kHalfMask;
-
   uint64 q = DivCore(an, bn0, bn1, c);
   if (c)
     *c >>= shift;
@@ -230,7 +229,7 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* 
   for (int64 i = n - 2; i >= 0; --i) {
     uint64 an1 = rem + (a[i] >> (64 - shift));
     uint64 an0 = a[i] << shift;
-    uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1 & kHalfMask, an1 >> 32};
+    uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1};
     c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
@@ -247,7 +246,7 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
 
   uint64 rem = a << shift;
   for (int64 i = n - 1; i >= 0; --i) {
-    uint64 an[4] {0, 0, rem & kHalfMask, rem >> 32};
+    uint64 an[] {0, 0, rem};
     c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
