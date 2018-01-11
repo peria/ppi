@@ -27,7 +27,7 @@ TEST(RealTest, Inverse) {
   std::ostringstream oss;
   oss << inv;
 
-  const std::string expect = "0.00000000000000016a09e667f3bcc908b";
+  const std::string expect = "1.6a09e667f3bcc908b";
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));
 }
 

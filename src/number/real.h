@@ -40,12 +40,12 @@ class Real : public Integer {
   // Computes c=a/b.
   static void Div(const Real& a, const uint32 b, Real* c);
 
-  // Compares with the content of the file.
+  // Compares with the content of the file, and returns the number of
+  // matched continuous digits.
   // If the file is not readable, returns 0.
   int64 Compare(std::string& filename);
 
   int64 exponent() const { return exponent_; }
-
   int64 precision() const { return precision_; }
   void setPrecision(int64 prec);
 

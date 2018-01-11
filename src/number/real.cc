@@ -397,11 +397,26 @@ int64 Real::TailingZero() {
 }
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {
-  os << "0." << *reinterpret_cast<const Integer*>(&val);
+  static char buffer[50];
+
   int64 diff = val.size() + val.exponent();
-  if (diff) {
-    os << " * (2^64)^(" << diff << ")";
+  if (diff <= 0) {
+    os << "0";
+  } else {
+    sprintf(buffer, "%lx", val[val.size() - 1]);
+    os << buffer;
+    for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0); --i) {
+      sprintf(buffer, "%016lx", val[i]);
+      os << buffer;
+    }
   }
+  os << ".";
+  for (int64 i = val.size() - diff - 1; i >= 0; --i) {
+    uint64 digit = (i < val.size()) ? val[i] : 0;
+    sprintf(buffer, "%016lx", digit);
+    os << buffer;
+  }
+
   return os;
 }
 
