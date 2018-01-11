@@ -93,7 +93,7 @@ double Real::InverseSqrt(uint64 a, Real* val) {
       tmp.push_back(1);
 
     Div(tmp, 2, &tmp);
-    // FIXME: in this multiplication, &tmp needs to be extended.
+    // TODO: in this multiplication, &tmp needs to be extended.
     // Currently, the size of |tmp| is not updated.
     Mult(*val, tmp, &tmp);
     tmp.Normalize();

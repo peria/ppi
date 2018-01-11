@@ -224,8 +224,8 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* 
   const uint64 bn1 = bn >> 32;
   const uint64 bn0 = bn & kHalfMask;
 
-  c[n - 1] = a[n - 1] / b;
   uint64 rem = (a[n - 1] % b) << shift;
+  c[n - 1] = a[n - 1] / b;
   for (int64 i = n - 2; i >= 0; --i) {
     uint64 an1 = rem + (a[i] >> (64 - shift));
     uint64 an0 = a[i] << shift;

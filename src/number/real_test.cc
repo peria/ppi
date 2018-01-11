@@ -6,7 +6,7 @@
 namespace ppi {
 namespace number {
 
-TEST(RealTest, DISABLED_InverseSqrt) {
+TEST(RealTest, InverseSqrt) {
   Real val;
   val.setPrecision(10);
   Real::InverseSqrt(2, &val);
