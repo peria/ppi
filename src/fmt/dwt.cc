@@ -5,7 +5,7 @@
 #include <cstring>
 
 #include "base/base.h"
-#include "fmt/fft.h"
+#include "fmt/dft.h"
 #include "fmt/fmt.h"
 
 namespace ppi {
@@ -26,7 +26,7 @@ void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
     }
   }
 
-  Fft::Transform(config, dir, a);
+  Dft::Transform(config, dir, a);
 
   if (dir == Direction::Backward) {
     double th = -M_PI / (2 * n); // q = 1/4
@@ -56,7 +56,7 @@ void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
     }
   }
 
-  Fft::Transform(config, dir, a);
+  Dft::Transform(config, dir, a);
 
   if (dir == Direction::Backward) {
     double th = M_PI / n;

@@ -7,7 +7,7 @@ namespace ppi {
 namespace fmt {
 
 // Computes DFT in complex field.
-class Fft {
+class Dft {
  public:
   // Compute DFT of |a|.
   static void Transform(const Config& config, const Direction dir, Complex* a);

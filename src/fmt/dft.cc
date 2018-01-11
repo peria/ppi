@@ -1,4 +1,4 @@
-#include "fmt/fft.h"
+#include "fmt/dft.h"
 
 #include <algorithm>
 #include <cmath>
@@ -27,7 +27,7 @@ Complex* WorkArea(int64 size) {
 
 }  // namespace
 
-void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
+void Dft::Transform(const Config& config, const Direction dir, Complex a[]) {
   const int64 n = config.n;
   CHECK_GE(kMaxSize, n);
   if (dir == Direction::Backward) {
@@ -70,7 +70,7 @@ void Fft::Transform(const Config& config, const Direction dir, Complex a[]) {
   }
 }
 
-void Fft::Radix2(const int64 width, const int64 height,
+void Dft::Radix2(const int64 width, const int64 height,
                  Complex* table, Complex x[], Complex y[]) {
   const int64 n2 = width * height;
   for (int64 k = 0; k < height; ++k) {
@@ -95,7 +95,7 @@ void Fft::Radix2(const int64 width, const int64 height,
   }
 }
 
-void Fft::Radix4(const int64 width, const int64 height,
+void Dft::Radix4(const int64 width, const int64 height,
                  Complex table[], Complex x[], Complex y[]) {
   const int64 n4 = width * height;
   for (int64 k = 0; k < height; ++k) {

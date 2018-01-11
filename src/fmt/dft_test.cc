@@ -1,4 +1,4 @@
-#include "fmt/fft.h"
+#include "fmt/dft.h"
 
 #include <gtest/gtest.h>
 
@@ -8,25 +8,25 @@
 namespace ppi {
 namespace fmt {
 
-TEST(FftTest, Fft2ElemTest) {
+TEST(DftTest, Dft2ElemTest) {
   const double kEps = 1e-10;
   Config config(2);
 
   Complex a[] = {{1, 2}, {3, 4}};
-  Fft::Transform(config, Direction::Forward, a);
+  Dft::Transform(config, Direction::Forward, a);
   EXPECT_NEAR(4, a[0].real, kEps);
   EXPECT_NEAR(6, a[0].imag, kEps);
   EXPECT_NEAR(-2, a[1].real, kEps);
   EXPECT_NEAR(-2, a[1].imag, kEps);
 
-  Fft::Transform(config, Direction::Backward, a);
+  Dft::Transform(config, Direction::Backward, a);
   EXPECT_NEAR(1, a[0].real, kEps);
   EXPECT_NEAR(2, a[0].imag, kEps);
   EXPECT_NEAR(3, a[1].real, kEps);
   EXPECT_NEAR(4, a[1].imag, kEps);
 }
 
-TEST(FftTest, FftTest) {
+TEST(DftTest, DftTest) {
   const double kEps = 1e-10;
 
   for (int64 k = 1; k <= 10; ++k) {
@@ -37,8 +37,8 @@ TEST(FftTest, FftTest) {
       a[i].real = i;
       a[i].imag = i + n;
     }
-    Fft::Transform(config, Direction::Forward, a);
-    Fft::Transform(config, Direction::Backward, a);
+    Dft::Transform(config, Direction::Forward, a);
+    Dft::Transform(config, Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k;
       ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k;

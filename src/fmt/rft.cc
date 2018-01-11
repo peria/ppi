@@ -7,7 +7,7 @@
 #include "base/base.h"
 #include "base/allocator.h"
 #include "base/util.h"
-#include "fmt/fft.h"
+#include "fmt/dft.h"
 
 namespace ppi {
 namespace fmt {
@@ -39,7 +39,7 @@ void Rft::Transform(const Config& config, const Direction dir, double* a) {
     ca[n / 4].imag = -ca[n / 4].imag;
   }
 
-  Fft::Transform(config, dir, ca);
+  Dft::Transform(config, dir, ca);
 
   if (dir == Direction::Forward) {
     double x0r = a[0];
