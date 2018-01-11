@@ -16,6 +16,7 @@ class Real : public Integer {
  public:
   Real();
   Real(double d);
+  Real(const Real& other);
 
   void fitInteger(int64 n);
   
@@ -35,10 +36,10 @@ class Real : public Integer {
   
   // Computes c=a*b 
   static double Mult(const Real& a, const Real& b, Real* c);
-  static void Mult(const Real& a, const uint32 b, Real* c);
+  static void Mult(const Real& a, const uint64 b, Real* c);
 
   // Computes c=a/b.
-  static void Div(const Real& a, const uint32 b, Real* c);
+  static void Div(const Real& a, const uint64 b, Real* c);
 
   // Compares with the content of the file, and returns the number of
   // matched continuous digits.

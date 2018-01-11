@@ -15,6 +15,7 @@ class Integer {
  public:
   Integer();
   explicit Integer(uint64 value);
+  explicit Integer(const Integer& other);
   ~Integer();
 
   uint64& operator[](int64 i) const { return data_[i]; }

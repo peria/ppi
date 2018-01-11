@@ -11,7 +11,7 @@ TEST(RealTest, InverseSqrt) {
   val.setPrecision(10);
   Real::InverseSqrt(2, &val);
   std::ostringstream oss;
-  oss << val;
+  oss << std::hex << val;
 
   const std::string expect = "0.b504f333f9de648459";
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));
@@ -25,7 +25,7 @@ TEST(RealTest, Inverse) {
   inv.setPrecision(10);
   Real::Inverse(val, &inv);
   std::ostringstream oss;
-  oss << inv;
+  oss << std::hex << inv;
 
   const std::string expect = "1.6a09e667f3bcc908b";
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));

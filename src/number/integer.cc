@@ -18,6 +18,13 @@ Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {
   (*this)[0] = value;
 }
 
+Integer::Integer(const Integer& other)
+  : data_(base::Allocator::Allocate<uint64>(other.size())) {
+  for (int64 i = 0; i < size(); ++i) {
+    (*this)[i] = other[i];
+  }
+}
+
 Integer::~Integer() {
   if (data_)
     base::Allocator::Deallocate(data_);

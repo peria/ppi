@@ -55,6 +55,11 @@ Real::Real(double d) {
   exponent_ = e;
 }
 
+Real::Real(const Real& other)
+  : Integer(other),
+    precision_(other.precision_),
+    exponent_(other.exponent_) {}
+
 void Real::fitInteger(int64 n) {
   exponent_ = 0;
   precision_ = n;
@@ -277,14 +282,14 @@ double Real::Mult(const Real& a, const Real& b, Real* c) {
   return err;
 }
 
-void Real::Mult(const Real& a, const uint32 b, Real* c) {
+void Real::Mult(const Real& a, const uint64 b, Real* c) {
   Integer::Mult(a, b, c);
   c->precision_ = c->size();
   c->exponent_ = a.exponent_;
   c->Normalize();
 }
 
-void Real::Div(const Real& a, const uint32 b, Real* c) {
+void Real::Div(const Real& a, const uint64 b, Real* c) {
   int64 prec = c->precision();
 
   *c = a;
@@ -396,7 +401,9 @@ int64 Real::TailingZero() {
   return val;
 }
 
-std::ostream& operator<<(std::ostream& os, const Real& val) {
+namespace {
+
+std::ostream& outputInHex(std::ostream& os, const Real& val) {
   static char buffer[50];
 
   int64 diff = val.size() + val.exponent();
@@ -418,6 +425,49 @@ std::ostream& operator<<(std::ostream& os, const Real& val) {
   }
 
   return os;
+}
+
+std::ostream& outputInDec(std::ostream& os, const Real& val) {
+  static char buffer[50];
+  static const uint64 kBase = 10000000000000000000ULL;
+
+  Real dec(val);
+
+  int64 exp_in_dec = (-dec.exponent() * std::log10(2) * 64 + 18) / 19;
+  int64 diff = dec.size() + dec.exponent();
+  if (diff <= 0) {
+    os << "0";
+  } else {
+    sprintf(buffer, "%lx", dec[dec.size() - 1]);
+    os << buffer;
+    dec[dec.size() - 1] = 0;
+    for (int64 i = dec.size() - 2; i >= std::max<int64>(dec.size() - diff, 0); --i) {
+      sprintf(buffer, "%016lx", dec[i]);
+      dec[i] = 0;
+      os << buffer;
+    }
+  }
+  os << ".";
+  int64 integral = std::max<int64>(dec.size() - diff, 0);
+  if (integral >= 0) {
+    for (int64 i = 0; i < exp_in_dec; ++i) {
+      Real frac(dec);
+      Real::Mult(frac, kBase, &dec);
+      sprintf(buffer, "%019lu ", frac[integral]);
+      frac[integral] = 0;
+      os << buffer;
+    }
+  }
+  return os;
+}
+
+}  // namespace
+
+std::ostream& operator<<(std::ostream& os, const Real& val) {
+  if (os.flags() & std::ios_base::hex) {
+    return outputInHex(os, val);
+  }
+  return outputInDec(os, val);
 }
 
 }  // namespace number

@@ -7,9 +7,7 @@ ppi_target_link_libraries(ppi_fmt ppi_base ppi_number)
 
 function(ppi_fmt_test target)
   ppi_test(fmt_${target} ${ARGN})
-  target_link_libraries(fmt_${target}_test ppi_fmt)
-  target_link_libraries(fmt_${target}_test ${LIB_GFLAGS})
-  target_link_libraries(fmt_${target}_test ${GLOG_LIBRARIES})
+  ppi_target_link_libraries(fmt_${target}_test ppi_fmt)
 endfunction()
 
 function(ppi_fmt_add_executable target)
