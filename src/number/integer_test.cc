@@ -46,7 +46,7 @@ TEST(IntegerTest, Mult) {
   EXPECT_EQ(0x0000100020003ULL, c[1]);
 }
 
-TEST(IntegerTest, DISABLED_LongMult) {
+TEST(IntegerTest, LongMult) {
   Integer a, b, c;
   a.push_back(0xba686c78678e686bULL);
   a.push_back(0xac7d868e97d8a076ULL);

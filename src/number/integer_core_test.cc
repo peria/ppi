@@ -107,15 +107,15 @@ TEST(IntegerCoreTest, SplitAndGather) {
 
   // Integer -> Complex[2]
   IntegerCoreForTest::Split4(b, 1, 1, c);
-  EXPECT_EQ(static_cast<double>(0xcdef - 0x10000), c[0]);
-  EXPECT_EQ(static_cast<double>(0x90ab - 0x10000 + 1), c[1]);
-  EXPECT_EQ(static_cast<double>(0x5678 + 1), c[2]);
+  EXPECT_EQ(static_cast<double>(0xcdef), c[0]);
+  EXPECT_EQ(static_cast<double>(0x90ab), c[1]);
+  EXPECT_EQ(static_cast<double>(0x5678), c[2]);
   EXPECT_EQ(static_cast<double>(0x1234), c[3]);
 
   // Nega-cyclic
   IntegerCoreForTest::Split4(b, 2, 1, c);
-  EXPECT_EQ(static_cast<double>(0xcdef - 0x4321 - 0x10000), c[0]);
-  EXPECT_EQ(static_cast<double>(0x90ab - 0x8765 + 1), c[1]);
+  EXPECT_EQ(static_cast<double>(0xcdef - 0x4321), c[0]);
+  EXPECT_EQ(static_cast<double>(0x90ab - 0x8765), c[1]);
   EXPECT_EQ(static_cast<double>(0x5678 - 0xba09), c[2]);
   EXPECT_EQ(static_cast<double>(0x1234 - 0xfedc), c[3]);
 }

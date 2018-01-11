@@ -272,48 +272,32 @@ void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double*
     ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
   }
-
-  // Normalize
-  static constexpr double kBase = 1 << kMaskBitSize;
-  static constexpr double kHalf = kBase * 0.5;
-  for (int64 i = 0; i < 4 * n - 1; ++i) {
-    if (ca[i] >= kHalf) {
-      ca[i] -= kBase;
-      ca[i + 1] += 1;
-    }
-  }
 }
 
 double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
-  static constexpr double kBase = 1 << kMaskBitSize;
-
-  // Normalize in double
+  // double -> integral double
   double err = 0;
-  double carry = 0;
   for (int64 i = 0; i < 4 * n; ++i) {
     double d = std::floor(ca[i] + 0.5);
     err = std::max(err, std::abs(d - ca[i]));
-    d += carry;
-    carry = std::floor(d / kBase);
-    ca[i] = d - carry * kBase;
+    ca[i] = d;
   }
 
-  // Normalize, second
-  for (int64 i = 0; i < 4 * n; ++i) {
-    if (ca[i] < 0) {
-      ca[i] += kBase;
-      ca[i + 1] -= 1;
-    }
-    DCHECK_LT(ca[i], kBase);
-    DCHECK_GE(ca[i], 0);
-  }
-
-  // 2. Re-alignment
+  // Normalize & re-alignment
+  uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 ia0 = ca[4 * i    ];
     uint64 ia1 = ca[4 * i + 1];
     uint64 ia2 = ca[4 * i + 2];
     uint64 ia3 = ca[4 * i + 3];
+    ia0 += carry;
+    ia1 += ia0 >> kMaskBitSize;
+    ia2 += ia1 >> kMaskBitSize;
+    ia3 += ia2 >> kMaskBitSize;
+    carry = ia3 >> kMaskBitSize;
+    ia0 &= kMask;
+    ia1 &= kMask;
+    ia2 &= kMask;
     a[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
   }
 

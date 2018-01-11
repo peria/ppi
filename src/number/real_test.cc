@@ -6,7 +6,7 @@
 namespace ppi {
 namespace number {
 
-TEST(RealTest, InverseSqrt) {
+TEST(RealTest, DISABLED_InverseSqrt) {
   Real val;
   val.setPrecision(10);
   Real::InverseSqrt(2, &val);
@@ -17,7 +17,7 @@ TEST(RealTest, InverseSqrt) {
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));
 }
 
-TEST(RealTest, Inverse) {
+TEST(RealTest, DISABLED_Inverse) {
   Real val;
   val.setPrecision(10);
   Real::InverseSqrt(2, &val);
