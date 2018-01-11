@@ -256,10 +256,10 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
 void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
-    ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
-    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
     ca[4 * i    ] = ia & kMask;
+    ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
+    ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
+    ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
   }
   for (int64 i = 4 * na; i < 4 * n; ++i) {
     ca[i] = 0;
@@ -274,6 +274,7 @@ void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double*
     ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
   }
 
+  // Normalize
   static constexpr double kBase = 1 << kMaskBitSize;
   static constexpr double kHalf = kBase * 0.5;
   for (int64 i = 0; i < 4 * n - 1; ++i) {
@@ -287,9 +288,9 @@ void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double*
 double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
   static constexpr double kBase = 1 << kMaskBitSize;
 
+  // Normalize in double
   double err = 0;
   double carry = 0;
-  // 1. double -> normalized integral double
   for (int64 i = 0; i < 4 * n; ++i) {
     double d = std::floor(ca[i] + 0.5);
     err = std::max(err, std::abs(d - ca[i]));

@@ -11,6 +11,7 @@
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
 DEFINE_string(refer, "", "file name which has another computing result");
+DEFINE_int32(base, 10, "Base to output. Accepts only 10 or 16.");
 
 using ppi::int64;
 
@@ -32,7 +33,13 @@ int main(int argc, char* argv[]) {
       ppi::pi::Arctan::Machin(&pi);
       break;
   }
-  std::cout << pi << "\n";
+
+  if (FLAGS_base == 16) {
+    std::cout << std::hex << pi << "\n";
+  } else {
+    std::cout << pi << "\n";
+  }
+
   if (!FLAGS_refer.empty()) {
     int64 size = pi.size() * 16;
     int64 same = pi.Compare(FLAGS_refer);
