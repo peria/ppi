@@ -182,14 +182,14 @@ void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
     if (c01 < c10) {
       c11 += 1ULL << kHalfSize;
     }
-    c11 += c10 >> kHalfSize;
-    uint64 cl = c00 + (c01 << kHalfSize);
-    if (cl < c00) {
+    uint64 u = c00 + (c01 << kHalfSize);
+    if (u < c00) {
       ++c11;
     }
+    c11 += c01 >> kHalfSize;
 
-    (*c)[i] = cl + carry;
-    if ((*c)[i] < cl) {
+    (*c)[i] = u + carry;
+    if ((*c)[i] < u) {
       ++c11;
     }
     carry = c11;
