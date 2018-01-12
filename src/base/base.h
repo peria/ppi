@@ -25,6 +25,11 @@ using uint32 = std::uint32_t;
 using uint16 = std::uint16_t;
 using uint8  = std::uint8_t;
 
+#if __GNUC__ && !defined(UINT128)
+#define UINT128
+using uint128 = __uint128_t;
+#endif
+
 template<typename T>
 T pointer_cast(void* p) {
   return static_cast<T>(p);

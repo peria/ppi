@@ -161,6 +161,14 @@ const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
   uint64 carry = 0;
+#if defined(UINT128)
+  uint128 b128 = b;
+  for (int64 i = 0; i < a.size(); ++i) {
+    uint128 ab = a[i] * b128 + carry;
+    (*c)[i] = ab;
+    carry = ab >> 64;
+  }
+#else
   uint64 bl = b & kHalfBitMask;
   uint64 bh = b >> kHalfSize;
   for (int64 i = 0; i < a.size(); ++i) {
@@ -186,6 +194,7 @@ void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
     }
     carry = c11;
   }
+#endif
   if (carry) {
     c->push_back(carry);
   }

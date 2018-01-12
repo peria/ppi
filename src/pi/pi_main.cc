@@ -33,12 +33,17 @@ int main(int argc, char* argv[]) {
       ppi::pi::Arctan::Machin(&pi);
       break;
   }
+  double compute_end = ppi::base::Time::Now();
+  LOG(INFO) << "Computing Time: " << (compute_end - start) << " sec.";
 
+  double output_start = ppi::base::Time::Now();
   if (FLAGS_base == 16) {
     std::cout << std::hex << pi << "\n";
   } else {
     std::cout << pi << "\n";
   }
+  double output_end = ppi::base::Time::Now();
+  LOG(INFO) << "Output(Base conversion): " << (output_end - output_start) << " sec.";
 
   if (!FLAGS_refer.empty()) {
     int64 size = pi.size() * 16;

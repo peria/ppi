@@ -429,7 +429,7 @@ std::ostream& outputInHex(std::ostream& os, const Real& val) {
 
 std::ostream& outputInDec(std::ostream& os, const Real& val) {
   static char buffer[50];
-  static const uint64 kBase = 10000000000000000000ULL;
+  static const uint64 kBase = 1e+19;
 
   Real dec(val);
 
@@ -447,15 +447,14 @@ std::ostream& outputInDec(std::ostream& os, const Real& val) {
       os << buffer;
     }
   }
-  os << ".";
-  int64 integral = std::max<int64>(dec.size() - diff, 0);
-  if (integral >= 0) {
+  if (dec.exponent() < 0) {
+    os << ".";
     for (int64 i = 0; i < exp_in_dec; ++i) {
-      Real frac(dec);
-      Real::Mult(frac, kBase, &dec);
-      sprintf(buffer, "%019lu ", frac[integral]);
-      frac[integral] = 0;
-      os << buffer;
+      Real::Mult(dec, kBase, &dec);
+      int64 integral = -dec.exponent();
+      sprintf(buffer, "%019lu", dec[integral]);
+      dec[integral] = 0;
+    os << buffer;
     }
   }
   return os;
