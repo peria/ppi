@@ -17,7 +17,7 @@ TEST(RealTest, InverseSqrt) {
   EXPECT_EQ(expect, oss.str().substr(0, expect.size()));
 }
 
-TEST(RealTest, DISABLED_Inverse) {
+TEST(RealTest, Inverse) {
   Real val;
   val.setPrecision(10);
   Real::InverseSqrt(2, &val);
