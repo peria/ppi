@@ -19,7 +19,7 @@ Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {
 }
 
 Integer::Integer(const Integer& other)
-  : data_(base::Allocator::Allocate<uint64>(other.size())) {
+    : data_(base::Allocator::Allocate<uint64>(other.size())) {
   for (int64 i = 0; i < size(); ++i) {
     (*this)[i] = other[i];
   }
@@ -119,7 +119,7 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   uint64 carry = IntegerCore::Subtract(a.data_, b.data_, nb, c->data_);
   carry = IntegerCore::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
   CHECK_EQ(0, carry);
-  
+
   c->Normalize();
 }
 
@@ -127,15 +127,14 @@ namespace {
 
 int64 MinPow2(int64 n) {
   static const int64 kCandidates[] = {
-      1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7,
-      1 << 8, 1 << 9, 1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14,
-      1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 21,
-      1 << 22, 1 << 23, 1 << 24, 1 << 25, 1 << 26, 1 << 27, 1 << 28,
-      1 << 29, 1 << 30,};
-  return *std::lower_bound(kCandidates,
-                           kCandidates + ARRAY_SIZE(kCandidates), n);
+      1 << 0,  1 << 1,  1 << 2,  1 << 3,  1 << 4,  1 << 5,  1 << 6,  1 << 7,
+      1 << 8,  1 << 9,  1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15,
+      1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 21, 1 << 22, 1 << 23,
+      1 << 24, 1 << 25, 1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30,
+  };
+  return *std::lower_bound(kCandidates, kCandidates + ARRAY_SIZE(kCandidates),
+                           n);
 }
-
 }
 
 // static

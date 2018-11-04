@@ -13,10 +13,10 @@ TEST(DwtTest, Dwt4Convolution) {
 
   Dwt::Dwt4(config, Direction::Forward, reinterpret_cast<Complex*>(a));
   for (int i = 0; i < n; ++i) {
-    double ar = a[2*i  ];
-    double ai = a[2*i+1];
-    a[2*i  ] = ar * ar - ai * ai;
-    a[2*i+1] = 2 * ar * ai;
+    double ar = a[2 * i];
+    double ai = a[2 * i + 1];
+    a[2 * i] = ar * ar - ai * ai;
+    a[2 * i + 1] = 2 * ar * ai;
   }
   Dwt::Dwt4(config, Direction::Backward, reinterpret_cast<Complex*>(a));
 
@@ -34,10 +34,10 @@ TEST(DwtTest, Dwt2) {
 
   Dwt::Dwt2(config, Direction::Forward, reinterpret_cast<Complex*>(a));
   for (int i = 0; i < n; ++i) {
-    double ar = a[2*i  ];
-    double ai = a[2*i+1];
-    a[2*i  ] = ar * ar - ai * ai;
-    a[2*i+1] = 2 * ar * ai;
+    double ar = a[2 * i];
+    double ai = a[2 * i + 1];
+    a[2 * i] = ar * ar - ai * ai;
+    a[2 * i + 1] = 2 * ar * ai;
   }
   Dwt::Dwt2(config, Direction::Backward, reinterpret_cast<Complex*>(a));
 
@@ -55,10 +55,10 @@ TEST(DwtTest, Dwt2ComplexNegaCyclic) {
 
   Dwt::Dwt2(config, Direction::Forward, reinterpret_cast<Complex*>(a));
   for (int i = 0; i < n; ++i) {
-    double ar = a[2*i  ];
-    double ai = a[2*i+1];
-    a[2*i  ] = ar * ar - ai * ai;
-    a[2*i+1] = 2 * ar * ai;
+    double ar = a[2 * i];
+    double ai = a[2 * i + 1];
+    a[2 * i] = ar * ar - ai * ai;
+    a[2 * i + 1] = 2 * ar * ai;
   }
   Dwt::Dwt2(config, Direction::Backward, reinterpret_cast<Complex*>(a));
 
@@ -76,10 +76,10 @@ TEST(DwtTest, Dwt2RealConvolution) {
 
   Dwt::Dwt2Real(config, Direction::Forward, a);
   for (int i = 0; i < n / 2; ++i) {
-    double ar = a[2*i  ];
-    double ai = a[2*i+1];
-    a[2*i  ] = ar * ar - ai * ai;
-    a[2*i+1] = 2 * ar * ai;
+    double ar = a[2 * i];
+    double ai = a[2 * i + 1];
+    a[2 * i] = ar * ar - ai * ai;
+    a[2 * i + 1] = 2 * ar * ai;
   }
   Dwt::Dwt2Real(config, Direction::Backward, a);
 
@@ -97,10 +97,10 @@ TEST(DwtTest, Dwt2RealNegaCyclic) {
 
   Dwt::Dwt2Real(config, Direction::Forward, a);
   for (int i = 0; i < n / 2; ++i) {
-    double ar = a[2*i  ];
-    double ai = a[2*i+1];
-    a[2*i  ] = ar * ar - ai * ai;
-    a[2*i+1] = 2 * ar * ai;
+    double ar = a[2 * i];
+    double ai = a[2 * i + 1];
+    a[2 * i] = ar * ar - ai * ai;
+    a[2 * i + 1] = 2 * ar * ai;
   }
   Dwt::Dwt2Real(config, Direction::Backward, a);
 

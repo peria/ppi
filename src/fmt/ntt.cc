@@ -114,7 +114,10 @@ void Ntt::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
   }
 }
 
-void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b) {
+void Ntt::ShiftLeftWords(const uint64* a,
+                         const int64 w,
+                         const int64 n,
+                         uint64* b) {
   DCHECK_LT(w, 2 * n);
 
   if (w == 0) {
@@ -138,7 +141,7 @@ void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* 
     b[w - n] = 1;
     return;
   }
-  
+
   b[n] = 0;
   if (w < n) {
     for (int64 i = 0, j = w; j < n; ++i, ++j)
@@ -181,7 +184,10 @@ void Ntt::ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* 
   }
 }
 
-void Ntt::ShiftRightBits(const uint64* a, const int64 k, const int64 n, uint64* b) {
+void Ntt::ShiftRightBits(const uint64* a,
+                         const int64 k,
+                         const int64 n,
+                         uint64* b) {
   DCHECK_LT(0, k);
   DCHECK_LT(k, 64);
 

@@ -61,11 +61,14 @@ int64 LeadingZeros(uint64 x) {
 }
 
 // Core part of Div routines to compute an[3] / bn, assuming an[2] < bn.
-// Returns the quotient, and stores the "normalized" reminder in cn (if not null).
+// Returns the quotient, and stores the "normalized" reminder in cn (if not
+// null).
 // It requires some conditions written in DCHECK()s.
-// Algorithm is described in pp. 159-163 in "Hackers Delight" translated into Japanese.
+// Algorithm is described in pp. 159-163 in "Hackers Delight" translated into
+// Japanese.
 inline uint64 DivCore(const uint64* an,
-                      const uint64 bn0, const uint64 bn1,
+                      const uint64 bn0,
+                      const uint64 bn1,
                       uint64* cn) {
   DCHECK_EQ(1, bn1 >> 31);
   DCHECK_LT(bn0, kShortBase);
@@ -109,7 +112,10 @@ inline uint64 DivCore(const uint64* an,
 
 }  // namespace
 
-uint64 IntegerCore::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+uint64 IntegerCore::Add(const uint64* a,
+                        const uint64* b,
+                        const int64 n,
+                        uint64* c) {
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 s = b[i] + carry;
@@ -133,7 +139,10 @@ uint64 IntegerCore::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
   return b;
 }
 
-uint64 IntegerCore::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
+uint64 IntegerCore::Subtract(const uint64* a,
+                             const uint64* b,
+                             const int64 n,
+                             uint64* c) {
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 s = a[i] - carry;
@@ -144,7 +153,10 @@ uint64 IntegerCore::Subtract(const uint64* a, const uint64* b, const int64 n, ui
   return carry;
 }
 
-uint64 IntegerCore::Subtract(const uint64* a, uint64 b, const int64 n, uint64* c) {
+uint64 IntegerCore::Subtract(const uint64* a,
+                             uint64 b,
+                             const int64 n,
+                             uint64* c) {
   int64 i;
   for (i = 0; i < n && b; ++i) {
     uint64 s = a[i] - b;
@@ -157,9 +169,12 @@ uint64 IntegerCore::Subtract(const uint64* a, uint64 b, const int64 n, uint64* c
   return b;
 }
 
-double IntegerCore::Mult(const uint64* a, const int64 na,
-                         const uint64* b, const int64 nb,
-                         const int64 nc, uint64* c) {
+double IntegerCore::Mult(const uint64* a,
+                         const int64 na,
+                         const uint64* b,
+                         const int64 nb,
+                         const int64 nc,
+                         uint64* c) {
   const int64 n = nc;
   const int64 nd = n * 4;
   double* da = WorkArea(0, nd);
@@ -184,7 +199,7 @@ double IntegerCore::Mult(const uint64* a, const int64 na,
   for (int64 i = 1; i < 2 * n; ++i) {
     double ar = da[2 * i], ai = da[2 * i + 1];
     double br = db[2 * i], bi = db[2 * i + 1];
-    da[2 * i    ] = ar * br - ai * bi;
+    da[2 * i] = ar * br - ai * bi;
     da[2 * i + 1] = ar * bi + ai * br;
   }
 
@@ -210,14 +225,17 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
     an0 = a[0] << shift;
   }
 
-  uint64 an[] {an0 & kHalfMask, an0 >> 32, an1};
+  uint64 an[]{an0 & kHalfMask, an0 >> 32, an1};
   uint64 q = DivCore(an, bn0, bn1, c);
   if (c)
     *c >>= shift;
   return q;
 }
 
-uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* c) {
+uint64 IntegerCore::Div(const uint64* a,
+                        const uint64 b,
+                        const int64 n,
+                        uint64* c) {
   // Normalize numbers to set the divisor to have the MSB.
   const int64 shift = LeadingZeros(b);
   const uint64 bn = b << shift;
@@ -229,13 +247,16 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, const int64 n, uint64* 
   for (int64 i = n - 2; i >= 0; --i) {
     uint64 an1 = rem + (a[i] >> (64 - shift));
     uint64 an0 = a[i] << shift;
-    uint64 an[4] {an0 & kHalfMask, an0 >> 32, an1};
+    uint64 an[4]{an0 & kHalfMask, an0 >> 32, an1};
     c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
 }
 
-uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
+uint64 IntegerCore::Div(const uint64 a,
+                        const uint64 b,
+                        const int64 n,
+                        uint64* c) {
   DCHECK_LT(a, b);
 
   // Normalize numbers to set divisor to have the MSB.
@@ -246,16 +267,19 @@ uint64 IntegerCore::Div(const uint64 a, const uint64 b, const int64 n, uint64* c
 
   uint64 rem = a << shift;
   for (int64 i = n - 1; i >= 0; --i) {
-    uint64 an[] {0, 0, rem};
+    uint64 an[]{0, 0, rem};
     c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
 }
 
-void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double* ca) {
+void IntegerCore::Split4(const uint64* a,
+                         const int64 na,
+                         const int64 n,
+                         double* ca) {
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
-    ca[4 * i    ] = ia & kMask;
+    ca[4 * i] = ia & kMask;
     ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
     ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
@@ -267,7 +291,7 @@ void IntegerCore::Split4(const uint64* a, const int64 na, const int64 n, double*
   // Nega-cyclic part
   for (int64 i = n, j = 0; i < na; ++i, ++j) {
     uint64 ia = a[i];
-    ca[4 * j    ] -= ia & kMask;
+    ca[4 * j] -= ia & kMask;
     ca[4 * j + 1] -= (ia >> kMaskBitSize) & kMask;
     ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
@@ -286,7 +310,7 @@ double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
   // Normalize & re-alignment
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
-    uint64 ia0 = ca[4 * i    ];
+    uint64 ia0 = ca[4 * i];
     uint64 ia1 = ca[4 * i + 1];
     uint64 ia2 = ca[4 * i + 2];
     uint64 ia3 = ca[4 * i + 3];
@@ -298,7 +322,9 @@ double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
     ia0 &= kMask;
     ia1 &= kMask;
     ia2 &= kMask;
-    a[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1) << kMaskBitSize) + ia0;
+    a[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1)
+            << kMaskBitSize) +
+           ia0;
   }
 
   return err;

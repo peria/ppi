@@ -34,7 +34,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
   for (int64 i = 1; i < k / 2; ++i) {
     double ar = a[2 * i], ai = a[2 * i + 1];
     double br = b[2 * i], bi = b[2 * i + 1];
-    a[2 * i    ] = ar * br - ai * bi;
+    a[2 * i] = ar * br - ai * bi;
     a[2 * i + 1] = ar * bi + ai * br;
   }
   Rft::Transform(config, Direction::Backward, a);
@@ -53,7 +53,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
 
 using ppi::int64;
 
-int main(int, char*[]) {
+int main(int, char* []) {
   std::mt19937_64 rng;
   const int64 kMaxK = 1 << 21;
   a = new double[kMaxK];

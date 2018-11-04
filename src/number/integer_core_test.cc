@@ -63,18 +63,20 @@ TEST(IntegerCoreTest, Div2By1) {
     uint64 expect_quot;
     uint64 expect_rem;
   } datas[] = {
-    {{0, 1ULL << 63}, (1ULL << 63) + 1, 0xfffffffffffffffe, 2},
-    {{0, 1ULL << 62}, (1ULL << 63) - 1, (1ULL << 63) + 1, 1},
-    {{0, (1ULL << 63) + (1ULL << 32) - 1}, (1ULL << 63) + (1ULL << 32),
-     0xfffffffffffffffe, 1ULL << 33},
+      {{0, 1ULL << 63}, (1ULL << 63) + 1, 0xfffffffffffffffe, 2},
+      {{0, 1ULL << 62}, (1ULL << 63) - 1, (1ULL << 63) + 1, 1},
+      {{0, (1ULL << 63) + (1ULL << 32) - 1},
+       (1ULL << 63) + (1ULL << 32),
+       0xfffffffffffffffe,
+       1ULL << 33},
   };
   for (auto data : datas) {
     uint64 rem;
     uint64 quot = IntegerCore::Div(data.a, data.b, &rem);
     EXPECT_EQ(data.expect_rem, rem)
-      << " for 0x" << std::hex << data.a[1] << data.a[0] << " % 0x" << data.b;
+        << " for 0x" << std::hex << data.a[1] << data.a[0] << " % 0x" << data.b;
     EXPECT_EQ(data.expect_quot, quot)
-      << " for 0x" << std::hex << data.a[1] << data.a[0] << " / 0x" << data.b;
+        << " for 0x" << std::hex << data.a[1] << data.a[0] << " / 0x" << data.b;
   }
 
   constexpr int64 kTestTimes = 100000;

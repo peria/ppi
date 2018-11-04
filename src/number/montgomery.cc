@@ -77,14 +77,16 @@ uint64 Montgomery::Power(uint64 a, uint64 e, uint64 m) {
   return Mult(r, 1, m, inverse);
 }
 
-Montgomery Montgomery::Mult(const Montgomery& lhs, const Montgomery& rhs,
-                            uint64 mod, uint64 inverse) {
+Montgomery Montgomery::Mult(const Montgomery& lhs,
+                            const Montgomery& rhs,
+                            uint64 mod,
+                            uint64 inverse) {
   uint64 thi;
-  uint64 tlo = Mult64_128(lhs, rhs, &thi); // t = abar*bbar.
+  uint64 tlo = Mult64_128(lhs, rhs, &thi);  // t = abar*bbar.
 
   uint64 tm = tlo * inverse;
   uint64 tmmhi;
-  uint64 tmmlo = Mult64_128(tm, mod, &tmmhi); // tmm = tm*m.
+  uint64 tmmlo = Mult64_128(tm, mod, &tmmhi);  // tmm = tm*m.
 
   // u = t + tmm
   uint64 ulo = tlo + tmmlo;

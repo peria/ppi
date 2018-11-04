@@ -15,7 +15,7 @@ void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
   const int64 n = config.n;
 
   if (dir == Direction::Forward) {
-    double th = M_PI / (2 * n); // q = 1/4
+    double th = M_PI / (2 * n);  // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
       double ai = a[i].imag;
@@ -29,7 +29,7 @@ void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
   Dft::Transform(config, dir, a);
 
   if (dir == Direction::Backward) {
-    double th = -M_PI / (2 * n); // q = 1/4
+    double th = -M_PI / (2 * n);  // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
       double ai = a[i].imag;
@@ -45,7 +45,7 @@ void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
   const int64 n = config.n;
 
   if (dir == Direction::Forward) {
-    double th = - M_PI / n;
+    double th = -M_PI / n;
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
       double ai = a[i].imag;

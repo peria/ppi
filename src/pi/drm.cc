@@ -15,7 +15,8 @@ double Drm::Chudnovsky(Real* pi) {
   double error = 0;
 
   int64 half = (n + 1) / 2;
-  LOG(INFO) << "Use " << n << " terms to get " << (length * 16) << " hex digits.";
+  LOG(INFO) << "Use " << n << " terms to get " << (length * 16)
+            << " hex digits.";
   Real a, b, c;
 
   double start_bs = base::Time::Now();
@@ -50,8 +51,11 @@ double Drm::Chudnovsky(Real* pi) {
   return error;
 }
 
-double Drm::Internal(int64 n0, int64 n1,
-                     Integer* a0, Integer* b0, Integer* c0) {
+double Drm::Internal(int64 n0,
+                     int64 n1,
+                     Integer* a0,
+                     Integer* b0,
+                     Integer* c0) {
   Integer a1, b1, c1;
   if (n0 + 1 == n1) {
     int64 n = 2 * n0;

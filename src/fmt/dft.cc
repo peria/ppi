@@ -4,8 +4,8 @@
 #include <cmath>
 #include <cstring>
 
-#include "base/base.h"
 #include "base/allocator.h"
+#include "base/base.h"
 #include "fmt/fmt.h"
 
 namespace ppi {
@@ -70,8 +70,11 @@ void Dft::Transform(const Config& config, const Direction dir, Complex a[]) {
   }
 }
 
-void Dft::Radix2(const int64 width, const int64 height,
-                 Complex* table, Complex x[], Complex y[]) {
+void Dft::Radix2(const int64 width,
+                 const int64 height,
+                 Complex* table,
+                 Complex x[],
+                 Complex y[]) {
   const int64 n2 = width * height;
   for (int64 k = 0; k < height; ++k) {
     for (int64 j = 0; j < width; ++j) {
@@ -95,17 +98,20 @@ void Dft::Radix2(const int64 width, const int64 height,
   }
 }
 
-void Dft::Radix4(const int64 width, const int64 height,
-                 Complex table[], Complex x[], Complex y[]) {
+void Dft::Radix4(const int64 width,
+                 const int64 height,
+                 Complex table[],
+                 Complex x[],
+                 Complex y[]) {
   const int64 n4 = width * height;
   for (int64 k = 0; k < height; ++k) {
     for (int64 j = 0; j < width; ++j) {
-      double w1r = table[3*j].real;
-      double w1i = table[3*j].imag;
-      double w2r = table[3*j+1].real;
-      double w2i = table[3*j+1].imag;
-      double w3r = table[3*j+2].real;
-      double w3i = table[3*j+2].imag;
+      double w1r = table[3 * j].real;
+      double w1i = table[3 * j].imag;
+      double w2r = table[3 * j + 1].real;
+      double w2i = table[3 * j + 1].imag;
+      double w3r = table[3 * j + 2].real;
+      double w3i = table[3 * j + 2].imag;
 
       int64 ix0 = k * width + j;
       int64 ix1 = ix0 + n4;

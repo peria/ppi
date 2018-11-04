@@ -16,8 +16,11 @@ class Drm {
   static double Chudnovsky(Real* pi);
 
  private:
-  static double Internal(int64 n0, int64 n1,
-                         Integer* a0, Integer* b0, Integer* c0);
+  static double Internal(int64 n0,
+                         int64 n1,
+                         Integer* a0,
+                         Integer* b0,
+                         Integer* c0);
   static void SetValues(int64 n, Integer* a, Integer* b, Integer* c);
 };
 

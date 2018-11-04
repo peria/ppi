@@ -13,11 +13,17 @@ class TestableNtt : public Ntt {
 
 class NttTest : public testing::Test {
  public:
-  static void ShiftLeftWords(const uint64* a, const int64 w, const int64 n, uint64* b) {
+  static void ShiftLeftWords(const uint64* a,
+                             const int64 w,
+                             const int64 n,
+                             uint64* b) {
     TestableNtt::ShiftLeftWords(a, w, n, b);
   }
 
-  static void ShiftRightBits(const uint64* a, const int64 k, const int64 n, uint64* b) {
+  static void ShiftRightBits(const uint64* a,
+                             const int64 k,
+                             const int64 n,
+                             uint64* b) {
     TestableNtt::ShiftRightBits(a, k, n, b);
   }
 };
@@ -49,11 +55,11 @@ TEST_F(NttTest, ShiftLeftWords) {
     int64 shift;
     uint64 expect[kSize];
   } datas[] = {
-    {{1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0}},
-    {{0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1}},
-    {{0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits, 0}},
-    {{0, 0, 0, 0, 1}, 6, {0, 0, 1, 0, 0}},
-    {{1, 0, 0, 0, 0}, 5, {1, kFullBits, kFullBits, kFullBits, 0}},
+      {{1, 0, 0, 0, 0}, 2, {0, 0, 1, 0, 0}},
+      {{0, 1, 0, 0, 0}, 3, {0, 0, 0, 0, 1}},
+      {{0, 0, 0, 0, 1}, 1, {1, kFullBits, kFullBits, kFullBits, 0}},
+      {{0, 0, 0, 0, 1}, 6, {0, 0, 1, 0, 0}},
+      {{1, 0, 0, 0, 0}, 5, {1, kFullBits, kFullBits, kFullBits, 0}},
   };
 
   for (auto& data : datas) {
@@ -63,8 +69,8 @@ TEST_F(NttTest, ShiftLeftWords) {
     ShiftLeftWords(data.value, data.shift, N, output);
     for (int64 i = 0; i < kSize; ++i) {
       EXPECT_EQ(data.expect[i], output[i])
-          << "[" << i << "] w = " << data.shift << " : "
-          << std::hex << data.expect[i] << " - " << output[i];
+          << "[" << i << "] w = " << data.shift << " : " << std::hex
+          << data.expect[i] << " - " << output[i];
     }
   }
 }
@@ -78,11 +84,11 @@ TEST_F(NttTest, ShiftRightBits) {
     int64 shift;
     uint64 expect[kSize];
   } datas[] = {
-    { {1 << 4, 0, 0}, 2, {1 << 2, 0, 0} },
-    { {1, 0, 0}, 2, {1, 0xc000000000000000ULL, 0} },
-    { {1, 0, 0}, 3, {1, 0xe000000000000000ULL, 0} },
-    { {0xffffffffffffffff, 0, 0}, 2, {1ULL << 62, 1ULL << 62, 0} },
-    { {0x7fffffffffffffff, 0, 0}, 2, {1ULL << 61, 1ULL << 62, 0} },
+      {{1 << 4, 0, 0}, 2, {1 << 2, 0, 0}},
+      {{1, 0, 0}, 2, {1, 0xc000000000000000ULL, 0}},
+      {{1, 0, 0}, 3, {1, 0xe000000000000000ULL, 0}},
+      {{0xffffffffffffffff, 0, 0}, 2, {1ULL << 62, 1ULL << 62, 0}},
+      {{0x7fffffffffffffff, 0, 0}, 2, {1ULL << 61, 1ULL << 62, 0}},
   };
 
   for (auto& data : datas) {

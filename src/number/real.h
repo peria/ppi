@@ -19,7 +19,7 @@ class Real : public Integer {
   Real(const Real& other);
 
   void fitInteger(int64 n);
-  
+
   // Computes 1/\sqrt{a}.  Returns the maximum rounding error.
   static double InverseSqrt(uint64 a, Real* val);
 
@@ -33,8 +33,8 @@ class Real : public Integer {
 
   // Comptues c=a-b
   static void Sub(const Real& a, const Real& b, Real* c);
-  
-  // Computes c=a*b 
+
+  // Computes c=a*b
   static double Mult(const Real& a, const Real& b, Real* c);
   static void Mult(const Real& a, const uint64 b, Real* c);
 
@@ -60,7 +60,7 @@ class Real : public Integer {
 
   // Returns the number zeros in tail.
   int64 TailingZero();
-  
+
   int64 precision_;
   int64 exponent_;
 };

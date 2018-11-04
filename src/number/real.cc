@@ -30,7 +30,7 @@ Real::Real(double d) {
     exponent_ = 0;
     return;
   }
-  
+
   int64 e = 0;
   while (d >= kPow2_64) {
     ++e;
@@ -56,9 +56,9 @@ Real::Real(double d) {
 }
 
 Real::Real(const Real& other)
-  : Integer(other),
-    precision_(other.precision_),
-    exponent_(other.exponent_) {}
+    : Integer(other),
+      precision_(other.precision_),
+      exponent_(other.exponent_) {}
 
 void Real::fitInteger(int64 n) {
   exponent_ = 0;
@@ -120,7 +120,7 @@ double Real::Inverse(const Real& a, Real* val) {
     val->exponent_ = -a.exponent();
     return 0;
   }
-  
+
   // Initialize
   double da = a.back();
   if (a.size() > 1) {
@@ -132,7 +132,7 @@ double Real::Inverse(const Real& a, Real* val) {
   val->exponent_ = -(a.exponent() + a.size()) - val->size() + 1;
 
   double max_error = 0;
-  for (int64 k = 2; k < length * 2; k*= 2) {
+  for (int64 k = 2; k < length * 2; k *= 2) {
     tmp.setPrecision(k);
     double err = Mult(a, *val, &tmp);
     max_error = std::max(max_error, err);
@@ -156,7 +156,7 @@ double Real::Inverse(const Real& a, Real* val) {
 
   val->setPrecision(length);
   val->Normalize();
-  
+
   return max_error;
 }
 
@@ -169,7 +169,7 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
 
   Real sum;
   sum.resize(c_lead - c_exp);
-  for (int64 i  =0; i < c_lead - c_exp; ++i)
+  for (int64 i = 0; i < c_lead - c_exp; ++i)
     sum[i] = 0;
   sum.exponent_ = c_exp;
 
@@ -189,8 +189,8 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
   if (b_lead < a.exponent()) {
     ic = ica;
   }
-  
-  // Now our situation is either of 
+
+  // Now our situation is either of
   //   aaaaaa          aaa
   // +    bbb  or + bbbbbb
   uint64 carry = 0;
@@ -348,7 +348,7 @@ Real& Real::operator=(double d) {
     exponent_ = 0;
     return *this;
   }
-  
+
   int64 e = 0;
   while (d >= kPow2_64) {
     ++e;
@@ -412,7 +412,8 @@ std::ostream& outputInHex(std::ostream& os, const Real& val) {
   } else {
     sprintf(buffer, "%lx", val[val.size() - 1]);
     os << buffer;
-    for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0); --i) {
+    for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0);
+         --i) {
       sprintf(buffer, "%016lx", val[i]);
       os << buffer;
     }
@@ -441,7 +442,8 @@ std::ostream& outputInDec(std::ostream& os, const Real& val) {
     sprintf(buffer, "%lx", dec[dec.size() - 1]);
     os << buffer;
     dec[dec.size() - 1] = 0;
-    for (int64 i = dec.size() - 2; i >= std::max<int64>(dec.size() - diff, 0); --i) {
+    for (int64 i = dec.size() - 2; i >= std::max<int64>(dec.size() - diff, 0);
+         --i) {
       sprintf(buffer, "%016lx", dec[i]);
       dec[i] = 0;
       os << buffer;
@@ -454,7 +456,7 @@ std::ostream& outputInDec(std::ostream& os, const Real& val) {
       int64 integral = -dec.exponent();
       sprintf(buffer, "%019lu", dec[integral]);
       dec[integral] = 0;
-    os << buffer;
+      os << buffer;
     }
   }
   return os;

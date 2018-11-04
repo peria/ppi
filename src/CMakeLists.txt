@@ -15,26 +15,29 @@ endif()
 find_package(Threads REQUIRED)
 find_package(PkgConfig)
 
-find_library(LIB_GFLAGS gflags)
-pkg_search_module(GLOG REQUIRED libglog)
+set(CMAKE_SKIP_INSTALL_RULES ON)
 
-set(gtest_build_tests FALSE)
-set(gtest_root third_party/googletest/googletest)
-add_subdirectory(${gtest_root})
+set(GFLAGS_BUILD_gflags_LIB ON)
+add_subdirectory(third_party/gflags)
+set(WITH_GFLAGS OFF)
+set(gflags_FOUND ON)
+set(BUILD_TESTING OFF)
+add_subdirectory(third_party/glog)
+
+set(gtest_build_tests OFF)
+add_subdirectory(third_party/googletest/googletest)
 
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
 
 include_directories(.)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-include_directories(${gflags_INCLUDE_DIR})
-include_directories(${glog_INCLUDE_DIRS})
 
 function(ppi_add_cxx_flags flags)
   set(CMAKE_CXX_FLAGS "${flags} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
 endfunction()
 
-ppi_add_cxx_flags("-std=c++11")
+ppi_add_cxx_flags("-std=c++17")
 ppi_add_cxx_flags("-Wall -Wextra")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   ppi_add_cxx_flags("-O0")
@@ -50,6 +53,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   ppi_add_cxx_flags("-Wno-error=missing-field-initializers")
   ppi_add_cxx_flags("-Wno-error=sign-compare")
   ppi_add_cxx_flags("-DNOINLINE_UNLESS_RELEASE=")
+  ppi_add_cxx_flags("-DNDEBUG=1")
 endif()
 
 # Set up coverage build type.
@@ -82,7 +86,7 @@ function(ppi_target_link_libraries target)
   target_link_libraries(${target} ${CMAKE_THREAD_LIBS_INIT})
   target_link_libraries(${target} ${ARGN})
   target_link_libraries(${target} ${LIB_GFLAGS})
-  target_link_libraries(${target} ${GLOG_LIBRARIES})
+  target_link_libraries(${target} glog)
 endfunction()
 
 function(ppi_test target)

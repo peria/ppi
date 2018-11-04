@@ -16,7 +16,7 @@ DEFINE_int32(base, 10, "Base to output. Accepts only 10 or 16.");
 using ppi::int64;
 
 int main(int argc, char* argv[]) {
-  google::ParseCommandLineFlags(&argc, &argv, true);
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   double start = ppi::base::Time::Now();
   int64 limbs = FLAGS_digits / 16 + 1;
@@ -24,14 +24,14 @@ int main(int argc, char* argv[]) {
   ppi::number::Real pi;
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
-    case 0: {
-      double error = ppi::pi::Drm::Chudnovsky(&pi);
-      LOG(INFO) << "Maximum error in FFT: " << error;
-      break;
-    }
-    case 1:
-      ppi::pi::Arctan::Machin(&pi);
-      break;
+  case 0: {
+    double error = ppi::pi::Drm::Chudnovsky(&pi);
+    LOG(INFO) << "Maximum error in FFT: " << error;
+    break;
+  }
+  case 1:
+    ppi::pi::Arctan::Machin(&pi);
+    break;
   }
   double compute_end = ppi::base::Time::Now();
   LOG(INFO) << "Computing Time: " << (compute_end - start) << " sec.";
@@ -43,7 +43,8 @@ int main(int argc, char* argv[]) {
     std::cout << pi << "\n";
   }
   double output_end = ppi::base::Time::Now();
-  LOG(INFO) << "Output(Base conversion): " << (output_end - output_start) << " sec.";
+  LOG(INFO) << "Output(Base conversion): " << (output_end - output_start)
+            << " sec.";
 
   if (!FLAGS_refer.empty()) {
     int64 size = pi.size() * 16;

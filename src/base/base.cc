@@ -1,4 +1,3 @@
 #include "base/base.h"
 
-namespace ppi {
-}  // namespace ppi
+namespace ppi {}  // namespace ppi

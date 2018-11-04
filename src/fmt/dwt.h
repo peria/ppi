@@ -1,8 +1,8 @@
 #pragma once
 
 #include "base/base.h"
-#include "fmt/rft.h"
 #include "fmt/fmt.h"
+#include "fmt/rft.h"
 
 namespace ppi {
 namespace fmt {

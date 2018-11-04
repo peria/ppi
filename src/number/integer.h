@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ostream>
 #include "base/base.h"
+#include <ostream>
 
 namespace ppi {
 namespace number {
@@ -53,10 +53,10 @@ class Integer {
   static void Show(const Integer& val, std::ostream& os);
 
   Integer& operator=(uint64 a);
-  
+
  protected:
   void Normalize();
-  
+
  private:
   uint64* data_;
 };
