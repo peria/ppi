@@ -1,14 +1,9 @@
 #pragma once
 
-#include <gflags/gflags.h>
-#include <glog/logging.h>
-
 #include <cassert>
 #include <cstdint>
 
 namespace ppi {
-
-#define UNUSED_VARIABLE(x) (void)(x)
 
 // C++11 allows us to implement code to take the array size.
 // If we pass non-array to this function, compile error will happen.

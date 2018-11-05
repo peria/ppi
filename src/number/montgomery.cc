@@ -1,5 +1,7 @@
 #include "number/montgomery.h"
 
+#include <glog/logging.h>
+
 #include "base/base.h"
 
 namespace ppi {

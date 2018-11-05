@@ -1,5 +1,7 @@
 #include "fmt/fmt.h"
 
+#include <glog/logging.h>
+
 #include <cmath>
 
 #include "base/allocator.h"

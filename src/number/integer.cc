@@ -1,5 +1,7 @@
 #include "number/integer.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <cmath>
 #include <ostream>

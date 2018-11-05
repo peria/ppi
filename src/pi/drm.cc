@@ -1,5 +1,7 @@
 #include "pi/drm.h"
 
+#include <glog/logging.h>
+
 #include <cmath>
 
 #include "base/base.h"

@@ -1,5 +1,7 @@
 #include "number/real.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>

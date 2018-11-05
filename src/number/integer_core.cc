@@ -1,5 +1,7 @@
 #include "number/integer_core.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <cmath>
 #include <ostream>
@@ -70,7 +72,7 @@ inline uint64 DivCore(const uint64* an,
                       const uint64 bn0,
                       const uint64 bn1,
                       uint64* cn) {
-  DCHECK_EQ(1, bn1 >> 31);
+  DCHECK_EQ(1ULL, bn1 >> 31);
   DCHECK_LT(bn0, kShortBase);
   DCHECK_LT(an[0], kShortBase);
   DCHECK_LT(an[1], kShortBase);
