@@ -30,7 +30,7 @@ function(ppi_add_cxx_flags flags)
   set(CMAKE_CXX_FLAGS "${flags} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
 endfunction()
 
-ppi_add_cxx_flags("-std=c++17")
+ppi_add_cxx_flags("-std=c++14")
 ppi_add_cxx_flags("-Wall -Wextra")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   ppi_add_cxx_flags("-O0")
