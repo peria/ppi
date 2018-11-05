@@ -19,7 +19,7 @@ set(CMAKE_SKIP_INSTALL_RULES ON)
 
 set(GFLAGS_BUILD_gflags_LIB ON)
 add_subdirectory(third_party/gflags)
-set(WITH_GFLAGS OFF)
+set(WITH_GFLAGS ON)
 set(gflags_FOUND ON)
 set(BUILD_TESTING OFF)
 add_subdirectory(third_party/glog)
