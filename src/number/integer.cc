@@ -118,7 +118,7 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
 
   uint64 carry = IntegerCore::Subtract(a.data_, b.data_, nb, c->data_);
   carry = IntegerCore::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
-  CHECK_EQ(0, carry);
+  CHECK_EQ(0ULL, carry);
 
   c->Normalize();
 }

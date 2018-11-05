@@ -15,23 +15,15 @@ endif()
 find_package(Threads REQUIRED)
 find_package(PkgConfig)
 
-set(CMAKE_SKIP_INSTALL_RULES ON)
-
-set(GFLAGS_BUILD_gflags_LIB ON)
-set(GFLAGS_BUILD_TESTING OFF)
-add_subdirectory(third_party/gflags)
-set(WITH_GFLAGS ON)
-set(gflags_FOUND ON)
-set(BUILD_TESTING OFF)
-add_subdirectory(third_party/glog)
-
-set(gtest_build_tests OFF)
-add_subdirectory(third_party/googletest/googletest)
+add_subdirectory(third_party)
 
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
 
 include_directories(.)
+include_directories(${CMAKE_BINARY_DIR}/third_party/gflags/include)
+include_directories(${CMAKE_BINARY_DIR}/third_party/glog)
+include_directories(third_party/glog/src)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 function(ppi_add_cxx_flags flags)
