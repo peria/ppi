@@ -12,6 +12,8 @@ srcdir="$rootdir/src"
 
 declare -a cmake_opts
 cmake_opts+=("-GNinja")
+cmake_opts+=("-DCMAKE_C_COMPILER=clang")
+cmake_opts+=("-DCMAKE_CXX_COMPILER=clang++")
 cmake_opts+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
 
 mkdir -p $outdir
@@ -20,4 +22,3 @@ cmake "${cmake_opts[@]}" $srcdir
 
 ninja
 CTEST_OUTPUT_ON_FAILURE=1 ninja test
-

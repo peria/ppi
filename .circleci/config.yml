@@ -14,4 +14,4 @@ jobs:
             apt-get install -y git clang cmake ninja-build
             git submodule init
             git submodule update
-            ./build/travis.sh
+            ./build/ci.sh
