@@ -1,4 +1,4 @@
-master: [![Build Status](https://travis-ci.org/peria/ppi.svg?branch=master)](https://travis-ci.org/peria/ppi) [![Coverage Status](https://coveralls.io/repos/github/peria/ppi/badge.svg?branch=master)](https://coveralls.io/github/peria/ppi?branch=master)
+master: [![CircleCI](https://circleci.com/gh/peria/ppi.svg?style=svg)](https://circleci.com/gh/peria/ppi) [![Coverage Status](https://coveralls.io/repos/github/peria/ppi/badge.svg?branch=master)](https://coveralls.io/github/peria/ppi?branch=master)
 
 # ppi
 ppi は円周率の計算をするプログラムを書いていくお一人様プロジェクトです。十分なストレージがあれば現実的な時間で１兆桁とか計算できるようになることを目標にしています。なので円周率の計算で必要になる多倍長計算に [GMP](https://gmplib.org/)のようなライブラリは用いません。
