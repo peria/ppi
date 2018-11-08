@@ -1,4 +1,4 @@
-#include "number/integer_core.h"
+#include "number/natural.h"
 
 #include <glog/logging.h>
 
@@ -114,7 +114,7 @@ inline uint64 DivCore(const uint64* an,
 
 }  // namespace
 
-uint64 IntegerCore::Add(const uint64* a,
+uint64 Natural::Add(const uint64* a,
                         const uint64* b,
                         const int64 n,
                         uint64* c) {
@@ -128,7 +128,7 @@ uint64 IntegerCore::Add(const uint64* a,
   return carry;
 }
 
-uint64 IntegerCore::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
+uint64 Natural::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
   int64 i;
   for (i = 0; i < n && b; ++i) {
     uint64 s = a[i] + b;
@@ -141,7 +141,7 @@ uint64 IntegerCore::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
   return b;
 }
 
-uint64 IntegerCore::Subtract(const uint64* a,
+uint64 Natural::Subtract(const uint64* a,
                              const uint64* b,
                              const int64 n,
                              uint64* c) {
@@ -155,7 +155,7 @@ uint64 IntegerCore::Subtract(const uint64* a,
   return carry;
 }
 
-uint64 IntegerCore::Subtract(const uint64* a,
+uint64 Natural::Subtract(const uint64* a,
                              uint64 b,
                              const int64 n,
                              uint64* c) {
@@ -171,7 +171,7 @@ uint64 IntegerCore::Subtract(const uint64* a,
   return b;
 }
 
-double IntegerCore::Mult(const uint64* a,
+double Natural::Mult(const uint64* a,
                          const int64 na,
                          const uint64* b,
                          const int64 nb,
@@ -211,7 +211,7 @@ double IntegerCore::Mult(const uint64* a,
   return Gather4(da, n, c);
 }
 
-uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
+uint64 Natural::Div(const uint64* a, const uint64 b, uint64* c) {
   DCHECK_LT(a[1], b);
 
   // Normalize numbers to set divisor to have the MSB.
@@ -234,7 +234,7 @@ uint64 IntegerCore::Div(const uint64* a, const uint64 b, uint64* c) {
   return q;
 }
 
-uint64 IntegerCore::Div(const uint64* a,
+uint64 Natural::Div(const uint64* a,
                         const uint64 b,
                         const int64 n,
                         uint64* c) {
@@ -255,7 +255,7 @@ uint64 IntegerCore::Div(const uint64* a,
   return rem >> shift;
 }
 
-uint64 IntegerCore::Div(const uint64 a,
+uint64 Natural::Div(const uint64 a,
                         const uint64 b,
                         const int64 n,
                         uint64* c) {
@@ -275,7 +275,7 @@ uint64 IntegerCore::Div(const uint64 a,
   return rem >> shift;
 }
 
-void IntegerCore::Split4(const uint64* a,
+void Natural::Split4(const uint64* a,
                          const int64 na,
                          const int64 n,
                          double* ca) {
@@ -300,7 +300,7 @@ void IntegerCore::Split4(const uint64* a,
   }
 }
 
-double IntegerCore::Gather4(double* ca, const int64 n, uint64* a) {
+double Natural::Gather4(double* ca, const int64 n, uint64* a) {
   // double -> integral double
   double err = 0;
   for (int64 i = 0; i < 4 * n; ++i) {

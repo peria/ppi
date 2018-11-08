@@ -9,7 +9,7 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "fmt/fmt.h"
-#include "number/integer_core.h"
+#include "number/natural.h"
 
 namespace ppi {
 namespace fmt {
@@ -49,8 +49,8 @@ void Ntt::Forward(const int64 n, uint64* a) {
         int64 w = (shift * k) & (n - 1);
         std::copy_n(element(a, n, j + k), n, x0);
         std::copy_n(element(a, n, j + m + k), n, x1);
-        number::IntegerCore::Add(x0, x1, n, element(a, n, j + k));
-        number::IntegerCore::Subtract(x0, x1, n, x2);
+        number::Natural::Add(x0, x1, n, element(a, n, j + k));
+        number::Natural::Subtract(x0, x1, n, x2);
         ShiftLeftWords(x2, w, n, element(a, n, j + k + m));
       }
     }
@@ -75,8 +75,8 @@ void Ntt::Backward(const int64 n, uint64* a) {
         int64 w = (shift * k) & (n - 1);
         std::copy_n(element(a, n, j + k), n, x0);
         ShiftLeftWords(element(a, n, j + k + m), w, n, x1);
-        number::IntegerCore::Add(x0, x1, n, element(a, n, j + k));
-        number::IntegerCore::Subtract(x0, x1, n, element(a, n, j + k + m));
+        number::Natural::Add(x0, x1, n, element(a, n, j + k));
+        number::Natural::Subtract(x0, x1, n, element(a, n, j + k + m));
       }
     }
   }
@@ -95,7 +95,7 @@ void Ntt::Backward(const int64 n, uint64* a) {
 }
 
 void Ntt::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
-  if (number::IntegerCore::Add(a, b, n, c) == 0)
+  if (number::Natural::Add(a, b, n, c) == 0)
     return;
 
   for (int64 i = 0; i < n; ++i) {
@@ -106,7 +106,7 @@ void Ntt::Add(const uint64* a, const uint64* b, const int64 n, uint64* c) {
 }
 
 void Ntt::Subtract(const uint64* a, const uint64* b, const int64 n, uint64* c) {
-  if (number::IntegerCore::Add(a, b, n, c) == 0)
+  if (number::Natural::Add(a, b, n, c) == 0)
     return;
 
   for (int64 i = 0; i < n; ++i) {

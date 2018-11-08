@@ -5,9 +5,9 @@
 namespace ppi {
 namespace number {
 
-// IntegerCore class is a namespace to provide computing numbers.
+// Natural class is a namespace to provide computing numbers.
 // It does not manage sizes of operands and results.
-class IntegerCore {
+class Natural {
  public:
   static uint64 Add(const uint64* a, const uint64* b, const int64 n, uint64* c);
   static uint64 Add(const uint64* a, uint64 b, const int64 n, uint64* c);

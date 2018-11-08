@@ -9,7 +9,7 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "fmt/dwt.h"
-#include "number/integer_core.h"
+#include "number/natural.h"
 
 namespace ppi {
 namespace number {
@@ -101,9 +101,9 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = std::min(na, nb);
   c->resize(std::max(na, nb));
 
-  uint64 carry = IntegerCore::Add(a.data_, b.data_, n, c->data_);
-  carry = IntegerCore::Add(a.data_ + n, carry, na - n, c->data_ + n);
-  carry = IntegerCore::Add(b.data_ + n, carry, nb - n, c->data_ + n);
+  uint64 carry = Natural::Add(a.data_, b.data_, n, c->data_);
+  carry = Natural::Add(a.data_ + n, carry, na - n, c->data_ + n);
+  carry = Natural::Add(b.data_ + n, carry, nb - n, c->data_ + n);
 
   if (carry) {
     c->push_back(carry);
@@ -118,8 +118,8 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   CHECK_GE(na, nb);
   c->resize(na);
 
-  uint64 carry = IntegerCore::Subtract(a.data_, b.data_, nb, c->data_);
-  carry = IntegerCore::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
+  uint64 carry = Natural::Subtract(a.data_, b.data_, nb, c->data_);
+  carry = Natural::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
   CHECK_EQ(0ULL, carry);
 
   c->Normalize();
@@ -146,7 +146,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = MinPow2(na + nb);
   c->resize(n);
 
-  double err = IntegerCore::Mult(a.data_, na, b.data_, nb, n, c->data_);
+  double err = Natural::Mult(a.data_, na, b.data_, nb, n, c->data_);
 
   c->Normalize();
 
@@ -203,7 +203,7 @@ void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
 
 void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
-  IntegerCore::Div(a.data_, b, a.size(), c->data_);
+  Natural::Div(a.data_, b, a.size(), c->data_);
   c->Normalize();
 }
 
