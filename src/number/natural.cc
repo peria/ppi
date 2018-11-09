@@ -115,9 +115,9 @@ inline uint64 DivCore(const uint64* an,
 }  // namespace
 
 uint64 Natural::Add(const uint64* a,
-                        const uint64* b,
-                        const int64 n,
-                        uint64* c) {
+                    const uint64* b,
+                    const int64 n,
+                    uint64* c) {
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 s = b[i] + carry;
@@ -142,9 +142,9 @@ uint64 Natural::Add(const uint64* a, uint64 b, const int64 n, uint64* c) {
 }
 
 uint64 Natural::Subtract(const uint64* a,
-                             const uint64* b,
-                             const int64 n,
-                             uint64* c) {
+                         const uint64* b,
+                         const int64 n,
+                         uint64* c) {
   uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 s = a[i] - carry;
@@ -155,10 +155,7 @@ uint64 Natural::Subtract(const uint64* a,
   return carry;
 }
 
-uint64 Natural::Subtract(const uint64* a,
-                             uint64 b,
-                             const int64 n,
-                             uint64* c) {
+uint64 Natural::Subtract(const uint64* a, uint64 b, const int64 n, uint64* c) {
   int64 i;
   for (i = 0; i < n && b; ++i) {
     uint64 s = a[i] - b;
@@ -172,11 +169,11 @@ uint64 Natural::Subtract(const uint64* a,
 }
 
 double Natural::Mult(const uint64* a,
-                         const int64 na,
-                         const uint64* b,
-                         const int64 nb,
-                         const int64 nc,
-                         uint64* c) {
+                     const int64 na,
+                     const uint64* b,
+                     const int64 nb,
+                     const int64 nc,
+                     uint64* c) {
   const int64 n = nc;
   const int64 nd = n * 4;
   double* da = WorkArea(0, nd);
@@ -234,10 +231,7 @@ uint64 Natural::Div(const uint64* a, const uint64 b, uint64* c) {
   return q;
 }
 
-uint64 Natural::Div(const uint64* a,
-                        const uint64 b,
-                        const int64 n,
-                        uint64* c) {
+uint64 Natural::Div(const uint64* a, const uint64 b, const int64 n, uint64* c) {
   // Normalize numbers to set the divisor to have the MSB.
   const int64 shift = LeadingZeros(b);
   const uint64 bn = b << shift;
@@ -255,10 +249,7 @@ uint64 Natural::Div(const uint64* a,
   return rem >> shift;
 }
 
-uint64 Natural::Div(const uint64 a,
-                        const uint64 b,
-                        const int64 n,
-                        uint64* c) {
+uint64 Natural::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
   DCHECK_LT(a, b);
 
   // Normalize numbers to set divisor to have the MSB.
@@ -276,9 +267,9 @@ uint64 Natural::Div(const uint64 a,
 }
 
 void Natural::Split4(const uint64* a,
-                         const int64 na,
-                         const int64 n,
-                         double* ca) {
+                     const int64 na,
+                     const int64 n,
+                     double* ca) {
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
     ca[4 * i] = ia & kMask;
