@@ -1,7 +1,7 @@
 #include "number/integer.h"
 
-#include "base/base.h"
 #include <gtest/gtest.h>
+#include "base/base.h"
 
 namespace ppi {
 namespace number {

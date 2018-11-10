@@ -11,17 +11,11 @@ class Timer {
   using MilliSec = std::chrono::milliseconds;
 
  public:
-  Timer() {
-    Start();
-  }
+  Timer() { Start(); }
 
-  void Start() {
-    start_time_ = Clock::now();
-  }
+  void Start() { start_time_ = Clock::now(); }
 
-  void Stop() {
-    stop_time_ = Clock::now();
-  }
+  void Stop() { stop_time_ = Clock::now(); }
 
   double GetTimeInSec() const;
   double GetTimeInMs() const;

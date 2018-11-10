@@ -52,8 +52,8 @@ void CreateProd(const uint64 a, const uint64 b, const uint64 r, uint64* c) {
 
 class NaturalForTest : public Natural {
  public:
-  using Natural::Split4;
   using Natural::Gather4;
+  using Natural::Split4;
 };
 
 TEST(NaturalTest, Div2By1) {

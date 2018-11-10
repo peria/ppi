@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base/base.h"
 #include <ostream>
+#include "base/base.h"
 
 namespace ppi {
 namespace number {

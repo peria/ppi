@@ -6,8 +6,8 @@
 namespace ppi {
 namespace pi {
 
-using number::Real;
 using number::Integer;
+using number::Real;
 
 class Arctan {
  public:
