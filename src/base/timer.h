@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include "base/base.h"
 
 namespace ppi {
 namespace base {
@@ -18,12 +19,11 @@ class Timer {
   void Stop() { stop_time_ = Clock::now(); }
 
   double GetTimeInSec() const;
-  double GetTimeInMs() const;
+  int64 GetTimeInMs() const;
 
  private:
   TimeStamp start_time_;
   TimeStamp stop_time_;
-  int64 duration_ms_;
 };
 
 }  // namespace base

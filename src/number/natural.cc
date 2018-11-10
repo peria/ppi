@@ -270,12 +270,28 @@ void Natural::Split4(const uint64* a,
                      const int64 na,
                      const int64 n,
                      double* ca) {
+  static constexpr double kDoubleBase = (1ULL << kMaskBitSize);
+  static constexpr double kHalfBase = kDoubleBase / 2;
+
   for (int64 i = 0; i < std::min(n, na); ++i) {
     uint64 ia = a[i];
     ca[4 * i] = ia & kMask;
     ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
     ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
+
+    if (ca[4 * i] >= kHalfBase) {
+      ca[4 * i] -= kDoubleBase;
+      ca[4 * i + 1] += 1;
+    }
+    if (ca[4 * i + 1] >= kHalfBase) {
+      ca[4 * i + 1] -= kDoubleBase;
+      ca[4 * i + 2] += 1;
+    }
+    if (ca[4 * i + 2] >= kHalfBase) {
+      ca[4 * i + 2] -= kDoubleBase;
+      ca[4 * i + 3] += 1;
+    }
   }
   for (int64 i = 4 * na; i < 4 * n; ++i) {
     ca[i] = 0;
@@ -292,29 +308,25 @@ void Natural::Split4(const uint64* a,
 }
 
 double Natural::Gather4(double* ca, const int64 n, uint64* a) {
+  static constexpr double kDoubleBase = (1ULL << kMaskBitSize);
+
   // double -> integral double
   double err = 0;
+  double carry = 0;
   for (int64 i = 0; i < 4 * n; ++i) {
     double d = std::floor(ca[i] + 0.5);
     err = std::max(err, std::abs(d - ca[i]));
-    ca[i] = d;
+    d += carry;
+    carry = std::floor(d / kDoubleBase);
+    ca[i] = d - carry * kDoubleBase;
   }
 
   // Normalize & re-alignment
-  uint64 carry = 0;
   for (int64 i = 0; i < n; ++i) {
     uint64 ia0 = ca[4 * i];
     uint64 ia1 = ca[4 * i + 1];
     uint64 ia2 = ca[4 * i + 2];
     uint64 ia3 = ca[4 * i + 3];
-    ia0 += carry;
-    ia1 += ia0 >> kMaskBitSize;
-    ia2 += ia1 >> kMaskBitSize;
-    ia3 += ia2 >> kMaskBitSize;
-    carry = ia3 >> kMaskBitSize;
-    ia0 &= kMask;
-    ia1 &= kMask;
-    ia2 &= kMask;
     a[i] = (((((ia3 << kMaskBitSize) + ia2) << kMaskBitSize) + ia1)
             << kMaskBitSize) +
            ia0;

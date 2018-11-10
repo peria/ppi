@@ -22,6 +22,10 @@ int main(int argc, char* argv[]) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
 
+  if (argc > 1) {
+    FLAGS_digits = strtoll(argv[1], NULL, 10);
+  }
+
   ppi::base::Timer timer_all;
   ppi::base::Timer timer_compute;
   int64 limbs = FLAGS_digits / 16 + 1;
