@@ -6,7 +6,7 @@
 #include <random>
 
 #include "base/base.h"
-#include "base/time.h"
+#include "base/timer.h"
 #include "fmt/fmt.h"
 #include "fmt/rft.h"
 
@@ -59,14 +59,14 @@ int main(int, char* []) {
   a = new double[kMaxK];
   b = new double[kMaxK];
   for (int64 k = 8; k <= 1 << 21; k *= 2) {
-    double start = ppi::base::Time::Now();
+    ppi::base::Timer timer;
     double err = 0;
     const int64 n = (kMaxK * 8) / k;
     for (int64 i = 0; i < n; ++i)
       err += ppi::fmt::GetRoundingError(k / 2, rng);
-    double end = ppi::base::Time::Now();
+    timer.Stop();
 
-    std::printf("%10ld\t%.3e\t%.3f ms\n", k, err / n, (end - start) * 1e+3 / n);
+    std::printf("%10ld\t%.3e\t%.3f ms\n", k, err / n, timer.GetTimeInMs() / n);
   }
   return 0;
 }

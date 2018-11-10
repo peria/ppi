@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include "base/base.h"
-#include "base/time.h"
+#include "base/timer.h"
 #include "number/real.h"
 
 namespace ppi {
@@ -21,14 +21,16 @@ double Drm::Chudnovsky(Real* pi) {
             << " hex digits.";
   Real a, b, c;
 
-  double start_bs = base::Time::Now();
-  // Pass a, b, and c as Integer elements into binary split
-  error = std::max(error, Internal(0, half, &a, &b, &c));
-  // c is no longer used.
-  c.clear();
-  double end_bs = base::Time::Now();
-  LOG(INFO) << "Binary Split: " << (end_bs - start_bs) << " sec.";
-  LOG(INFO) << "Sizes: a(" << a.size() << "), b(" << b.size() << ")";
+  {
+    base::Timer timer;
+    // Pass a, b, and c as Integer elements into binary split
+    error = std::max(error, Internal(0, half, &a, &b, &c));
+    // c is no longer used.
+    c.clear();
+    timer.Stop();
+    LOG(INFO) << "Binary Split: " << timer.GetTimeInSec() << " sec.";
+    LOG(INFO) << "Sizes: a(" << a.size() << "), b(" << b.size() << ")";
+  }
 
   Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
   int64 len = std::max(a.size(), b.size()) + 1;
@@ -36,17 +38,21 @@ double Drm::Chudnovsky(Real* pi) {
   b.setPrecision(len);
   pi->setPrecision(len);
 
-  double start_inverse = base::Time::Now();
-  error = std::max(error, Real::Inverse(b, pi));
-  error = std::max(error, Real::Mult(*pi, a, pi));
-  double end_inverse = base::Time::Now();
-  LOG(INFO) << "Division: " << (end_inverse - start_inverse) << " sec.";
+  {
+    base::Timer timer;
+    error = std::max(error, Real::Inverse(b, pi));
+    error = std::max(error, Real::Mult(*pi, a, pi));
+    timer.Stop();
+    LOG(INFO) << "Division: " << timer.GetTimeInSec() << " sec.";
+  }
 
-  double start_sqrt = base::Time::Now();
-  error = std::max(error, Real::InverseSqrt(10005, &b));
-  error = std::max(error, Real::Mult(*pi, b, pi));
-  double end_sqrt = base::Time::Now();
-  LOG(INFO) << "Square Root: " << (end_sqrt - start_sqrt) << " sec.";
+  {
+    base::Timer timer;
+    error = std::max(error, Real::InverseSqrt(10005, &b));
+    error = std::max(error, Real::Mult(*pi, b, pi));
+    timer.Stop();
+    LOG(INFO) << "Square Root: " << timer.GetTimeInSec() << " sec.";
+  }
 
   pi->setPrecision(length);
 

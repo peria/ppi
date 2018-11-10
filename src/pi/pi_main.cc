@@ -6,7 +6,7 @@
 
 #include "base/allocator.h"
 #include "base/base.h"
-#include "base/time.h"
+#include "base/timer.h"
 #include "number/real.h"
 #include "pi/arctan.h"
 #include "pi/drm.h"
@@ -22,7 +22,8 @@ int main(int argc, char* argv[]) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
 
-  double start = ppi::base::Time::Now();
+  ppi::base::Timer timer_all;
+  ppi::base::Timer timer_compute;
   int64 limbs = FLAGS_digits / 16 + 1;
 
   ppi::number::Real pi;
@@ -37,17 +38,17 @@ int main(int argc, char* argv[]) {
     ppi::pi::Arctan::Machin(&pi);
     break;
   }
-  double compute_end = ppi::base::Time::Now();
-  LOG(INFO) << "Computing Time: " << (compute_end - start) << " sec.";
+  timer_compute.Stop();
+  LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
 
-  double output_start = ppi::base::Time::Now();
+  ppi::base::Timer timer_output;
   if (FLAGS_base == 16) {
     std::cout << std::hex << pi << "\n";
   } else {
     std::cout << pi << "\n";
   }
-  double output_end = ppi::base::Time::Now();
-  LOG(INFO) << "Output(Base conversion): " << (output_end - output_start)
+  timer_output.Stop();
+  LOG(INFO) << "Output(Base conversion): " << timer_output.GetTimeInSec()
             << " sec.";
 
   if (!FLAGS_refer.empty()) {
@@ -56,8 +57,8 @@ int main(int argc, char* argv[]) {
     std::cerr << same << " out of " << size << " digits are same.\n";
   }
 
-  double end = ppi::base::Time::Now();
-  LOG(INFO) << "Elapsed Time: " << (end - start) << " sec.";
+  timer_all.Stop();
+  LOG(INFO) << "Elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
 
 #if !defined(BUILD_TYPE_release)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
