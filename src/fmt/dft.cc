@@ -29,10 +29,10 @@ Complex* WorkArea(int64 size) {
 
 }  // namespace
 
-void Dft::Transform(const Config& config, const Direction dir, Complex a[]) {
+void Dft::Transform(const Fmt::Config& config, const Fmt::Direction dir, Complex a[]) {
   const int64 n = config.n;
   CHECK_GE(kMaxSize, n);
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;
     }
@@ -63,7 +63,7 @@ void Dft::Transform(const Config& config, const Direction dir, Complex a[]) {
     Radix2(width, height, ptr, (log4n % 2) ? y : x, x);
   }
 
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     double inverse = 1.0 / n;
     for (int64 i = 0; i < n; ++i) {
       a[i].real *= inverse;

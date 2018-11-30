@@ -10,7 +10,7 @@
 namespace ppi {
 namespace fmt {
 
-Config::Config(int64 m) : n(m), log2n(PopCount(m - 1)) {
+Fmt::Config::Config(int64 m) : n(m), log2n(PopCount(m - 1)) {
   DCHECK_EQ(n, 1LL << (log2n));
 
   table = reinterpret_cast<Complex*>(base::Allocator::Allocate<double>(2 * n));
@@ -39,7 +39,7 @@ Config::Config(int64 m) : n(m), log2n(PopCount(m - 1)) {
   }
 }
 
-Config::~Config() {
+Fmt::Config::~Config() {
   base::Allocator::Deallocate(table);
 }
 

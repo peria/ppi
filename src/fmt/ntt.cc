@@ -22,8 +22,8 @@ inline uint64* element(uint64* a, const int64 n, int64 id) {
 
 }  // namespace
 
-void Ntt::Transfer(const Direction dir, const int64 n, uint64* a) {
-  if (dir == Direction::Forward) {
+void Ntt::Transfer(const Fmt::Direction dir, const int64 n, uint64* a) {
+  if (dir == Fmt::Direction::Forward) {
     Forward(n, a);
   } else {
     Backward(n, a);

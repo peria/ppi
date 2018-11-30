@@ -12,11 +12,11 @@
 namespace ppi {
 namespace fmt {
 
-void Rft::Transform(const Config& config, const Direction dir, double* a) {
+void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double* a) {
   const int64 n = config.n * 2;
   Complex* ca = reinterpret_cast<Complex*>(a);
 
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = (x0r + x0i) * 0.5;
@@ -41,7 +41,7 @@ void Rft::Transform(const Config& config, const Direction dir, double* a) {
 
   Dft::Transform(config, dir, ca);
 
-  if (dir == Direction::Forward) {
+  if (dir == Fmt::Direction::Forward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = x0r + x0i;

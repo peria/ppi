@@ -26,9 +26,9 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     b[i] = rng() & kMask15Bits;
   }
 
-  Config config(k / 2);
-  Rft::Transform(config, Direction::Forward, a);
-  Rft::Transform(config, Direction::Forward, b);
+  Fmt::Config config(k / 2);
+  Rft::Transform(config, Fmt::Direction::Forward, a);
+  Rft::Transform(config, Fmt::Direction::Forward, b);
   a[0] *= b[0];
   a[1] *= b[1];
   for (int64 i = 1; i < k / 2; ++i) {
@@ -37,7 +37,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     a[2 * i] = ar * br - ai * bi;
     a[2 * i + 1] = ar * bi + ai * br;
   }
-  Rft::Transform(config, Direction::Backward, a);
+  Rft::Transform(config, Fmt::Direction::Backward, a);
 
   double err = 0;
   for (int64 i = 0; i < k; ++i) {

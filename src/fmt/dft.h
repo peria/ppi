@@ -10,7 +10,7 @@ namespace fmt {
 class Dft {
  public:
   // Compute DFT of |a|.
-  static void Transform(const Config& config, const Direction dir, Complex* a);
+  static void Transform(const Fmt::Config& config, const Fmt::Direction dir, Complex* a);
 
  private:
   // Compute 1 step of DFT from |x| into |y|.

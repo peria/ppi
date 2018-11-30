@@ -12,7 +12,7 @@ namespace fmt {
 class Rft {
  public:
   // Compute DFT of |a|.
-  static void Transform(const Config& config, const Direction dir, double* a);
+  static void Transform(const Fmt::Config& config, const Fmt::Direction dir, double* a);
 };
 
 }  // namespace fmt

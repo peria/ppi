@@ -36,8 +36,8 @@ TEST_F(NttTest, DISABLED_Transfer) {
   for (int64 i = 0; i < kTotalSize; ++i) {
     value[i] = ((i + 1) % kElementSize == 0) ? 0 : (i + 1);
   }
-  Ntt::Transfer(Direction::Forward, kNumElements, value);
-  Ntt::Transfer(Direction::Backward, kNumElements, value);
+  Ntt::Transfer(Fmt::Direction::Forward, kNumElements, value);
+  Ntt::Transfer(Fmt::Direction::Backward, kNumElements, value);
   for (int64 i = 0; i < kTotalSize; ++i) {
     uint64 expected = ((i + 1) % kElementSize == 0) ? 0 : (i + 1);
     EXPECT_EQ(expected, value[i])

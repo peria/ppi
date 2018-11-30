@@ -179,18 +179,18 @@ double Natural::Mult(const uint64* a,
   double* da = WorkArea(0, nd);
   double* db = nullptr;
 
-  fmt::Config config(nd / 2);
+  fmt::Fmt::Config config(nd / 2);
 
   // Split uint64[na] -> double[4n]
   Split4(a, na, n, da);
-  fmt::Rft::Transform(config, fmt::Direction::Forward, da);
+  fmt::Rft::Transform(config, fmt::Fmt::Direction::Forward, da);
 
   if (a == b) {
     db = da;
   } else {
     db = WorkArea(1, 4 * n);
     Split4(b, nb, n, db);
-    fmt::Rft::Transform(config, fmt::Direction::Forward, db);
+    fmt::Rft::Transform(config, fmt::Fmt::Direction::Forward, db);
   }
 
   da[0] *= db[0];
@@ -202,7 +202,7 @@ double Natural::Mult(const uint64* a,
     da[2 * i + 1] = ar * bi + ai * br;
   }
 
-  fmt::Rft::Transform(config, fmt::Direction::Backward, da);
+  fmt::Rft::Transform(config, fmt::Fmt::Direction::Backward, da);
 
   // Gather Complex[4n] -> uint64[n]
   return Gather4(da, n, c);

@@ -11,10 +11,10 @@
 namespace ppi {
 namespace fmt {
 
-void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
+void Dwt::Dwt4(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) {
   const int64 n = config.n;
 
-  if (dir == Direction::Forward) {
+  if (dir == Fmt::Direction::Forward) {
     double th = M_PI / (2 * n);  // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -28,7 +28,7 @@ void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
 
   Dft::Transform(config, dir, a);
 
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     double th = -M_PI / (2 * n);  // q = 1/4
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -41,10 +41,10 @@ void Dwt::Dwt4(const Config& config, const Direction dir, Complex* a) {
   }
 }
 
-void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
+void Dwt::Dwt2(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) {
   const int64 n = config.n;
 
-  if (dir == Direction::Forward) {
+  if (dir == Fmt::Direction::Forward) {
     double th = -M_PI / n;
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -58,7 +58,7 @@ void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
 
   Dft::Transform(config, dir, a);
 
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     double th = M_PI / n;
     for (int64 i = 0; i < n; ++i) {
       double ar = a[i].real;
@@ -71,11 +71,11 @@ void Dwt::Dwt2(const Config& config, const Direction dir, Complex* a) {
   }
 }
 
-void Dwt::Dwt2Real(const Config& config, const Direction dir, double* a) {
+void Dwt::Dwt2Real(const Fmt::Config& config, const Fmt::Direction dir, double* a) {
   const int64 n = config.n * 2;
   Complex* ca = reinterpret_cast<Complex*>(a);
 
-  if (dir == Direction::Backward) {
+  if (dir == Fmt::Direction::Backward) {
     const double th = -2 * M_PI / n;
     for (int64 i = 0; i < n / 4; ++i) {
       Complex& x0 = ca[i];
@@ -96,7 +96,7 @@ void Dwt::Dwt2Real(const Config& config, const Direction dir, double* a) {
 
   Dwt2(config, dir, ca);
 
-  if (dir == Direction::Forward) {
+  if (dir == Fmt::Direction::Forward) {
     const double th = -2 * M_PI / n;
     for (int64 i = 0; i < n / 4; ++i) {
       Complex& x0 = ca[i];
