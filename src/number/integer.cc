@@ -8,7 +8,6 @@
 
 #include "base/allocator.h"
 #include "base/base.h"
-#include "fmt/dwt.h"
 #include "number/natural.h"
 
 namespace ppi {
