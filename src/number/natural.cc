@@ -183,14 +183,14 @@ double Natural::Mult(const uint64* a,
 
   // Split uint64[na] -> double[4n]
   Split4(a, na, n, da);
-  rft.Transform(fmt::Fmt::Direction::Forward, da);
+  rft.Transform(fmt::Direction::Forward, da);
 
   if (a == b) {
     db = da;
   } else {
     db = WorkArea(1, 4 * n);
     Split4(b, nb, n, db);
-    rft.Transform(fmt::Fmt::Direction::Forward, db);
+    rft.Transform(fmt::Direction::Forward, db);
   }
 
   da[0] *= db[0];
@@ -202,7 +202,7 @@ double Natural::Mult(const uint64* a,
     da[2 * i + 1] = ar * bi + ai * br;
   }
 
-  rft.Transform(fmt::Fmt::Direction::Backward, da);
+  rft.Transform(fmt::Direction::Backward, da);
 
   // Gather Complex[4n] -> uint64[n]
   return Gather4(da, n, c);

@@ -7,7 +7,6 @@
 
 #include "base/base.h"
 #include "base/timer.h"
-#include "fmt/fmt.h"
 #include "fmt/rft.h"
 
 namespace {
@@ -27,8 +26,8 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
   }
 
   Rft rft(k);
-  rft.Transform(Fmt::Direction::Forward, a);
-  rft.Transform(Fmt::Direction::Forward, b);
+  rft.Transform(Direction::Forward, a);
+  rft.Transform(Direction::Forward, b);
   a[0] *= b[0];
   a[1] *= b[1];
   for (int64 i = 1; i < k / 2; ++i) {
@@ -37,7 +36,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
     a[2 * i] = ar * br - ai * bi;
     a[2 * i + 1] = ar * bi + ai * br;
   }
-  rft.Transform(Fmt::Direction::Backward, a);
+  rft.Transform(Direction::Backward, a);
 
   double err = 0;
   for (int64 i = 0; i < k; ++i) {

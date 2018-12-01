@@ -2,6 +2,7 @@
 
 #include "base/base.h"
 #include "fmt/dft.h"
+#include "fmt/fmt.h"
 
 namespace ppi {
 namespace fmt {
@@ -14,7 +15,7 @@ class Rft : public Dft {
   Rft(const int64 n);
 
   // Compute DFT of |a|.
-  void Transform(const Fmt::Direction dir, double* a) const;
+  void Transform(const Direction dir, double* a) const;
 
  private:
   const int64 n_;

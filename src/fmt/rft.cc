@@ -2,14 +2,7 @@
 
 #include <glog/logging.h>
 
-#include <algorithm>
 #include <cmath>
-#include <cstring>
-
-#include "base/allocator.h"
-#include "base/base.h"
-#include "base/util.h"
-#include "fmt/dft.h"
 
 namespace ppi {
 namespace fmt {
@@ -19,10 +12,10 @@ Rft::Rft(const int64 n)
   DCHECK_EQ(0, n % 4);
 }
 
-void Rft::Transform(const Fmt::Direction dir, double* a) const {
+void Rft::Transform(const Direction dir, double* a) const {
   Complex* ca = reinterpret_cast<Complex*>(a);
 
-  if (dir == Fmt::Direction::Backward) {
+  if (dir == Direction::Backward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = (x0r + x0i) * 0.5;
@@ -47,7 +40,7 @@ void Rft::Transform(const Fmt::Direction dir, double* a) const {
 
   Dft::Transform(dir, ca);
 
-  if (dir == Fmt::Direction::Forward) {
+  if (dir == Direction::Forward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = x0r + x0i;

@@ -8,10 +8,8 @@ namespace ppi {
 namespace fmt {
 
 // Computes DFT in complex field.
-class Dft : public Fmt {
+class Dft {
  public:
-  using Fmt::Direction;
-
   Dft(const int64 n);
 
   // Compute DFT of |a|.

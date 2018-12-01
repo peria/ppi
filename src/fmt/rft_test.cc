@@ -15,8 +15,8 @@ TEST(RftTest, OverallTest) {
     for (int i = 0; i < n; ++i) {
       a[i] = i;
     }
-    rft.Transform(Fmt::Direction::Forward, a);
-    rft.Transform(Fmt::Direction::Backward, a);
+    rft.Transform(Direction::Forward, a);
+    rft.Transform(Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i], kEps) << "index=" << i << ", n=2^" << k;
     }
