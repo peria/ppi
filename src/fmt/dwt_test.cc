@@ -5,28 +5,6 @@
 namespace ppi {
 namespace fmt {
 
-// TODO: Do not use convolution.  Each test should test each transform.
-TEST(DwtTest, Dwt4Convolution) {
-  const int64 n = 4;
-  Fmt::Config config(n);
-  double a[] = {1, 0, 2, 0, 3, 0, 4, 0};
-
-  Dwt::Dwt4(config, Fmt::Direction::Forward, reinterpret_cast<Complex*>(a));
-  for (int i = 0; i < n; ++i) {
-    double ar = a[2 * i];
-    double ai = a[2 * i + 1];
-    a[2 * i] = ar * ar - ai * ai;
-    a[2 * i + 1] = 2 * ar * ai;
-  }
-  Dwt::Dwt4(config, Fmt::Direction::Backward, reinterpret_cast<Complex*>(a));
-
-  const double kEps = 1e-10;
-  const double answer[] = {1, 25, 4, 24, 10, 16, 20, 0};
-  for (int64 i = 0; i < 2 * n; ++i) {
-    EXPECT_NEAR(answer[i], a[i], kEps) << "index: " << i;
-  }
-}
-
 TEST(DwtTest, Dwt2) {
   const int64 n = 4;
   Fmt::Config config(n);
