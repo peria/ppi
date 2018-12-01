@@ -27,128 +27,295 @@ Complex* WorkArea(int64 size) {
   return g_work;
 }
 
+int64 FitSize(const int n) {
+  static constexpr int64 kAcceptSizes[] {
+    1LL, 1LL << 1, 1LL << 2, 5LL, 1LL << 3, 5LL << 1, 1LL << 4, 5LL << 2,
+    1LL << 5, 5LL << 3, 1LL << 6, 5LL << 4, 1LL << 7, 5LL << 5,
+    1LL << 8, 5LL << 6, 1LL << 9, 5LL << 7, 1LL << 10, 5LL << 8,
+    1LL << 11, 5LL << 9, 1LL << 12, 5LL << 10, 1LL << 13, 5LL << 11,
+    1LL << 14, 5LL << 12, 1LL << 15, 5LL << 13, 1LL << 16, 5LL << 14,
+    1LL << 17, 5LL << 15, 1LL << 18, 5LL << 16, 1LL << 19, 5LL << 17,
+    1LL << 20, 5LL << 18, 1LL << 21, 5LL << 19, 1LL << 22, 5LL << 20,
+  };
+  static const int64 kSize = ARRAY_SIZE(kAcceptSizes);
+  DCHECK_LE(n, kAcceptSizes[kSize - 1]);
+  return *std::lower_bound(kAcceptSizes, kAcceptSizes + kSize, n);
+}
+
+int64 GetExpOf2(const int64 n) {
+  int64 log2n = 0;
+  for (int64 m = n; (m & 1) == 0; m /= 2) {
+    ++log2n;
+  }
+  return log2n;
+}
+
+Complex* InitTable(const int64 n, const int64 log2n) {
+  Complex* table = base::Allocator::Allocate<Complex>(2 * n);
+
+  auto setTable = [](const int64 r, const int64 height, Complex* table) {
+    const double theta = -2.0 * M_PI / (r * height);
+    for (int64 i = 0; i < height; ++i) {
+      for (int64 j = 1; j < r; ++j) {
+        double t = theta * i * j;
+        table[i * (r - 1) + j - 1] = Complex{std::cos(t), std::sin(t)};
+      }
+    }
+  };
+
+  int64 log4n = (log2n > 1) ? 2 - (log2n + 2) % 3 : 0;
+  int64 log8n = (log2n > 1) ? (log2n - 2 * log4n) / 3 : 0;
+
+  Complex* tbl = table;
+  int64 height = n;
+  for (int64 i = 0; i < log8n; ++i) {
+    height /= 8;
+    setTable(8, height, tbl);
+    tbl += 7 * height;
+  }
+  for (int64 i = 0; i < log4n; ++i) {
+    height /= 4;
+    setTable(4, height, tbl);
+    tbl += 3 * height;
+  }
+  if (log2n == 1) {
+    height /= 2;
+    setTable(2, height, tbl);
+  }
+
+  return table;
+}
+
 }  // namespace
 
-void Dft::Transform(const Fmt::Config& config, const Fmt::Direction dir, Complex a[]) {
-  const int64 n = config.n;
-  CHECK_GE(kMaxSize, n);
+Dft::Dft(const int64 n)
+  : n_(FitSize(n)),
+    log2n_(GetExpOf2(n_)),
+    log4n_((log2n_ > 1) ? 2 - (log2n_ + 2) % 3 : 0),
+    log8n_((log2n_ > 1) ? (log2n_ - 2 * log4n_) / 3 : 0),
+    table_(InitTable(n_, log2n_)) {
+  DCHECK((n_ >> log2n_) == 1 || (n_ >> log2n_) == 5);
+}
+
+void Dft::Transform(const Fmt::Direction dir, Complex* a) const {
   if (dir == Fmt::Direction::Backward) {
-    for (int64 i = 0; i < n; ++i) {
+    for (int64 i = 0; i < n_; ++i) {
       a[i].imag = -a[i].imag;
     }
   }
 
   Complex* x = a;
-  Complex* y = WorkArea(n);
-  Complex* ptr = config.table;
-  int64 height = n;
-  int64 width = 1;
+  Complex* y = WorkArea(n_);
+  const Complex* table = table_;
 
-  // Radix-4
-  const int64 log4n = config.log2n / 2;
-  for (int64 i = 0; i < log4n; ++i) {
-    height /= 4;
-    if (i % 2) {
-      Radix4(width, height, ptr, y, x);
+  bool data_in_x = true;
+  int64 width = 1, height = n_;
+  for (int64 i = 0; i < log8n_; ++i) {
+    height /= 8;
+    if (data_in_x) {
+      radix8(width, height, table, x, (height > 1) ? y : x);
     } else {
-      Radix4(width, height, ptr, x, ((i + 1) * 2 == config.log2n) ? x : y);
+      radix8(width, height, table, y, x);
     }
-    ptr += 3 * width;
+    data_in_x = !data_in_x;
+    width *= 8;
+    table += 7 * height;
+  }
+  for (int64 i = 0; i < log4n_; ++i) {
+    height /= 4;
+    if (data_in_x) {
+      radix4(width, height, table, x, (height > 1) ? y : x);
+    } else {
+      radix4(width, height, table, y, x);
+    }
+    data_in_x = !data_in_x;
     width *= 4;
+    table += 3 * height;
+  }
+  if (log2n_ == 1) {
+    height /= 2;
+    radix2(height, table, x, (height > 1) ? y : x);
+    data_in_x = (height == 1);
+    width *= 2;
   }
 
-  // Radix-2
-  if (config.log2n % 2 == 1) {
-    height /= 2;
-    Radix2(width, height, ptr, (log4n % 2) ? y : x, x);
+#if 0
+  if (radix == Radix::Five) {
+    height /= 5;
+    radix5(width, height, data_in_x ? x : y, x);
   }
+#endif
 
   if (dir == Fmt::Direction::Backward) {
-    double inverse = 1.0 / n;
-    for (int64 i = 0; i < n; ++i) {
+    double inverse = 1.0 / n_;
+    for (int64 i = 0; i < n_; ++i) {
       a[i].real *= inverse;
       a[i].imag *= -inverse;
     }
   }
 }
 
-void Dft::Radix2(const int64 width,
-                 const int64 height,
-                 Complex* table,
-                 Complex x[],
-                 Complex y[]) {
-  const int64 n2 = width * height;
-  for (int64 k = 0; k < height; ++k) {
-    for (int64 j = 0; j < width; ++j) {
-      double wr = table[j].real;
-      double wi = table[j].imag;
-
-      int64 ix0 = k * width + j;
-      int64 ix1 = ix0 + n2;
-      double x0r = x[ix0].real, x0i = x[ix0].imag;
-      double x1r = x[ix1].real, x1i = x[ix1].imag;
-      double xwr = x1r * wr - x1i * wi;
-      double xwi = x1r * wi + x1i * wr;
-
-      int64 iy0 = k * width * 2 + j;
-      int64 iy1 = iy0 + width;
-      y[iy0].real = x0r + xwr;
-      y[iy0].imag = x0i + xwi;
-      y[iy1].real = x0r - xwr;
-      y[iy1].imag = x0i - xwi;
-    }
+void Dft::radix2(const int64 height,
+                 const Complex* table,
+                 Complex* x,
+                 Complex* y) const {
+#define X(A, B) x[(A)*height + (B)]
+#define Y(A, B) y[(A)*2 + (B)]
+  Complex c0 = X(0, 0);
+  Complex c1 = X(1, 0);
+  Complex d0 = c0 + c1;
+  Complex d1 = c0 - c1;
+  Y(0, 1) = d1;
+  Y(0, 0) = d0;
+  for (int64 j = 1; j < height; ++j) {
+    Complex w = table[j];
+    Complex c0 = X(0, j);
+    Complex c1 = X(1, j);
+    Complex d0 = c0 + c1;
+    Complex d1 = c0 - c1;
+    Y(j, 0) = d0;
+    Y(j, 1) = w * d1;
   }
+#undef X
+#undef Y
 }
 
-void Dft::Radix4(const int64 width,
+void Dft::radix4(const int64 width,
                  const int64 height,
-                 Complex table[],
-                 Complex x[],
-                 Complex y[]) {
-  const int64 n4 = width * height;
-  for (int64 k = 0; k < height; ++k) {
-    for (int64 j = 0; j < width; ++j) {
-      double w1r = table[3 * j].real;
-      double w1i = table[3 * j].imag;
-      double w2r = table[3 * j + 1].real;
-      double w2i = table[3 * j + 1].imag;
-      double w3r = table[3 * j + 2].real;
-      double w3i = table[3 * j + 2].imag;
-
-      int64 ix0 = k * width + j;
-      int64 ix1 = ix0 + n4;
-      int64 ix2 = ix0 + n4 * 2;
-      int64 ix3 = ix0 + n4 * 3;
-
-      double x0r = x[ix0].real, x0i = x[ix0].imag;
-      double x1r = x[ix1].real, x1i = x[ix1].imag;
-      double x2r = x[ix2].real, x2i = x[ix2].imag;
-      double x3r = x[ix3].real, x3i = x[ix3].imag;
-
-      double x1wr = x1r * w1r - x1i * w1i, x1wi = x1r * w1i + x1i * w1r;
-      double x2wr = x2r * w2r - x2i * w2i, x2wi = x2r * w2i + x2i * w2r;
-      double x3wr = x3r * w3r - x3i * w3i, x3wi = x3r * w3i + x3i * w3r;
-
-      double x0p2r = x0r + x2wr, x0p2i = x0i + x2wi;
-      double x0m2r = x0r - x2wr, x0m2i = x0i - x2wi;
-      double x1p3r = x1wr + x3wr, x1p3i = x1wi + x3wi;
-      double x1m3r = -x1wi + x3wi, x1m3i = x1wr - x3wr;
-
-      int64 iy0 = k * width * 4 + j;
-      int64 iy1 = iy0 + width;
-      int64 iy2 = iy0 + width * 2;
-      int64 iy3 = iy0 + width * 3;
-
-      y[iy0].real = x0p2r + x1p3r;
-      y[iy0].imag = x0p2i + x1p3i;
-      y[iy1].real = x0m2r - x1m3r;
-      y[iy1].imag = x0m2i - x1m3i;
-      y[iy2].real = x0p2r - x1p3r;
-      y[iy2].imag = x0p2i - x1p3i;
-      y[iy3].real = x0m2r + x1m3r;
-      y[iy3].imag = x0m2i + x1m3i;
+                 const Complex* table,
+                 Complex* x,
+                 Complex* y) const {
+#define X(A, B, C) x[((A)*height + (B)) * width + (C)]
+#define Y(A, B, C) y[((A)*4 + (B)) * width + (C)]
+  for (int64 i = 0; i < width; ++i) {
+    Complex c0 = X(0, 0, i);
+    Complex c1 = X(1, 0, i);
+    Complex c2 = X(2, 0, i);
+    Complex c3 = X(3, 0, i);
+    Complex d0 = c0 + c2;
+    Complex d1 = c0 - c2;
+    Complex d2 = c1 + c3;
+    Complex d3 = (c1 - c3).i();
+    Y(0, 3, i) = d1 - d3;
+    Y(0, 2, i) = d0 - d2;
+    Y(0, 1, i) = d1 + d3;
+    Y(0, 0, i) = d0 + d2;
+  }
+  for (int64 j = 1; j < height; ++j) {
+    Complex w1 = table[3 * j];
+    Complex w2 = table[3 * j + 1];
+    Complex w3 = table[3 * j + 2];
+    for (int64 i = 0; i < width; ++i) {
+      Complex c0 = X(0, j, i);
+      Complex c1 = X(1, j, i);
+      Complex c2 = X(2, j, i);
+      Complex c3 = X(3, j, i);
+      Complex d0 = c0 + c2;
+      Complex d1 = c0 - c2;
+      Complex d2 = c1 + c3;
+      Complex d3 = (c1 - c3).i();
+      Y(j, 0, i) = d0 + d2;
+      Y(j, 1, i) = w1 * (d1 + d3);
+      Y(j, 2, i) = w2 * (d0 - d2);
+      Y(j, 3, i) = w3 * (d1 - d3);
     }
   }
+#undef X
+#undef Y
+}
+
+void Dft::radix8(const int64 width,
+                 const int64 height,
+                 const Complex* table,
+                 Complex* x,
+                 Complex* y) const {
+#define X(A, B, C) x[((A)*height + (B)) * width + (C)]
+#define Y(A, B, C) y[((A)*8 + (B)) * width + (C)]
+  static constexpr double kC81 = 0.70710678118654752;
+
+  for (int64 i = 0; i < width; ++i) {
+    Complex c0 = X(0, 0, i);
+    Complex c1 = X(1, 0, i);
+    Complex c2 = X(2, 0, i);
+    Complex c3 = X(3, 0, i);
+    Complex c4 = X(4, 0, i);
+    Complex c5 = X(5, 0, i);
+    Complex c6 = X(6, 0, i);
+    Complex c7 = X(7, 0, i);
+    Complex d0 = c0 + c4;
+    Complex d1 = c0 - c4;
+    Complex d2 = c2 + c6;
+    Complex d3 = (c2 - c6).i();
+    Complex d4 = c1 + c5;
+    Complex d5 = c1 - c5;
+    Complex d6 = c3 + c7;
+    Complex d7 = c3 - c7;
+    Complex e0 = d0 + d2;
+    Complex e1 = d0 - d2;
+    Complex e2 = d4 + d6;
+    Complex e3 = (d4 - d6).i();
+    Complex e4 = kC81 * (d5 - d7);
+    Complex e5 = kC81 * (d5 + d7).i();
+    Complex e6 = d1 + e4;
+    Complex e7 = d1 - e4;
+    Complex e8 = d3 + e5;
+    Complex e9 = d3 - e5;
+    Y(0, 0, i) = e0 + e2;
+    Y(0, 1, i) = e6 + e8;
+    Y(0, 2, i) = e1 + e3;
+    Y(0, 3, i) = e7 - e9;
+    Y(0, 4, i) = e0 - e2;
+    Y(0, 5, i) = e7 + e9;
+    Y(0, 6, i) = e1 - e3;
+    Y(0, 7, i) = e6 - e8;
+  }
+  for (int64 j = 1; j < height; ++j) {
+    Complex w1 = table[7 * j];
+    Complex w2 = table[7 * j + 1];
+    Complex w3 = table[7 * j + 2];
+    Complex w4 = table[7 * j + 3];
+    Complex w5 = table[7 * j + 4];
+    Complex w6 = table[7 * j + 5];
+    Complex w7 = table[7 * j + 6];
+    for (int64 i = 0; i < width; ++i) {
+      Complex c0 = X(0, j, i);
+      Complex c1 = X(1, j, i);
+      Complex c2 = X(2, j, i);
+      Complex c3 = X(3, j, i);
+      Complex c4 = X(4, j, i);
+      Complex c5 = X(5, j, i);
+      Complex c6 = X(6, j, i);
+      Complex c7 = X(7, j, i);
+      Complex d0 = c0 + c4;
+      Complex d1 = c0 - c4;
+      Complex d2 = c2 + c6;
+      Complex d3 = (c2 - c6).i();
+      Complex d4 = c1 + c5;
+      Complex d5 = c1 - c5;
+      Complex d6 = c3 + c7;
+      Complex d7 = c3 - c7;
+      Complex e0 = d0 + d2;
+      Complex e1 = d0 - d2;
+      Complex e2 = d4 + d6;
+      Complex e3 = (d4 - d6).i();
+      Complex e4 = kC81 * (d5 - d7);
+      Complex e5 = kC81 * (d5 + d7).i();
+      Complex e6 = d1 + e4;
+      Complex e7 = d1 - e4;
+      Complex e8 = d3 + e5;
+      Complex e9 = d3 - e5;
+      Y(j, 0, i) = e0 + e2;
+      Y(j, 1, i) = w1 * (e6 + e8);
+      Y(j, 2, i) = w2 * (e1 + e3);
+      Y(j, 3, i) = w3 * (e7 - e9);
+      Y(j, 4, i) = w4 * (e0 - e2);
+      Y(j, 5, i) = w5 * (e7 + e9);
+      Y(j, 6, i) = w6 * (e1 - e3);
+      Y(j, 7, i) = w7 * (e6 - e8);
+    }
+  }
+#undef X
+#undef Y
 }
 
 }  // namespace fmt

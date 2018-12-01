@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "base/base.h"
+#include "base/complex.h"
 
 namespace ppi {
 namespace fmt {

@@ -153,12 +153,6 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   return err;
 }
 
-namespace {
-// TODO: Move these constant values to a header in base/.
-const int64 kHalfSize = 32;
-const int64 kHalfBitMask = (1ULL << kHalfSize) - 1;
-}  // namespace
-
 void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
   uint64 carry = 0;

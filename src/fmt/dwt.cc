@@ -13,6 +13,7 @@ namespace fmt {
 
 void Dwt::Dwt4(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) {
   const int64 n = config.n;
+  Dft dft(n);
 
   if (dir == Fmt::Direction::Forward) {
     double th = M_PI / (2 * n);  // q = 1/4
@@ -26,7 +27,7 @@ void Dwt::Dwt4(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) 
     }
   }
 
-  Dft::Transform(config, dir, a);
+  dft.Transform(dir, a);
 
   if (dir == Fmt::Direction::Backward) {
     double th = -M_PI / (2 * n);  // q = 1/4
@@ -43,6 +44,7 @@ void Dwt::Dwt4(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) 
 
 void Dwt::Dwt2(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) {
   const int64 n = config.n;
+  Dft dft(n);
 
   if (dir == Fmt::Direction::Forward) {
     double th = -M_PI / n;
@@ -56,7 +58,7 @@ void Dwt::Dwt2(const Fmt::Config& config, const Fmt::Direction dir, Complex* a) 
     }
   }
 
-  Dft::Transform(config, dir, a);
+  dft.Transform(dir, a);
 
   if (dir == Fmt::Direction::Backward) {
     double th = M_PI / n;

@@ -10,16 +10,16 @@ namespace fmt {
 
 TEST(DftTest, Dft2ElemTest) {
   const double kEps = 1e-10;
-  Fmt::Config config(2);
+  Dft dft(2);
 
   Complex a[] = {{1, 2}, {3, 4}};
-  Dft::Transform(config, Fmt::Direction::Forward, a);
+  dft.Transform(Fmt::Direction::Forward, a);
   EXPECT_NEAR(4, a[0].real, kEps);
   EXPECT_NEAR(6, a[0].imag, kEps);
   EXPECT_NEAR(-2, a[1].real, kEps);
   EXPECT_NEAR(-2, a[1].imag, kEps);
 
-  Dft::Transform(config, Fmt::Direction::Backward, a);
+  dft.Transform(Fmt::Direction::Backward, a);
   EXPECT_NEAR(1, a[0].real, kEps);
   EXPECT_NEAR(2, a[0].imag, kEps);
   EXPECT_NEAR(3, a[1].real, kEps);
@@ -31,14 +31,14 @@ TEST(DftTest, DftTest) {
 
   for (int64 k = 1; k <= 10; ++k) {
     const int n = 1 << k;
-    Fmt::Config config(n);
+    Dft dft(n);
     Complex a[n];
     for (int i = 0; i < n; ++i) {
       a[i].real = i;
       a[i].imag = i + n;
     }
-    Dft::Transform(config, Fmt::Direction::Forward, a);
-    Dft::Transform(config, Fmt::Direction::Backward, a);
+    dft.Transform(Fmt::Direction::Forward, a);
+    dft.Transform(Fmt::Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k;
       ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k;

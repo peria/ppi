@@ -39,7 +39,8 @@ void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double*
     ca[n / 4].imag = -ca[n / 4].imag;
   }
 
-  Dft::Transform(config, dir, ca);
+  Dft dft(config.n);
+  dft.Transform(dir, ca);
 
   if (dir == Fmt::Direction::Forward) {
     double x0r = a[0];

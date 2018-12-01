@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/base.h"
+#include "base/complex.h"
 #include "fmt/fmt.h"
 #include "fmt/rft.h"
 
