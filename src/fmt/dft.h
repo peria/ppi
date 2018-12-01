@@ -8,12 +8,14 @@ namespace ppi {
 namespace fmt {
 
 // Computes DFT in complex field.
-class Dft {
+class Dft : public Fmt {
  public:
+  using Fmt::Direction;
+
   Dft(const int64 n);
 
   // Compute DFT of |a|.
-  void Transform(const Fmt::Direction, Complex* a) const;
+  void Transform(const Direction, Complex* a) const;
 
  private:
   void radix2(const int64 height,

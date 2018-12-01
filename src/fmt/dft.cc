@@ -15,7 +15,6 @@ namespace fmt {
 
 namespace {
 
-const int64 kMaxSize = 1 << 21;
 Complex* g_work = nullptr;
 
 Complex* WorkArea(int64 size) {
@@ -25,21 +24,6 @@ Complex* WorkArea(int64 size) {
     g_work = base::Allocator::Allocate<Complex>(size * 2);
   }
   return g_work;
-}
-
-int64 FitSize(const int n) {
-  static constexpr int64 kAcceptSizes[] {
-    1LL, 1LL << 1, 1LL << 2, 5LL, 1LL << 3, 5LL << 1, 1LL << 4, 5LL << 2,
-    1LL << 5, 5LL << 3, 1LL << 6, 5LL << 4, 1LL << 7, 5LL << 5,
-    1LL << 8, 5LL << 6, 1LL << 9, 5LL << 7, 1LL << 10, 5LL << 8,
-    1LL << 11, 5LL << 9, 1LL << 12, 5LL << 10, 1LL << 13, 5LL << 11,
-    1LL << 14, 5LL << 12, 1LL << 15, 5LL << 13, 1LL << 16, 5LL << 14,
-    1LL << 17, 5LL << 15, 1LL << 18, 5LL << 16, 1LL << 19, 5LL << 17,
-    1LL << 20, 5LL << 18, 1LL << 21, 5LL << 19, 1LL << 22, 5LL << 20,
-  };
-  static const int64 kSize = ARRAY_SIZE(kAcceptSizes);
-  DCHECK_LE(n, kAcceptSizes[kSize - 1]);
-  return *std::lower_bound(kAcceptSizes, kAcceptSizes + kSize, n);
 }
 
 int64 GetExpOf2(const int64 n) {
@@ -89,16 +73,16 @@ Complex* InitTable(const int64 n, const int64 log2n) {
 }  // namespace
 
 Dft::Dft(const int64 n)
-  : n_(FitSize(n)),
+    : n_(n),
     log2n_(GetExpOf2(n_)),
     log4n_((log2n_ > 1) ? 2 - (log2n_ + 2) % 3 : 0),
     log8n_((log2n_ > 1) ? (log2n_ - 2 * log4n_) / 3 : 0),
     table_(InitTable(n_, log2n_)) {
-  DCHECK((n_ >> log2n_) == 1 || (n_ >> log2n_) == 5);
+  DCHECK((1LL << log2n_) == n_ || (5LL << log2n_) == n_);
 }
 
-void Dft::Transform(const Fmt::Direction dir, Complex* a) const {
-  if (dir == Fmt::Direction::Backward) {
+void Dft::Transform(const Direction dir, Complex* a) const {
+  if (dir == Direction::Backward) {
     for (int64 i = 0; i < n_; ++i) {
       a[i].imag = -a[i].imag;
     }
@@ -146,7 +130,7 @@ void Dft::Transform(const Fmt::Direction dir, Complex* a) const {
   }
 #endif
 
-  if (dir == Fmt::Direction::Backward) {
+  if (dir == Direction::Backward) {
     double inverse = 1.0 / n_;
     for (int64 i = 0; i < n_; ++i) {
       a[i].real *= inverse;

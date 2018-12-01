@@ -14,15 +14,6 @@ public:
     Forward,
     Backward,
   };
-
-  struct Config {
-    explicit Config(int64 n);
-    ~Config();
-
-    int64 n;
-    int64 log2n;
-    Complex* table;
-  };
 };
 
 }  // namespace fmt
