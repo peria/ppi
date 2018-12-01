@@ -11,7 +11,7 @@ jobs:
           # TODO: Check in unit-test specific files in this repository
           command: |
             apt-get update
-            apt-get install -y git clang cmake ninja-build
+            apt-get install -y git clang cmake ninja-build libgflags-dev libgoogle-glog-dev
             git submodule init
             git submodule update
             ./build/ci.sh

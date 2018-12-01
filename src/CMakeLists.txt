@@ -20,10 +20,10 @@ add_subdirectory(third_party)
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
 
+find_library(LIB_GFLAGS gflags)
+pkg_search_module(GLOG REQUIRED libglog)
+
 include_directories(.)
-include_directories(${CMAKE_BINARY_DIR}/third_party/gflags/include)
-include_directories(${CMAKE_BINARY_DIR}/third_party/glog)
-include_directories(third_party/glog/src)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 function(ppi_add_cxx_flags flags)
