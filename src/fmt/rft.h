@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base/base.h"
-#include "fmt/fmt.h"
+#include "fmt/dft.h"
 
 namespace ppi {
 namespace fmt {
@@ -9,10 +9,15 @@ namespace fmt {
 // Computes DFT in real number field.
 // (Actually, this is a proxy between real and complex number fields
 // to compute DFTs)
-class Rft {
+class Rft : public Dft {
  public:
+  Rft(const int64 n);
+
   // Compute DFT of |a|.
-  static void Transform(const Fmt::Config& config, const Fmt::Direction dir, double* a);
+  void Transform(const Fmt::Direction dir, double* a) const;
+
+ private:
+  const int64 n_;
 };
 
 }  // namespace fmt

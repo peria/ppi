@@ -1,5 +1,7 @@
 #include "fmt/rft.h"
 
+#include <glog/logging.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -12,8 +14,12 @@
 namespace ppi {
 namespace fmt {
 
-void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double* a) {
-  const int64 n = config.n * 2;
+Rft::Rft(const int64 n)
+    : Dft(n / 2), n_(n) {
+  DCHECK_EQ(0, n % 4);
+}
+
+void Rft::Transform(const Fmt::Direction dir, double* a) const {
   Complex* ca = reinterpret_cast<Complex*>(a);
 
   if (dir == Fmt::Direction::Backward) {
@@ -21,10 +27,10 @@ void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double*
     double x0i = a[1];
     a[0] = (x0r + x0i) * 0.5;
     a[1] = (x0r - x0i) * 0.5;
-    const double th = -2 * M_PI / n;
-    for (int64 i = 1; i < n / 4; ++i) {
+    const double th = -2 * M_PI / n_;
+    for (int64 i = 1; i < n_ / 4; ++i) {
       Complex& x0 = ca[i];
-      Complex& x1 = ca[n / 2 - i];
+      Complex& x1 = ca[n_ / 2 - i];
       double xr = x0.real - x1.real;
       double xi = x0.imag + x1.imag;
       double wr = 1 - std::sin(th * i);
@@ -36,21 +42,20 @@ void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double*
       x1.real += ar;
       x1.imag -= ai;
     }
-    ca[n / 4].imag = -ca[n / 4].imag;
+    ca[n_ / 4].imag = -ca[n_ / 4].imag;
   }
 
-  Dft dft(config.n);
-  dft.Transform(dir, ca);
+  Dft::Transform(dir, ca);
 
   if (dir == Fmt::Direction::Forward) {
     double x0r = a[0];
     double x0i = a[1];
     a[0] = x0r + x0i;
     a[1] = x0r - x0i;
-    const double th = -2 * M_PI / n;
-    for (int64 i = 1; i < n / 4; ++i) {
+    const double th = -2 * M_PI / n_;
+    for (int64 i = 1; i < n_ / 4; ++i) {
       Complex& x0 = ca[i];
-      Complex& x1 = ca[n / 2 - i];
+      Complex& x1 = ca[n_ / 2 - i];
       double xr = x0.real - x1.real;
       double xi = x0.imag + x1.imag;
       double wr = 1 - std::sin(th * i);
@@ -62,7 +67,7 @@ void Rft::Transform(const Fmt::Config& config, const Fmt::Direction dir, double*
       x1.real += ar;
       x1.imag -= ai;
     }
-    ca[n / 4].imag = -ca[n / 4].imag;
+    ca[n_ / 4].imag = -ca[n_ / 4].imag;
   }
 }
 

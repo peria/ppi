@@ -10,13 +10,13 @@ TEST(RftTest, OverallTest) {
 
   for (int64 k = 2; k <= 10; ++k) {
     const int n = 1 << k;
-    Fmt::Config config(n / 2);
+    Rft rft(n);
     double a[n];
     for (int i = 0; i < n; ++i) {
       a[i] = i;
     }
-    Rft::Transform(config, Fmt::Direction::Forward, a);
-    Rft::Transform(config, Fmt::Direction::Backward, a);
+    rft.Transform(Fmt::Direction::Forward, a);
+    rft.Transform(Fmt::Direction::Backward, a);
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i], kEps) << "index=" << i << ", n=2^" << k;
     }
