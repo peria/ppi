@@ -273,37 +273,22 @@ void Natural::Split4(const uint64* a,
   static constexpr double kDoubleBase = (1ULL << kMaskBitSize);
   static constexpr double kHalfBase = kDoubleBase / 2;
 
-  for (int64 i = 0; i < std::min(n, na); ++i) {
+  for (int64 i = 0; i < na; ++i) {
     uint64 ia = a[i];
     ca[4 * i] = ia & kMask;
     ca[4 * i + 1] = (ia >> kMaskBitSize) & kMask;
     ca[4 * i + 2] = (ia >> (kMaskBitSize * 2)) & kMask;
     ca[4 * i + 3] = ia >> (kMaskBitSize * 3);
-
-    if (ca[4 * i] >= kHalfBase) {
-      ca[4 * i] -= kDoubleBase;
-      ca[4 * i + 1] += 1;
-    }
-    if (ca[4 * i + 1] >= kHalfBase) {
-      ca[4 * i + 1] -= kDoubleBase;
-      ca[4 * i + 2] += 1;
-    }
-    if (ca[4 * i + 2] >= kHalfBase) {
-      ca[4 * i + 2] -= kDoubleBase;
-      ca[4 * i + 3] += 1;
-    }
   }
   for (int64 i = 4 * na; i < 4 * n; ++i) {
     ca[i] = 0;
   }
 
-  // Nega-cyclic part
-  for (int64 i = n, j = 0; i < na; ++i, ++j) {
-    uint64 ia = a[i];
-    ca[4 * j] -= ia & kMask;
-    ca[4 * j + 1] -= (ia >> kMaskBitSize) & kMask;
-    ca[4 * j + 2] -= (ia >> (kMaskBitSize * 2)) & kMask;
-    ca[4 * j + 3] -= ia >> (kMaskBitSize * 3);
+  for (int64 i = 0; i < 4 * na; ++i) {
+    if (ca[i] >= kHalfBase) {
+      ca[i] -= kDoubleBase;
+      ca[i + 1] += 1;
+    }
   }
 }
 
@@ -320,6 +305,9 @@ double Natural::Gather4(double* ca, const int64 n, uint64* a) {
     carry = std::floor(d / kDoubleBase);
     ca[i] = d - carry * kDoubleBase;
   }
+  // Because of cyclic convolution, we may have a carry from
+  // MSD to LSD.
+  ca[0] += carry;
 
   // Normalize & re-alignment
   for (int64 i = 0; i < n; ++i) {
