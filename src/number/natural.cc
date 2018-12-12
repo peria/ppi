@@ -284,11 +284,15 @@ void Natural::Split4(const uint64* a,
     ca[i] = 0;
   }
 
-  for (int64 i = 0; i < 4 * na; ++i) {
+  for (int64 i = 0; i < 4 * na - 1; ++i) {
     if (ca[i] >= kHalfBase) {
       ca[i] -= kDoubleBase;
       ca[i + 1] += 1;
     }
+  }
+  if (ca[4 * na - 1] >= kHalfBase) {
+    ca[4 * na - 1] -= kDoubleBase;
+    ca[0] += 1;
   }
 }
 
