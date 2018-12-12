@@ -290,10 +290,6 @@ void Natural::Split4(const uint64* a,
       ca[i + 1] += 1;
     }
   }
-  if (ca[4 * na - 1] >= kHalfBase) {
-    ca[4 * na - 1] -= kDoubleBase;
-    ca[0] += 1;
-  }
 }
 
 double Natural::Gather4(double* ca, const int64 n, uint64* a) {

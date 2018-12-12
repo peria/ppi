@@ -98,10 +98,10 @@ TEST(NaturalTest, Div2By1) {
 }
 
 TEST(NaturalTest, Split) {
-  uint64 a[] = {0x1234567890abcdefULL};
+  uint64 a = 0x1234567890abcdefULL;
   double b[4];
 
-  NaturalForTest::Split4(a, 1, 1, b);
+  NaturalForTest::Split4(&a, 1, 1, b);
   EXPECT_EQ(static_cast<double>(0xcdef - 0x10000), b[0]);
   EXPECT_EQ(static_cast<double>(0x90ab + 1 - 0x10000), b[1]);
   EXPECT_EQ(static_cast<double>(0x5678 + 1), b[2]);
