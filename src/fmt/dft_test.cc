@@ -9,7 +9,7 @@ namespace ppi {
 namespace fmt {
 
 TEST(DftTest, Dft2ElemTest) {
-  const double kEps = 1e-10;
+  static constexpr double kEps = 1e-10;
   Dft dft(2);
 
   Complex a[] = {{1, 2}, {3, 4}};

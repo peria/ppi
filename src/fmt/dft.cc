@@ -77,7 +77,8 @@ Dft::Parameters::~Parameters() {
 }
 
 Dft::Dft(const int64 n) : param_(n) {
-  DCHECK((1LL << param_.log2n) == n || (5LL << param_.log2n) == n);
+  DCHECK((1LL << param_.log2n) == n || (5LL << param_.log2n) == n)
+    << param_.log2n << " " << n;
 }
 
 void Dft::Transform(const Direction dir, Complex* a) const {
