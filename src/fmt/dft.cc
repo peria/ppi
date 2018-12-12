@@ -37,12 +37,13 @@ int64 GetExpOf2(const int64 n) {
 
 Dft::Parameters::Parameters(int64 n)
   : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
-  log2n = GetExpOf2(n);
-  DCHECK(n == (1LL << log2n) || n == (5LL << log2n));
+  this->log2n = GetExpOf2(n);
+  DCHECK(this->n == (1LL << this->log2n) ||
+         this->n == (5LL << this->log2n));
 
   if (log2n > 1) {
-    log4n = 2 - (log2n + 2) % 3;
-    log8n = (log2n - 2 * log4n) / 3;
+    this->log4n = 2 - (this->log2n + 2) % 3;
+    this->log8n = (this->log2n - 2 * this->log4n) / 3;
   }
 
   auto setTable = [](const int64 r, const int64 height, Complex* table) {
@@ -55,20 +56,20 @@ Dft::Parameters::Parameters(int64 n)
     }
   };
 
-  table = base::Allocator::Allocate<Complex>(2 * n);
+  table = base::Allocator::Allocate<Complex>(2 * this->n);
   Complex* tbl = table;
   int64 height = n;
-  for (int64 i = 0; i < log8n; ++i) {
+  for (int64 i = 0; i < this->log8n; ++i) {
     height /= 8;
     setTable(8, height, tbl);
     tbl += 7 * height;
   }
-  for (int64 i = 0; i < log4n; ++i) {
+  for (int64 i = 0; i < this->log4n; ++i) {
     height /= 4;
     setTable(4, height, tbl);
     tbl += 3 * height;
   }
-  if (log2n == 1) {
+  if (this->log2n == 1) {
     height /= 2;
     setTable(2, height, tbl);
   }
