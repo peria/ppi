@@ -15,13 +15,12 @@ endif()
 find_package(Threads REQUIRED)
 find_package(PkgConfig)
 
-add_subdirectory(third_party)
-
 # ----------------------------------------------------------------------
 # Set include directories, c++ options, etc.
 
 find_library(LIB_GFLAGS gflags)
 pkg_search_module(GLOG REQUIRED libglog)
+add_subdirectory(third_party)
 
 include_directories(.)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
