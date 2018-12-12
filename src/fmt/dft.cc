@@ -38,14 +38,8 @@ int64 GetExpOf2(const int64 n) {
 Dft::Parameters::Parameters(int64 n)
   : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
   log2n = GetExpOf2(n);
+  DCHECK(n == (1LL << log2n) || n == (5LL << log2n));
 
-#if DCHECK_IS_ON()
-  if (n % 5) {
-    CHECK_EQ(1LL << log2n, n);
-  } else {
-    CHECK_EQ(5LL << log2n, n);
-  }
-#endif
   if (log2n > 1) {
     log4n = 2 - (log2n + 2) % 3;
     log8n = (log2n - 2 * log4n) / 3;
