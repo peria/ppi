@@ -9,9 +9,9 @@ namespace fmt {
 
 // Computes DFT in complex field.
 class Dft {
-  struct Parameters {
-    Parameters(int64 n);
-    ~Parameters();
+  struct Setting {
+    Setting(int64 n);
+    ~Setting();
 
     int64 n;
     int64 log2n;
@@ -42,7 +42,7 @@ class Dft {
               Complex* x,
               Complex* y) const;
 
-  const Parameters param_;
+  const Setting setting_;
 };
 
 }  // namespace fmt

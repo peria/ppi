@@ -35,11 +35,9 @@ int64 GetExpOf2(const int64 n) {
 
 }  // namespace
 
-Dft::Parameters::Parameters(int64 n)
+Dft::Setting::Setting(int64 n)
   : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
-  this->log2n = GetExpOf2(n);
-  DCHECK(this->n == (1LL << this->log2n) ||
-         this->n == (5LL << this->log2n));
+  this->log2n = GetExpOf2(this->n);
 
   if (log2n > 1) {
     this->log4n = 2 - (this->log2n + 2) % 3;
@@ -75,14 +73,17 @@ Dft::Parameters::Parameters(int64 n)
   }
 }
 
-Dft::Parameters::~Parameters() {
+Dft::Setting::~Setting() {
   base::Allocator::Deallocate(table);
 }
 
-Dft::Dft(const int64 n) : param_(n) {}
+Dft::Dft(const int64 n) : setting_(n) {
+  DCHECK(setting_.n == (1LL << setting_.log2n) ||
+         setting_.n == (5LL << setting_.log2n));
+}
 
 void Dft::Transform(const Direction dir, Complex* a) const {
-  const int64 n = param_.n;
+  const int64 n = setting_.n;
   if (dir == Direction::Backward) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;
@@ -91,11 +92,11 @@ void Dft::Transform(const Direction dir, Complex* a) const {
 
   Complex* x = a;
   Complex* y = WorkArea(n);
-  const Complex* table = param_.table;
+  const Complex* table = setting_.table;
 
   bool data_in_x = true;
   int64 width = 1, height = n;
-  for (int64 i = 0; i < param_.log8n; ++i) {
+  for (int64 i = 0; i < setting_.log8n; ++i) {
     height /= 8;
     if (data_in_x) {
       radix8(width, height, table, x, (height > 1) ? y : x);
@@ -106,7 +107,7 @@ void Dft::Transform(const Direction dir, Complex* a) const {
     width *= 8;
     table += 7 * height;
   }
-  for (int64 i = 0; i < param_.log4n; ++i) {
+  for (int64 i = 0; i < setting_.log4n; ++i) {
     height /= 4;
     if (data_in_x) {
       radix4(width, height, table, x, (height > 1) ? y : x);
@@ -117,7 +118,7 @@ void Dft::Transform(const Direction dir, Complex* a) const {
     width *= 4;
     table += 3 * height;
   }
-  if (param_.log2n == 1) {
+  if (setting_.log2n == 1) {
     height /= 2;
     radix2(height, table, x, (height > 1) ? y : x);
     data_in_x = (height == 1);
