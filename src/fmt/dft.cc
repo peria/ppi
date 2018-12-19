@@ -33,118 +33,7 @@ int64 GetExpOf2(const int64 n) {
   return log2n;
 }
 
-}  // namespace
-
-Dft::Setting::Setting(int64 n)
-  : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
-  this->log2n = GetExpOf2(this->n);
-
-  if (log2n > 1) {
-    this->log4n = 2 - (this->log2n + 2) % 3;
-    this->log8n = (this->log2n - 2 * this->log4n) / 3;
-  }
-
-  auto setTable = [](const int64 r, const int64 height, Complex* table) {
-    const double theta = -2.0 * M_PI / (r * height);
-    for (int64 i = 0; i < height; ++i) {
-      for (int64 j = 1; j < r; ++j) {
-        double t = theta * i * j;
-        table[i * (r - 1) + j - 1] = Complex{std::cos(t), std::sin(t)};
-      }
-    }
-  };
-
-  table = base::Allocator::Allocate<Complex>(2 * this->n);
-  Complex* tbl = table;
-  int64 height = n;
-  for (int64 i = 0; i < this->log8n; ++i) {
-    height /= 8;
-    setTable(8, height, tbl);
-    tbl += 7 * height;
-  }
-  for (int64 i = 0; i < this->log4n; ++i) {
-    height /= 4;
-    setTable(4, height, tbl);
-    tbl += 3 * height;
-  }
-  if (this->log2n == 1) {
-    height /= 2;
-    setTable(2, height, tbl);
-  }
-}
-
-Dft::Setting::~Setting() {
-  base::Allocator::Deallocate(table);
-}
-
-Dft::Dft(const int64 n) : setting_(n) {
-  DCHECK(setting_.n == (1LL << setting_.log2n) ||
-         setting_.n == (5LL << setting_.log2n));
-}
-
-void Dft::Transform(const Direction dir, Complex* a) const {
-  const int64 n = setting_.n;
-  if (dir == Direction::Backward) {
-    for (int64 i = 0; i < n; ++i) {
-      a[i].imag = -a[i].imag;
-    }
-  }
-
-  Complex* x = a;
-  Complex* y = WorkArea(n);
-  const Complex* table = setting_.table;
-
-  bool data_in_x = true;
-  int64 width = 1, height = n;
-  for (int64 i = 0; i < setting_.log8n; ++i) {
-    height /= 8;
-    if (data_in_x) {
-      radix8(width, height, table, x, (height > 1) ? y : x);
-    } else {
-      radix8(width, height, table, y, x);
-    }
-    data_in_x = !data_in_x;
-    width *= 8;
-    table += 7 * height;
-  }
-  for (int64 i = 0; i < setting_.log4n; ++i) {
-    height /= 4;
-    if (data_in_x) {
-      radix4(width, height, table, x, (height > 1) ? y : x);
-    } else {
-      radix4(width, height, table, y, x);
-    }
-    data_in_x = !data_in_x;
-    width *= 4;
-    table += 3 * height;
-  }
-  if (setting_.log2n == 1) {
-    height /= 2;
-    radix2(height, table, x, (height > 1) ? y : x);
-    data_in_x = (height == 1);
-    width *= 2;
-  }
-
-#if 0
-  if (n % 5 == 0) {
-    height /= 5;
-    radix5(width, height, data_in_x ? x : y, x);
-  }
-#endif
-
-  if (dir == Direction::Backward) {
-    double inverse = 1.0 / n;
-    for (int64 i = 0; i < n; ++i) {
-      a[i].real *= inverse;
-      a[i].imag *= -inverse;
-    }
-  }
-}
-
-void Dft::radix2(const int64 height,
-                 const Complex* table,
-                 Complex* x,
-                 Complex* y) const {
+void Radix2(const int64 height, const Complex* table, Complex* x, Complex* y) {
 #define X(A, B) x[(A)*height + (B)]
 #define Y(A, B) y[(A)*2 + (B)]
   Complex c0 = X(0, 0);
@@ -166,11 +55,11 @@ void Dft::radix2(const int64 height,
 #undef Y
 }
 
-void Dft::radix4(const int64 width,
-                 const int64 height,
-                 const Complex* table,
-                 Complex* x,
-                 Complex* y) const {
+void Radix4(const int64 width,
+            const int64 height,
+            const Complex* table,
+            Complex* x,
+            Complex* y) {
 #define X(A, B, C) x[((A)*height + (B)) * width + (C)]
 #define Y(A, B, C) y[((A)*4 + (B)) * width + (C)]
   for (int64 i = 0; i < width; ++i) {
@@ -210,11 +99,11 @@ void Dft::radix4(const int64 width,
 #undef Y
 }
 
-void Dft::radix8(const int64 width,
-                 const int64 height,
-                 const Complex* table,
-                 Complex* x,
-                 Complex* y) const {
+void Radix8(const int64 width,
+            const int64 height,
+            const Complex* table,
+            Complex* x,
+            Complex* y) {
 #define X(A, B, C) x[((A)*height + (B)) * width + (C)]
 #define Y(A, B, C) y[((A)*8 + (B)) * width + (C)]
   static constexpr double kC81 = 0.70710678118654752;
@@ -302,6 +191,120 @@ void Dft::radix8(const int64 width,
   }
 #undef X
 #undef Y
+}
+
+}  // namespace
+
+Dft::Setting::Setting(int64 n)
+    : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
+  this->log2n = GetExpOf2(this->n);
+
+  if (log2n > 1) {
+    this->log4n = 2 - (this->log2n + 2) % 3;
+    this->log8n = (this->log2n - 2 * this->log4n) / 3;
+  }
+
+  auto setTable = [](const int64 r, const int64 height, Complex* table) {
+    const double theta = -2.0 * M_PI / (r * height);
+    for (int64 i = 0; i < height; ++i) {
+      for (int64 j = 1; j < r; ++j) {
+        double t = theta * i * j;
+        table[i * (r - 1) + j - 1] = Complex{std::cos(t), std::sin(t)};
+      }
+    }
+  };
+
+  table = base::Allocator::Allocate<Complex>(2 * this->n);
+  Complex* tbl = table;
+  int64 height = n;
+  for (int64 i = 0; i < this->log8n; ++i) {
+    height /= 8;
+    setTable(8, height, tbl);
+    tbl += 7 * height;
+  }
+  for (int64 i = 0; i < this->log4n; ++i) {
+    height /= 4;
+    setTable(4, height, tbl);
+    tbl += 3 * height;
+  }
+  if (this->log2n == 1) {
+    height /= 2;
+    setTable(2, height, tbl);
+  }
+}
+
+Dft::Setting::~Setting() {
+  base::Allocator::Deallocate(table);
+}
+
+Dft::Dft(const int64 n) : setting_(n) {
+  DCHECK(setting_.n == (1LL << setting_.log2n) ||
+         setting_.n == (5LL << setting_.log2n));
+}
+
+void Dft::Transform(const Direction dir, Complex* a) const {
+  const int64 n = setting_.n;
+  if (dir == Direction::Backward) {
+    for (int64 i = 0; i < n; ++i) {
+      a[i].imag = -a[i].imag;
+    }
+  }
+
+  Complex* work = WorkArea(n);
+  kernel(setting_, work, a);
+
+  if (dir == Direction::Backward) {
+    double inverse = 1.0 / n;
+    for (int64 i = 0; i < n; ++i) {
+      a[i].real *= inverse;
+      a[i].imag *= -inverse;
+    }
+  }
+}
+
+// static
+void Dft::kernel(const Setting& setting, Complex* work, Complex* a) {
+  Complex* x = a;
+  Complex* y = work;
+  const Complex* table = setting.table;
+
+  bool data_in_x = true;
+  int64 width = 1, height = setting.n;
+  for (int64 i = 0; i < setting.log8n; ++i) {
+    height /= 8;
+    if (data_in_x) {
+      Radix8(width, height, table, x, (height > 1) ? y : x);
+    } else {
+      Radix8(width, height, table, y, x);
+    }
+    data_in_x = !data_in_x;
+    width *= 8;
+    table += 7 * height;
+  }
+  for (int64 i = 0; i < setting.log4n; ++i) {
+    height /= 4;
+    if (data_in_x) {
+      Radix4(width, height, table, x, (height > 1) ? y : x);
+    } else {
+      Radix4(width, height, table, y, x);
+    }
+    data_in_x = !data_in_x;
+    width *= 4;
+    table += 3 * height;
+  }
+  if (setting.log2n == 1) {
+    height /= 2;
+    Radix2(height, table, x, (height > 1) ? y : x);
+    data_in_x = (height == 1);
+    width *= 2;
+  }
+
+#if 0
+  if (setting.n % 5 == 0) {
+    height /= 5;
+    Radix5(width, height, data_in_x ? x : y, x);
+  }
+#endif
 }
 
 }  // namespace fmt

@@ -27,20 +27,7 @@ class Dft {
   void Transform(const Direction, Complex* a) const;
 
  private:
-  void radix2(const int64 height,
-              const Complex* table,
-              Complex* x,
-              Complex* y) const;
-  void radix4(const int64 width,
-              const int64 height,
-              const Complex* table,
-              Complex* x,
-              Complex* y) const;
-  void radix8(const int64 width,
-              const int64 height,
-              const Complex* table,
-              Complex* x,
-              Complex* y) const;
+  static void kernel(const Setting& setting, Complex* work, Complex* a);
 
   const Setting setting_;
 };

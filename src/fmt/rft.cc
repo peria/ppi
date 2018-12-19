@@ -7,8 +7,7 @@
 namespace ppi {
 namespace fmt {
 
-Rft::Rft(const int64 n)
-    : Dft(n / 2), n_(n) {
+Rft::Rft(const int64 n) : Dft(n / 2), n_(n) {
   DCHECK_EQ(0, n % 4);
 }
 

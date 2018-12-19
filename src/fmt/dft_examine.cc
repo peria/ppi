@@ -52,7 +52,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
 
 using ppi::int64;
 
-int main(int, char*[]) {
+int main(int, char* []) {
   std::mt19937_64 rng;
   const int64 kMaxK = 1 << 21;
   a = new double[kMaxK];
