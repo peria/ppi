@@ -10,7 +10,8 @@ namespace fmt {
 // Computes DFT in complex field.
 class Dft {
   struct Setting {
-    Setting(int64 n);
+    enum class Axis { kFirst, kLast };
+    Setting(int64 n, const Axis axis = Axis::kLast);
     ~Setting();
 
     int64 n;
@@ -29,7 +30,8 @@ class Dft {
  private:
   static void kernel(const Setting& setting, Complex* work, Complex* a);
 
-  const Setting setting_;
+  const Setting setting1_;
+  const Setting setting2_;
 };
 
 }  // namespace fmt

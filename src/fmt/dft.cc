@@ -193,15 +193,25 @@ void Radix8(const int64 width,
 #undef Y
 }
 
+const int64 kL2CacheSize = 4 * 1024 * 1024;
+
 }  // namespace
 
-Dft::Setting::Setting(int64 n)
-    : n(n), log2n(0), log4n(0), log8n(0), table(nullptr) {
-  this->log2n = GetExpOf2(this->n);
+Dft::Setting::Setting(int64 n_, const Axis axis)
+    : n(n_), log2n(0), log4n(0), log8n(0), table(nullptr) {
+  const int64 exp2 = GetExpOf2(n);
+  if (axis == Axis::kFirst && kL2CacheSize / static_cast<int64>(sizeof(Complex)) / 3 < n) {
+    // Run a six-step FFT.
+    log2n = (exp2 + (n % 5 == 0 ? 2 : 0)) / 2;
+    n = 1LL << log2n;
+  } else {
+    // Run a simple FFT.
+    log2n = exp2;
+  }
 
   if (log2n > 1) {
-    this->log4n = 2 - (this->log2n + 2) % 3;
-    this->log8n = (this->log2n - 2 * this->log4n) / 3;
+    log4n = 2 - (log2n + 2) % 3;
+    log8n = (log2n - 2 * log4n) / 3;
   }
 
   auto setTable = [](const int64 r, const int64 height, Complex* table) {
@@ -214,20 +224,20 @@ Dft::Setting::Setting(int64 n)
     }
   };
 
-  table = base::Allocator::Allocate<Complex>(2 * this->n);
+  table = base::Allocator::Allocate<Complex>(2 * n);
   Complex* tbl = table;
   int64 height = n;
-  for (int64 i = 0; i < this->log8n; ++i) {
+  for (int64 i = 0; i < log8n; ++i) {
     height /= 8;
     setTable(8, height, tbl);
     tbl += 7 * height;
   }
-  for (int64 i = 0; i < this->log4n; ++i) {
+  for (int64 i = 0; i < log4n; ++i) {
     height /= 4;
     setTable(4, height, tbl);
     tbl += 3 * height;
   }
-  if (this->log2n == 1) {
+  if (log2n == 1) {
     height /= 2;
     setTable(2, height, tbl);
   }
@@ -237,21 +247,44 @@ Dft::Setting::~Setting() {
   base::Allocator::Deallocate(table);
 }
 
-Dft::Dft(const int64 n) : setting_(n) {
-  DCHECK(setting_.n == (1LL << setting_.log2n) ||
-         setting_.n == (5LL << setting_.log2n));
+Dft::Dft(const int64 n)
+    : setting1_(n, Setting::Axis::kFirst),
+      setting2_(n / setting1_.n) {
 }
 
 void Dft::Transform(const Direction dir, Complex* a) const {
-  const int64 n = setting_.n;
+  const int64 n = setting1_.n * setting2_.n;
   if (dir == Direction::Backward) {
     for (int64 i = 0; i < n; ++i) {
       a[i].imag = -a[i].imag;
     }
   }
 
-  Complex* work = WorkArea(n);
-  kernel(setting_, work, a);
+  if (setting2_.n == 1) {
+    // Run a simple FFT.
+    Complex* work = WorkArea(n);
+    kernel(setting1_, work, a);
+  } else {
+    // Run a six-step FFT.
+    const double theta = -2.0 * M_PI / n;
+    Complex* work = WorkArea((setting1_.n + 1) * 2);
+    Complex* temp = work + setting1_.n + 1;
+
+    for (int64 i = 0; i < setting2_.n; ++i) {
+      for (int64 j = 0; j < setting1_.n; ++j) {
+        temp[j] = a[j * setting2_.n + i];
+      }
+      kernel(setting1_, work, temp);
+      const double theta_i = theta * i;
+      for (int64 j = 0; j < setting1_.n; ++j) {
+        const double t = theta_i * j;
+        a[j * setting2_.n + i] = temp[j] * Complex {std::cos(t), std::sin(t)};
+      }
+    }
+    for (int64 i = 0; i < setting1_.n; ++i) {
+      kernel(setting2_, work, a + i * setting2_.n);
+    }
+  }
 
   if (dir == Direction::Backward) {
     double inverse = 1.0 / n;
