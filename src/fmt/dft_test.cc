@@ -46,5 +46,29 @@ TEST(DftTest, DftTest) {
   }
 }
 
+TEST(DftTest, SixStepFftTest) {
+  const double kEps = 1e-10;
+
+  for (int64 k = 2; k <= 10; ++k) {
+    const int64 k1 = k / 2;
+    const int64 k2 = k - k1;
+    const int64 n1 = 1 << k1;
+    const int64 n2 = 1 << k2;
+    const int64 n = n1 * n2;
+    Dft dft(n1, n2);
+    Complex a[n];
+    for (int i = 0; i < n; ++i) {
+      a[i].real = i;
+      a[i].imag = i + n;
+    }
+    dft.Transform(Direction::Forward, a);
+    dft.Transform(Direction::Backward, a);
+    for (int64 i = 0; i < n; ++i) {
+      ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
+      ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
+    }
+  }
+}
+
 }  // namespace fmt
 }  // namespace ppi

@@ -23,6 +23,8 @@ class Dft {
 
  public:
   Dft(const int64 n);
+  // Forcibly use 6 step FFT, for tests.
+  Dft(const int64 n1, const int64 m2);
 
   // Compute DFT of |a|.
   void Transform(const Direction, Complex* a) const;

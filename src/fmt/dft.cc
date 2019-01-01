@@ -252,6 +252,10 @@ Dft::Dft(const int64 n)
       setting2_(n / setting1_.n) {
 }
 
+Dft::Dft(const int64 n1, const int64 n2)
+    : setting1_(n1), setting2_(n2) {
+}
+
 void Dft::Transform(const Direction dir, Complex* a) const {
   const int64 n = setting1_.n * setting2_.n;
   if (dir == Direction::Backward) {
@@ -267,22 +271,25 @@ void Dft::Transform(const Direction dir, Complex* a) const {
   } else {
     // Run a six-step FFT.
     const double theta = -2.0 * M_PI / n;
-    Complex* work = WorkArea((setting1_.n + 1) * 2);
-    Complex* temp = work + setting1_.n + 1;
-
+    Complex* temp = WorkArea(n + (setting1_.n + 1) * 2);
+    Complex* work1 = temp + n;
+    Complex* work2 = work1 + setting1_.n + 1;
     for (int64 i = 0; i < setting2_.n; ++i) {
       for (int64 j = 0; j < setting1_.n; ++j) {
-        temp[j] = a[j * setting2_.n + i];
+        work1[j] = a[j * setting2_.n + i];
       }
-      kernel(setting1_, work, temp);
+      kernel(setting1_, work2, work1);
       const double theta_i = theta * i;
       for (int64 j = 0; j < setting1_.n; ++j) {
         const double t = theta_i * j;
-        a[j * setting2_.n + i] = temp[j] * Complex {std::cos(t), std::sin(t)};
+        temp[j * setting2_.n + i] = work1[j] * Complex {std::cos(t), std::sin(t)};
       }
     }
     for (int64 i = 0; i < setting1_.n; ++i) {
-      kernel(setting2_, work, a + i * setting2_.n);
+      kernel(setting2_, work1, temp + i * setting2_.n);
+      for (int64 j = 0; j < setting2_.n; ++j) {
+        a[j * setting1_.n + i] = temp[i * setting2_.n + j];
+      }
     }
   }
 
