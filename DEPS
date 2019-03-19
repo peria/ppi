@@ -7,13 +7,13 @@ deps = {
     "buildtools": "https://chromium.googlesource.com/chromium/buildtools@24ebce4578745db15274e180da1938ebc1358243",
 
     # gflags 2.2.1
-    "third_party/gflags/gflags": "https://github.com/gflags/gflags.git@46f73f88b18aee341538c0dfc22b1710a6abedef",
+    "src/third_party/gflags/gflags": "https://github.com/gflags/gflags.git@46f73f88b18aee341538c0dfc22b1710a6abedef",
 
     # google-glog
-    "third_party/glog/glog": "https://github.com/google/glog.git@2063b387080c1e7adffd33ca07adff0eb346ff1a",
+    "src/third_party/glog/glog": "https://github.com/google/glog.git@2063b387080c1e7adffd33ca07adff0eb346ff1a",
 
     # googletest
-    "third_party/gtest/gtest": Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + '145d05750b15324899473340c8dd5af50d125d33',
+    "src/third_party/gtest/gtest": Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + '145d05750b15324899473340c8dd5af50d125d33',
 }
 
 hooks = [
