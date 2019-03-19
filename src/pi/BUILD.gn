@@ -15,7 +15,10 @@ static_library("pi") {
 
 executable("ppi") {
   sources = [ "pi_main.cc" ]
-  deps = [ ":pi" ]
+  deps = [
+    ":pi",
+    "//third_party/gflags",
+  ]
 }
 
 # executable("pi_benchmark") {
