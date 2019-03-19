@@ -1,0 +1,28 @@
+static_library("pi") {
+  sources = [
+    "arctan.cc",
+    "arctan.h",
+    "drm.cc",
+    "drm.h",
+  ]
+  deps = [
+    "//src/base",
+    "//src/number",
+  ]
+}
+
+# ----------------------------------------------------------------------
+
+executable("ppi") {
+  sources = [ "pi_main.cc" ]
+  deps = [ ":pi" ]
+}
+
+# executable("pi_benchmark") {
+#   testonly = true
+#   sources = [ "pi_benchmark.cc" ]
+#   deps = [
+#     ":pi",
+#     "//third_party/benchmark",
+#   ]
+# }

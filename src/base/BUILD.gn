@@ -1,0 +1,19 @@
+static_library("base") {
+  sources = [
+    "allocator.cc",
+    "allocator.h",
+    "base.cc",
+    "base.h",
+    "complex.h",
+    "macros.h",
+    "timer.cc",
+    "timer.h",
+    "util.cc",
+    "util.h",
+  ]
+
+  public_deps = [
+    "//third_party/glog",
+    "//third_party/gflags",
+  ]
+}

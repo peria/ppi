@@ -1,0 +1,56 @@
+static_library("number") {
+  sources = [
+    "integer.cc",
+    "integer.h",
+    "natural.cc",
+    "natural.h",
+    "real.cc",
+    "real.h",
+  ]
+  deps = [
+    "//src/base",
+    "//src/fmt",
+  ]
+}
+
+static_library("montgomery") {
+  sources = [
+    "montgomery.cc",
+    "montgomery.h",
+  ]
+  deps = [
+    "//src/base",
+  ]
+}
+
+# ----------------------------------------------------------------------
+
+executable("integer_test") {
+  testonly = true
+  sources = [ "integer_test.cc" ]
+  deps = [
+    ":number",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+
+executable("natural_test") {
+  testonly = true
+  sources = [ "natural_test.cc" ]
+  deps = [
+    ":number",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+
+executable("real_test") {
+  testonly = true
+  sources = [ "real_test.cc" ]
+  deps = [
+    ":number",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}

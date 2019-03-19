@@ -1,0 +1,66 @@
+static_library("fmt") {
+  sources = [
+    "dft.cc",
+    "dft.h",
+    "fmt.cc",
+    "fmt.h",
+    # "ntt.cc",
+    # "ntt.h",
+    "rft.cc",
+    "rft.h",
+  ]
+  deps = [
+    "//src/base",
+  ]
+}
+
+
+# ----------------------------------------------------------------------
+
+executable("dft_test") {
+  testonly = true
+  sources = [
+    "dft_test.cc",
+  ]
+  deps = [
+    ":fmt",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+
+# executable("ntt_test") {
+#   testonly = true
+#   sources = [
+#     "ntt_test.cc",
+#   ]
+#   deps = [
+#     ":fmt",
+#     "//third_party/gtest",
+#     "//third_party/gtest:gtest_main",
+#   ]
+# }
+
+executable("rft_test") {
+  testonly = true
+  sources = [
+    "rft_test.cc",
+  ]
+  deps = [
+    ":fmt",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+
+executable("dft_performance") {
+  testonly = true
+  sources = [
+    "dft_examine.cc",
+  ]
+  deps = [
+    ":fmt",
+    # "//third_party/gtest",
+    # "//third_party/gtest:gtest_main",
+  ]
+}
