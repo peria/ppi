@@ -1,0 +1,21 @@
+static_library("bbp") {
+  sources = [
+     "bbp.cc",
+     "bbp.h",
+  ]
+  deps = [
+    "//src/base",
+  ]
+}
+
+# ------------------------------------------
+
+executable("bbp_main") {
+  sources = [ "main.cc" ]
+  deps = [
+    ":bbp",
+    "//src/base",
+    "//third_party/glog",
+    "//third_party/gflags",
+  ]
+}
