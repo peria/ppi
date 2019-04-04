@@ -5,6 +5,8 @@ static_library("bbp") {
   ]
   deps = [
     "//src/base",
+    "//src/number",
+    "//src/number:montgomery"
   ]
 }
 
