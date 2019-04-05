@@ -21,3 +21,15 @@ executable("bbp_main") {
     "//third_party/gflags",
   ]
 }
+
+executable("bbp_test") {
+  testonly = true
+  sources = [ "bbp_test.cc" ]
+  deps = [
+    ":bbp",
+    "//src/base",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+

@@ -9,6 +9,8 @@
 
 namespace ppi {
 
+const int64 Bbp::kLength = 4;  // 4 * 64bit
+
 namespace {
 
 struct Term {
@@ -30,8 +32,6 @@ struct Term {
   Sign sign;
   Flip flip;
 };
-
-constexpr int64 kLength = 4;  // 4 * 64bit
 
 std::vector<Term> getFormula(const Bbp::Formula& formula) {
   using Sign = Term::Sign;
@@ -69,7 +69,7 @@ std::vector<uint64> Div(uint64 a, uint64 b, const int64 n) {
 
 void Add(std::vector<uint64>& val, const std::vector<uint64>& rval) {
   uint64 carry = 0;
-  for (int64 i = 0; i < kLength; ++i) {
+  for (int64 i = 0; i < Bbp::kLength; ++i) {
     uint64 sum = val[i] + carry;
     carry = (sum < val[i]);  // 0 or 1
     val[i] = sum + rval[i];
@@ -80,7 +80,7 @@ void Add(std::vector<uint64>& val, const std::vector<uint64>& rval) {
 
 void Subtract(std::vector<uint64>& val, const std::vector<uint64>& rval) {
   uint64 borrow = 0;
-  for (int64 i = 0; i < kLength; ++i) {
+  for (int64 i = 0; i < Bbp::kLength; ++i) {
     uint64 sum = val[i] - borrow;
     borrow = (sum > val[i]);  // 0 or 1
     val[i] = sum - rval[i];
@@ -91,12 +91,12 @@ void Subtract(std::vector<uint64>& val, const std::vector<uint64>& rval) {
 
 std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
   CHECK_GE(bit_index, 1);
-  std::vector<uint64> ret(kLength, 0);
+  std::vector<uint64> ret(Bbp::kLength, 0);
 
   const int64 bit_shift = bit_index - 1 + term.a;
 
   const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b;
-  const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
+  const int64 zero_n = (bit_shift + 64 * Bbp::kLength) / term.b;
   VLOG(1) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
 
   // Where (2^A/2^(k*B)) is integral
@@ -104,7 +104,7 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
     int64 shift = bit_shift - i * term.b;
     const uint64 mod = term.c * i + term.d;
     uint64 rem = number::Power(2, shift, mod);
-    std::vector<uint64> q = Div(rem, mod, kLength);
+    std::vector<uint64> q = Div(rem, mod, Bbp::kLength);
     if (term.flip == Term::Flip::kFlip && i % 2 == 1)
       Subtract(ret, q);
     else
@@ -113,13 +113,13 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
 
   // Where (2^A/2^(k*B)) < 1
   for (int64 i = integer_n + 1; i <= zero_n; ++i) {
-    int64 shift = bit_shift + 64 * kLength - i * term.b;
+    int64 shift = bit_shift + 64 * Bbp::kLength - i * term.b;
     DCHECK_GE(shift, 0);
     const uint64 mod = term.c * i + term.d;
-    std::vector<uint64> q(kLength, 0);
+    std::vector<uint64> q(Bbp::kLength, 0);
     q[shift / 64] = 1ULL << (shift % 64);
     // q = (1 << shift) / mod
-    number::Natural::Div(q.data(), mod, kLength, q.data());
+    number::Natural::Div(q.data(), mod, Bbp::kLength, q.data());
     if (term.flip == Term::Flip::kFlip && i % 2 == 1)
       Subtract(ret, q);
     else

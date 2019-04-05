@@ -11,6 +11,8 @@ public:
     kBbp,
     kBellard,
   };
+  static const int64 kLength;
+
   Bbp(const Formula& formula);
 
   // Compute a part of pi, 64*4 bits from |hex_index|-th hexadecimal digit
