@@ -4,6 +4,7 @@ static_library("number") {
     "integer.h",
     "natural.cc",
     "natural.h",
+    "number.h",
     "real.cc",
     "real.h",
   ]

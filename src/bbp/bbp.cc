@@ -4,7 +4,7 @@
 #include <glog/logging.h>
 
 #include "base/timer.h"
-#include "number/montgomery.h"
+#include "number/number.h"
 #include "number/natural.h"
 
 namespace ppi {
@@ -103,7 +103,7 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
   for (int64 i = 0; i <= integer_n; ++i) {
     int64 shift = bit_shift - i * term.b;
     const uint64 mod = term.c * i + term.d;
-    uint64 rem = number::Montgomery::Power(2, shift, mod);
+    uint64 rem = number::Power(2, shift, mod);
     std::vector<uint64> q = Div(rem, mod, kLength);
     if (term.flip == Term::Flip::kFlip && i % 2 == 1)
       Subtract(ret, q);

@@ -10,10 +10,12 @@ namespace number {
 namespace {
 
 const int64 kBitSize = 64;
+const uint64 kMSBit = 1ULL << (kBitSize - 1);
 const int64 kHalfBitSize = kBitSize / 2;
 const uint64 kLowerMask = (1ULL << kHalfBitSize) - 1;
-const uint64 kMSBit = 1ULL << (kBitSize - 1);
 
+// Computes uint64 * uint64 -> uint128. Stores higher 64bits in |dst| and
+// returns lower 64bits.
 uint64 Mult64_128(const uint64 a, const uint64 b, uint64* dst) {
   const uint64 ah = a >> kHalfBitSize;
   const uint64 al = a & kLowerMask;
@@ -51,9 +53,16 @@ uint64 GetNegativeInverse(uint64 a) {
 
 }  // namespace
 
-Montgomery::Montgomery(uint64 value) : value_(value) {}
+Montgomery::Montgomery(uint64 value) : value_(value) {
+#ifdef UINT128
+  DCHECK(false) << "You don't need to use Montgomery";
+#endif
+}
 
 Montgomery::Montgomery(uint64 value, uint64 mod) {
+#ifdef UINT128
+  DCHECK(false) << "You don't need to use Montgomery";
+#endif
   value %= mod;
   for (int64 i = 0; i < kBitSize; ++i) {
     uint64 nvalue = value << 1;
@@ -64,8 +73,10 @@ Montgomery::Montgomery(uint64 value, uint64 mod) {
   value_ = value;
 }
 
+// static
 uint64 Montgomery::Power(uint64 a, uint64 e, uint64 m) {
   DCHECK(m % 2);
+
   // inverse * m = -1 mod 2^64
   uint64 inverse = GetNegativeInverse(m);
 
@@ -79,6 +90,7 @@ uint64 Montgomery::Power(uint64 a, uint64 e, uint64 m) {
   return Mult(r, 1, m, inverse);
 }
 
+// static
 Montgomery Montgomery::Mult(const Montgomery& lhs,
                             const Montgomery& rhs,
                             uint64 mod,

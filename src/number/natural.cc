@@ -252,6 +252,15 @@ uint64 Natural::Div(const uint64* a, const uint64 b, const int64 n, uint64* c) {
 uint64 Natural::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
   DCHECK_LT(a, b);
 
+#ifdef UINT128
+  uint128 r(a);
+  for (int64 i = n - 1; i >= 0; --i) {
+    r <<= 64;
+    c[i] = r / b;
+    r %= b;
+  }
+  return static_cast<uint64>(r);
+#else
   // Normalize numbers to set divisor to have the MSB.
   const int64 shift = LeadingZeros(b);
   const uint64 bn = b << shift;
@@ -264,6 +273,7 @@ uint64 Natural::Div(const uint64 a, const uint64 b, const int64 n, uint64* c) {
     c[i] = DivCore(an, bn0, bn1, &rem);
   }
   return rem >> shift;
+#endif  // UINT128
 }
 
 void Natural::Split4(const uint64* a,
