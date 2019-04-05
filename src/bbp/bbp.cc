@@ -3,6 +3,7 @@
 #include <vector>
 #include <glog/logging.h>
 
+#include "base/timer.h"
 #include "number/montgomery.h"
 #include "number/natural.h"
 
@@ -94,9 +95,11 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
 
   const int64 bit_shift = bit_index - 1 + term.a;
 
-  // Where (2^A/2^(k*B)) is integral
   const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b;
-  LOG(INFO) << bit_shift << " " << term.b << " " << integer_n;
+  const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
+  LOG(INFO) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
+
+  // Where (2^A/2^(k*B)) is integral
   for (int64 i = 0; i <= integer_n; ++i) {
     int64 shift = bit_shift - i * term.b;
     const uint64 mod = term.c * i + term.d;
@@ -109,7 +112,6 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
   }
 
   // Where (2^A/2^(k*B)) < 1
-  const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
   for (int64 i = integer_n + 1; i <= zero_n; ++i) {
     int64 shift = bit_shift + 64 * kLength - i * term.b;
     DCHECK_GE(shift, 0);
@@ -135,9 +137,11 @@ Bbp::Bbp(const Formula& formula)
 std::vector<uint64> Bbp::compute(int64 hex_index) const {
   const std::vector<Term> terms(getFormula(formula_));
 
+  base::Timer all_timer;
   const int64 bit_index = hex_index * 4 - 3;
   std::vector<uint64> ret(kLength, 0);
   for (const auto& term : terms) {
+    base::Timer term_timer;
     DCHECK_EQ(term.d % 2, 1);
     std::vector<uint64> v = ComputeTerm(term, bit_index);
     switch (term.sign) {
@@ -148,7 +152,11 @@ std::vector<uint64> Bbp::compute(int64 hex_index) const {
       Subtract(ret, v);
       break;
     }
+    term_timer.Stop();
+    LOG(INFO) << "per term time: " << term_timer.GetTimeInSec() << " src";
   }
+  all_timer.Stop();
+  LOG(INFO) << "total time: " << all_timer.GetTimeInSec() << " src";
 
   return ret;
 }
