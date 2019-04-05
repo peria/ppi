@@ -97,7 +97,7 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
 
   const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b;
   const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
-  LOG(INFO) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
+  VLOG(1) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
 
   // Where (2^A/2^(k*B)) is integral
   for (int64 i = 0; i <= integer_n; ++i) {
