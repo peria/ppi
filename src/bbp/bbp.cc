@@ -10,7 +10,6 @@ namespace ppi {
 
 namespace {
 
-// Represents (-1)^sign * \sum_k (-1)^k 2^(a-b*k)/(c*k+d)
 struct Term {
   enum class Sign : uint8 {
     kPositive,
@@ -21,15 +20,45 @@ struct Term {
     kFlip,
   };
 
-  int64 a;
-  int64 b;
-  int64 c;
-  int64 d;  // d must be an odd number.
+  // Represents T[k]
+  //   T[k] = t[k]    if sign==kPositive
+  //          -t[k]   if sign==kNegative
+  //   t[k] = \sum_k 2^(a-b*k)/(c*k+d)          if flip==kNoFlip
+  //          \sum_k (-1)^k 2^(a-b*k)/(c*k+d)   if flip==kFlip
+  int64 a, b, c, d;
   Sign sign;
   Flip flip;
 };
 
 constexpr int64 kLength = 4;  // 4 * 64bit
+
+std::vector<Term> getFormula(const Bbp::Formula& formula) {
+  using Sign = Term::Sign;
+  using Flip = Term::Flip;
+
+  switch (formula) {
+  case Bbp::Formula::kBbp:
+    return {
+        { 2, 4, 8, 1, Sign::kPositive, Flip::kNoFlip},  //  2^(-4k+2)/(8k+1)
+        {-1, 4, 2, 1, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k-1)/(2k+1)
+        { 0, 4, 8, 5, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k  )/(8k+5)
+        {-1, 4, 4, 3, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k-1)/(4k+3)
+    };
+  case Bbp::Formula::kBellard:
+    return {
+        {-1, 10,  4, 1, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-1)/(4k+1)
+        {-6, 10,  4, 3, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-6)/(4k+3)
+        { 2, 10, 10, 1, Sign::kPositive, Flip::kFlip},  //  (-1)^k 2^(-10k+2)/(10k+1)
+        { 0, 10, 10, 3, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k  )/(10k+3)
+        {-4, 10, 10, 5, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+5)
+        {-4, 10, 10, 7, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+7)
+        {-6, 10, 10, 9, Sign::kPositive, Flip::kFlip},  //  (-1)^k 2^(-10k-6)/(10k+9)
+    };
+  }
+
+  CHECK(false);
+  return {};
+}
 
 std::vector<uint64> Div(uint64 a, uint64 b, const int64 n) {
   std::vector<uint64> r(n);
@@ -59,16 +88,19 @@ void Subtract(std::vector<uint64>& val, const std::vector<uint64>& rval) {
   }
 }
 
-std::vector<uint64> ComputeTerm(const Term& term, int64 bit_shift) {
+std::vector<uint64> ComputeTerm(const Term& term, int64 bit_index) {
+  CHECK_GE(bit_index, 1);
   std::vector<uint64> ret(kLength, 0);
 
-  // Integer
-  const int64 integer_n = (bit_shift + term.a) / term.b;
-  for (int64 i = 0; i < integer_n; ++i) {
-    int64 shift = bit_shift + term.a - i * term.b;
+  const int64 bit_shift = bit_index - 1 + term.a;
+
+  // Where (2^A/2^(k*B)) is integral
+  const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b;
+  LOG(INFO) << bit_shift << " " << term.b << " " << integer_n;
+  for (int64 i = 0; i <= integer_n; ++i) {
+    int64 shift = bit_shift - i * term.b;
     const uint64 mod = term.c * i + term.d;
     uint64 rem = number::Montgomery::Power(2, shift, mod);
-    // q = (rem << (kLength*64)) / mod
     std::vector<uint64> q = Div(rem, mod, kLength);
     if (term.flip == Term::Flip::kFlip && i % 2 == 1)
       Subtract(ret, q);
@@ -76,10 +108,10 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_shift) {
       Add(ret, q);
   }
 
-  // < 1
-  const int64 zero_n = (bit_shift + term.a + 64 * kLength) / term.b;
-  for (int64 i = integer_n; i < zero_n; ++i) {
-    int64 shift = bit_shift + term.a + 64 * kLength - i * term.b;
+  // Where (2^A/2^(k*B)) < 1
+  const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
+  for (int64 i = integer_n + 1; i <= zero_n; ++i) {
+    int64 shift = bit_shift + 64 * kLength - i * term.b;
     DCHECK_GE(shift, 0);
     const uint64 mod = term.c * i + term.d;
     std::vector<uint64> q(kLength, 0);
@@ -95,41 +127,24 @@ std::vector<uint64> ComputeTerm(const Term& term, int64 bit_shift) {
   return ret;
 }
 
-void Dump(const std::vector<uint64>& x) {
-  for (int i = x.size() - 1; i >= 0; --i) {
-    printf("%016lX ", x[i]);
-  }
-  puts("");
-}
-
 }  // namespace
 
 Bbp::Bbp(const Formula& formula)
-    : formula_(formula) {
-  (void)(formula_);
-}
+    : formula_(formula) {}
 
-std::vector<uint64> Bbp::compute(int64 hex_index) {
-  using Sign = Term::Sign;
-  using Flip = Term::Flip;
-  std::vector<Term> terms {
-    {2, 4, 8, 1, Sign::kPositive, Flip::kNoFlip},  // (4/16^k)/(8k+1)
-    {-1, 4, 2, 1, Sign::kNegative, Flip::kNoFlip},  // (-2/16^k)/(8k+4)
-    {0, 4, 8, 5, Sign::kNegative, Flip::kNoFlip},  // (-1/16^k)/(8k+5)
-    {-1, 4, 4, 3, Sign::kNegative, Flip::kNoFlip},  // (-1/16^k)/(8k+6)
-  };
+std::vector<uint64> Bbp::compute(int64 hex_index) const {
+  const std::vector<Term> terms(getFormula(formula_));
 
-  const int64 bit_shift = (hex_index - 1) * 4;
+  const int64 bit_index = hex_index * 4 - 3;
   std::vector<uint64> ret(kLength, 0);
   for (const auto& term : terms) {
     DCHECK_EQ(term.d % 2, 1);
-    std::vector<uint64> v = ComputeTerm(term, bit_shift);
-    Dump(v);
+    std::vector<uint64> v = ComputeTerm(term, bit_index);
     switch (term.sign) {
-    case Sign::kPositive:
+    case Term::Sign::kPositive:
       Add(ret, v);
       break;
-    case Sign::kNegative:
+    case Term::Sign::kNegative:
       Subtract(ret, v);
       break;
     }

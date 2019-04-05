@@ -8,7 +8,7 @@ namespace ppi {
 // C++11 allows us to implement code to take the array size.
 // If we pass non-array to this function, compile error will happen.
 template<typename T, std::size_t size>
-constexpr std::size_t ARRAY_SIZE(const T (&)[size]) {
+constexpr std::size_t array_size(const T (&)[size]) {
   return size;
 }
 

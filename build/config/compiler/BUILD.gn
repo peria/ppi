@@ -37,7 +37,10 @@ config("optimize") {
 
 config("no_optimize") {
   if (is_posix) {
-    cflags = [ "-O0" ]
+    cflags = [
+      "-O0",
+      "-W",
+    ]
   }
   if (is_win) {
     cflags = [
