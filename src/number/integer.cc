@@ -133,7 +133,7 @@ int64 MinPow2(int64 n) {
       1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 21, 1 << 22, 1 << 23,
       1 << 24, 1 << 25, 1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30,
   };
-  return *std::lower_bound(kCandidates, kCandidates + ARRAY_SIZE(kCandidates),
+  return *std::lower_bound(kCandidates, kCandidates + array_size(kCandidates),
                            n);
 }
 }  // namespace

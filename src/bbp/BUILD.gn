@@ -1,0 +1,35 @@
+static_library("bbp") {
+  sources = [
+     "bbp.cc",
+     "bbp.h",
+  ]
+  deps = [
+    "//src/base",
+    "//src/number",
+    "//src/number:montgomery"
+  ]
+}
+
+# ------------------------------------------
+
+executable("bbp_main") {
+  sources = [ "main.cc" ]
+  deps = [
+    ":bbp",
+    "//src/base",
+    "//third_party/glog",
+    "//third_party/gflags",
+  ]
+}
+
+executable("bbp_test") {
+  testonly = true
+  sources = [ "bbp_test.cc" ]
+  deps = [
+    ":bbp",
+    "//src/base",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
+

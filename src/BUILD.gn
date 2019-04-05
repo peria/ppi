@@ -1,6 +1,7 @@
 group("src") {
   deps = [
     "//src/base",
+    "//src/bbp",
     "//src/fmt",
     "//src/number",
     "//src/pi",
