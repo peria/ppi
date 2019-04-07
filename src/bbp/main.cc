@@ -10,7 +10,7 @@
 
 #include "base/base.h"
 
-DEFINE_int32(formula, 0, "Choose formula. 0:BBP, 1:Bellard.");
+DEFINE_int32(formula, 1, "Choose formula. 0:BBP, 1:Bellard.");
 
 namespace {
 
