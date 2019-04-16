@@ -40,7 +40,12 @@ public:
   std::vector<uint64> compute(int64 hex_index) const;
 
 private:
+  // Compute |bit_index|-th bit of a term |term| using BBP algorithm.
   void computeTerm(const Term& term, int64 bit_index, uint64* value) const;
+  // Compute a part of BBP term |term| wich shifting |bit_shift|, from |from|-th
+  // to |to|-th index.
+  void computeIntegralTerm(const Term& term, int64 bit_shift, int64 from,
+                           int64 to, uint64* value) const;
   std::vector<Term> getTerms() const;
 
   // |val| += |rval|

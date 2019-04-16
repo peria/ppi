@@ -45,25 +45,16 @@ void Bbp::computeTerm(const Term& term, int64 bit_index, uint64* ret) const {
   CHECK_GE(bit_index, 1);
 
   const int64 bit_shift = bit_index - 1 + term.a;
-  const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b;
+  const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b + 1;
   const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
   VLOG(1) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
 
   // Where 2^(A-k*B) is integral
-  uint64 q[kLength];
-  for (int64 i = 0; i <= integer_n; ++i) {
-    int64 shift = bit_shift - i * term.b;
-    const uint64 mod = term.c * i + term.d;
-    uint64 rem = number::Power(2, shift, mod);
-    number::Natural::Div(rem, mod, kLength, q);
-    if (term.flip == Term::Flip::kFlip && i % 2 == 1)
-      Subtract(ret, q);
-    else
-      Add(ret, q);
-  }
+  computeIntegralTerm(term, bit_shift, 0, integer_n, ret);
 
   // Where (2^A/2^(k*B)) < 1. This part is very short.
-  for (int64 i = integer_n + 1; i <= zero_n; ++i) {
+  uint64 q[kLength];
+  for (int64 i = integer_n; i <= zero_n; ++i) {
     int64 shift = bit_shift + 64 * kLength - i * term.b;
     DCHECK_GE(shift, 0);
     const uint64 mod = term.c * i + term.d;
@@ -77,6 +68,24 @@ void Bbp::computeTerm(const Term& term, int64 bit_index, uint64* ret) const {
     else
       Add(ret, q);
   }
+}
+
+void Bbp::computeIntegralTerm(const Term& term, int64 bit_shift, int64 from,
+                              int64 to, uint64* ret) const {
+  uint64 value[kLength] {};
+  uint64 q[kLength];
+  for (int64 i = from; i < to; ++i) {
+    int64 shift = bit_shift - i * term.b;
+    const uint64 mod = term.c * i + term.d;
+    uint64 rem = number::Power(2, shift, mod);
+    number::Natural::Div(rem, mod, kLength, q);
+    if (term.flip == Term::Flip::kFlip && i % 2 == 1)
+      Subtract(value, q);
+    else
+      Add(value, q);
+  }
+
+  Add(ret, value);
 }
 
 std::vector<Bbp::Term> Bbp::getTerms() const {
