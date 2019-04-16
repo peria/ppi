@@ -13,6 +13,13 @@
 namespace ppi {
 namespace number {
 
+#ifndef UINT128
+namespace {
+constexpr int64 kHalfSize = 32;
+constexpr uint64 kHalfBitMask = (1ULL << kHalfSize) - 1;
+} // namespace
+#endif
+
 Integer::Integer() : data_(base::Allocator::Allocate<uint64>(0)) {}
 
 Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {

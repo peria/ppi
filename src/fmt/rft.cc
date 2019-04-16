@@ -11,6 +11,10 @@ Rft::Rft(const int64 n) : Dft(n / 2), n_(n) {
   DCHECK_EQ(0, n % 4);
 }
 
+#ifndef M_PI
+constexpr double M_PI = 3.141592653589793238;
+#endif
+
 void Rft::Transform(const Direction dir, double* a) const {
   Complex* ca = reinterpret_cast<Complex*>(a);
 

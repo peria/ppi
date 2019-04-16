@@ -14,6 +14,10 @@ namespace fmt {
 
 namespace {
 
+#ifndef M_PI
+constexpr double M_PI = 3.141592653589793238;
+#endif
+
 Complex* g_work = nullptr;
 
 Complex* WorkArea(int64 size) {

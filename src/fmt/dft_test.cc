@@ -1,5 +1,6 @@
 #include "fmt/dft.h"
 
+#include <vector>
 #include <gtest/gtest.h>
 
 #include "fmt/fmt.h"
@@ -30,15 +31,15 @@ TEST(DftTest, DftTest) {
   const double kEps = 1e-10;
 
   for (int64 k = 1; k <= 10; ++k) {
-    const int n = 1 << k;
+    const int64 n = 1 << k;
     Dft dft(n);
-    Complex a[n];
+    std::vector<Complex> a(n);
     for (int i = 0; i < n; ++i) {
       a[i].real = i;
       a[i].imag = i + n;
     }
-    dft.Transform(Direction::Forward, a);
-    dft.Transform(Direction::Backward, a);
+    dft.Transform(Direction::Forward, a.data());
+    dft.Transform(Direction::Backward, a.data());
     for (int i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k;
       ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k;
@@ -56,13 +57,13 @@ TEST(DftTest, SixStepFftTest) {
     const int64 n2 = 1 << k2;
     const int64 n = n1 * n2;
     Dft dft(n1, n2);
-    Complex a[n];
+    std::vector<Complex> a(n);
     for (int i = 0; i < n; ++i) {
       a[i].real = i;
       a[i].imag = i + n;
     }
-    dft.Transform(Direction::Forward, a);
-    dft.Transform(Direction::Backward, a);
+    dft.Transform(Direction::Forward, a.data());
+    dft.Transform(Direction::Backward, a.data());
     for (int64 i = 0; i < n; ++i) {
       ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
       ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
