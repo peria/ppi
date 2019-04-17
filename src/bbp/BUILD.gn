@@ -1,3 +1,5 @@
+import("//build/toolchain/gpu_toolchain.gni")
+
 static_library("bbp") {
   sources = [
      "bbp.cc",
@@ -12,6 +14,15 @@ static_library("bbp") {
 
 # ------------------------------------------
 
+group("bbp_exec") {
+  deps = [
+    ":bbp_main",
+  ]
+  if (gpu_toolchain != "") {
+    deps += [ ":bbp_gpu($gpu_toolchain)" ]
+  }
+}
+
 executable("bbp_main") {
   sources = [ "main.cc" ]
   deps = [
@@ -20,6 +31,18 @@ executable("bbp_main") {
     "//third_party/glog",
     "//third_party/gflags",
   ]
+}
+
+if (current_toolchain == gpu_toolchain) {
+  executable("bbp_gpu") {
+    sources = [ "main.cc" ]
+    deps = [
+      ":bbp",
+      "//src/base($default_toolchain)",
+      "//third_party/glog($default_toolchain)",
+      "//third_party/gflags($default_toolchain)",
+    ]
+  }
 }
 
 executable("bbp_test") {

@@ -1,0 +1,8 @@
+declare_args() {
+  gpu_toolchain = ""
+}
+
+if (is_win) {
+  gpu_toolchain = "//build/toolchain/${host_os}:gpgpu"
+}
+
