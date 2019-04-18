@@ -33,10 +33,9 @@ template("nvcc_msvc_toolchain") {
 
     tool("cxx") {
       precompiled_header_type = "msvc"
-      pdbname = "{{target_out_dir}}/{{label_name}}_c.pdb"
 
       # Label names may have spaces so pdbname must be quoted.
-      command = "$env_setup $cc_wrapper $cl  {{source}} {{defines}} {{include_dirs}} -Xcompiler \"{{cflags}} /nologo /FC $cl_m32_flag {{cflags_cc}} /c /Fo{{output}}\" -Xcompiler /Fd\"$pdbname\" -Xcompiler \"/source-charset:utf-8\""
+      command = "$env_setup $cc_wrapper $cl -c -o {{output}} {{source}} {{defines}} {{include_dirs}} -Xcompiler \"{{cflags}} /nologo /FC $cl_m32_flag {{cflags_cc}} /source-charset:utf-8\""
       depsformat = "msvc"
       outputs = [
         "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",

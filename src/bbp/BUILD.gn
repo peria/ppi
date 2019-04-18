@@ -6,9 +6,9 @@ static_library("bbp") {
      "bbp.h",
   ]
   deps = [
-    "//src/base",
-    "//src/number",
-    "//src/number:montgomery"
+    "//src/base($default_toolchain)",
+    "//src/number($default_toolchain)",
+    "//src/number:montgomery($default_toolchain)"
   ]
 }
 
@@ -37,10 +37,10 @@ if (current_toolchain == gpu_toolchain) {
   executable("bbp_gpu") {
     sources = [ "main.cc" ]
     deps = [
-      ":bbp",
+      ":bbp($gpu_toolchain)",
       "//src/base($default_toolchain)",
-      "//third_party/glog($default_toolchain)",
-      "//third_party/gflags($default_toolchain)",
+      "//third_party/glog",
+      "//third_party/gflags",
     ]
   }
 }
