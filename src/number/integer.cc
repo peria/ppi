@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 
 #include <algorithm>
+#include <cinttypes>
 #include <cmath>
 #include <ostream>
 
@@ -216,7 +217,7 @@ Integer& Integer::operator=(uint64 a) {
 std::ostream& operator<<(std::ostream& os, const Integer& val) {
   static char buffer[50];
   for (int64 i = val.size() - 1; i >= 0; --i) {
-    sprintf(buffer, "%016lx", val[i]);
+    sprintf(buffer, "%016" PRIX64, val[i]);
     os << buffer;
   }
   return os;

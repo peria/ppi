@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 
 #include <algorithm>
+#include <cinttypes>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -324,7 +325,7 @@ int64 Real::Compare(std::string& filename) {
   for (int64 i = size() - 1; i >= 0 && !ifs.eof(); --i) {
     char buffer[20];
     ifs.read(refer, 16);
-    std::sprintf(buffer, "%016lx", (*this)[i]);
+    std::sprintf(buffer, "%016" PRIX64, (*this)[i]);
     for (int64 j = 0; j < 16; ++j) {
       if (buffer[j] != refer[j])
         return match + j;
@@ -412,18 +413,18 @@ std::ostream& outputInHex(std::ostream& os, const Real& val) {
   if (diff <= 0) {
     os << "0";
   } else {
-    sprintf(buffer, "%lx", val[val.size() - 1]);
+    sprintf(buffer, "%" PRIX64, val[val.size() - 1]);
     os << buffer;
     for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0);
          --i) {
-      sprintf(buffer, "%016lx", val[i]);
+      sprintf(buffer, "%016" PRIX64, val[i]);
       os << buffer;
     }
   }
   os << ".";
   for (int64 i = val.size() - diff - 1; i >= 0; --i) {
     uint64 digit = (i < val.size()) ? val[i] : 0;
-    sprintf(buffer, "%016lx", digit);
+    sprintf(buffer, "%016" PRIX64, digit);
     os << buffer;
   }
 
@@ -441,12 +442,12 @@ std::ostream& outputInDec(std::ostream& os, const Real& val) {
   if (diff <= 0) {
     os << "0";
   } else {
-    sprintf(buffer, "%lx", dec[dec.size() - 1]);
+    sprintf(buffer, "%" PRIX64, dec[dec.size() - 1]);
     os << buffer;
     dec[dec.size() - 1] = 0;
     for (int64 i = dec.size() - 2; i >= std::max<int64>(dec.size() - diff, 0);
          --i) {
-      sprintf(buffer, "%016lx", dec[i]);
+      sprintf(buffer, "%016" PRIX64, dec[i]);
       dec[i] = 0;
       os << buffer;
     }
@@ -456,7 +457,7 @@ std::ostream& outputInDec(std::ostream& os, const Real& val) {
     for (int64 i = 0; i < exp_in_dec; ++i) {
       Real::Mult(dec, kBase, &dec);
       int64 integral = -dec.exponent();
-      sprintf(buffer, "%019lu", dec[integral]);
+      sprintf(buffer, "%019" PRIu64, dec[integral]);
       dec[integral] = 0;
       os << buffer;
     }

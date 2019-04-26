@@ -1,5 +1,6 @@
 #include "bbp/bbp.h"
 
+#include <cinttypes>
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
   const ppi::Bbp bbp(formula);
   std::vector<ppi::uint64> hexs = bbp.compute(hex_index);
   for (std::int64_t i = hexs.size() - 1; i >= 0; --i)
-    printf("%016lX ", hexs[i]);
+    printf("%016" PRIX64 " ", hexs[i]);
   puts("");
 
   return 0;

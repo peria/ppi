@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cinttypes>
 #include <iostream>
 #include <random>
 
@@ -65,7 +66,8 @@ int main(int, char* []) {
       err += ppi::fmt::GetRoundingError(k / 2, rng);
     timer.Stop();
 
-    std::printf("%10ld\t%.3e\t%ld ms\n", k, err / n, timer.GetTimeInMs() / n);
+    std::printf("%10" PRId64 "\t%.3e\t%" PRId64 " ms\n",
+                k, err / n, timer.GetTimeInMs() / n);
   }
   return 0;
 }

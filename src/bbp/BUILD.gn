@@ -6,9 +6,10 @@ static_library("bbp") {
      "bbp.h",
   ]
   deps = [
-    "//src/base($default_toolchain)",
-    "//src/number($default_toolchain)",
-    "//src/number:montgomery($default_toolchain)"
+    "//src/base",
+    "//src/number",
+    "//src/number:montgomery",
+    "//third_party/glog",
   ]
 }
 
