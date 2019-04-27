@@ -31,7 +31,7 @@ public:
     kBbp,
     kBellard,
   };
-  static const int64 kLength;
+  static const int64 kLength = 4;  // 4 * 64bit
 
   Bbp(const Formula& formula);
 

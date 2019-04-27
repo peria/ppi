@@ -10,8 +10,6 @@
 
 namespace ppi {
 
-const int64 Bbp::kLength = 4;  // 4 * 64bit
-
 Bbp::Bbp(const Formula& formula)
     : formula_(formula) {}
 
