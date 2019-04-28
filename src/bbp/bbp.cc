@@ -1,17 +1,37 @@
 #include "bbp/bbp.h"
 
 #include <array>
+#include <ostream>
 #include <vector>
+
 #include <glog/logging.h>
 
+#include "base/macros.h"
 #include "base/timer.h"
 #include "number/number.h"
 #include "number/natural.h"
 
+
 namespace ppi {
 
+std::ostream& operator<<(std::ostream& ost, const Bbp::ProcessType& pt) {
+  switch (pt) {
+  case Bbp::ProcessType::kCpu:
+    return ost << "CPU";
+  case Bbp::ProcessType::kGpu:
+    return ost << "GPU";
+  }
+
+  NOTREACHED();
+  // Otherwise, ignore
+  return ost;
+}
+
 Bbp::Bbp(const Formula& formula)
-    : formula_(formula) {}
+    : process_type_(ProcessType::kCpu),
+      formula_(formula) {
+  LOG(INFO) << "BBP in " << process_type_ << " is enabled";
+}
 
 std::vector<uint64> Bbp::compute(int64 hex_index) const {
   base::Timer all_timer;

@@ -1,11 +1,13 @@
 #pragma once
 
+#include <ostream>
 #include <vector>
 #include "base/base.h"
 
 namespace ppi {
 
 class Bbp {
+protected:
   struct Term {
     enum class Sign : uint8 {
       kPositive,
@@ -39,19 +41,28 @@ public:
   // after the decimal point.
   std::vector<uint64> compute(int64 hex_index) const;
 
-private:
-  // Compute |bit_index|-th bit of a term |term| using BBP algorithm.
-  void computeTerm(const Term& term, int64 bit_index, uint64* value) const;
+protected:
+  enum class ProcessType {
+    kCpu,
+    kGpu,
+  };
+  friend std::ostream& operator<<(std::ostream&, const ProcessType&);
+  const ProcessType process_type_;
+
   // Compute a part of BBP term |term| wich shifting |bit_shift|, from |from|-th
   // to |to|-th index.
-  void computeIntegralTerm(const Term& term, int64 bit_shift, int64 from,
-                           int64 to, uint64* value) const;
-  std::vector<Term> getTerms() const;
+  virtual void computeIntegralTerm(const Term& term, int64 bit_shift, int64 from,
+				   int64 to, uint64* value) const;
 
   // |val| += |rval|
   static void Add(uint64* val, const uint64* rval);
   // |val| -= |rval|
   static void Subtract(uint64* val, const uint64* rval);
+
+private:
+  // Compute |bit_index|-th bit of a term |term| using BBP algorithm.
+  void computeTerm(const Term& term, int64 bit_index, uint64* value) const;
+  std::vector<Term> getTerms() const;
 
   const Formula formula_;
 };

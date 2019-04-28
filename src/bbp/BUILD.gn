@@ -2,8 +2,8 @@ import("//build/toolchain/gpu_toolchain.gni")
 
 static_library("bbp") {
   sources = [
-     "bbp.cc",
-     "bbp.h",
+    "bbp.cc",
+    "bbp.h",
   ]
   deps = [
     "//src/base",
@@ -11,16 +11,22 @@ static_library("bbp") {
     "//src/number:montgomery",
     "//third_party/glog",
   ]
+
+  if (current_toolchain == gpu_toolchain) {
+    sources += [
+      "bbp_gpu.cc",
+      "bbp_gpu.h",
+    ]
+  }
 }
 
 # ------------------------------------------
 
 group("bbp_exec") {
-  deps = [
-    ":bbp_main",
-  ]
-  if (gpu_toolchain != "") {
-    deps += [ ":bbp_gpu($gpu_toolchain)" ]
+  if (gpu_toolchain == "") {
+    deps = [ ":bbp_main" ]
+  } else {
+    deps = [ ":bbp_main($gpu_toolchain)" ]
   }
 }
 
@@ -32,18 +38,6 @@ executable("bbp_main") {
     "//third_party/glog",
     "//third_party/gflags",
   ]
-}
-
-if (current_toolchain == gpu_toolchain) {
-  executable("bbp_gpu") {
-    sources = [ "main.cc" ]
-    deps = [
-      ":bbp($gpu_toolchain)",
-      "//src/base($default_toolchain)",
-      "//third_party/glog",
-      "//third_party/gflags",
-    ]
-  }
 }
 
 executable("bbp_test") {

@@ -9,7 +9,7 @@
 namespace ppi {
 namespace number {
 
-uint64 Power(uint64 a, uint64 e, uint64 m) {
+inline uint64 Power(uint64 a, uint64 e, uint64 m) {
 #ifdef UINT128
   uint128 r(1);
   uint128 an(a);
