@@ -11,6 +11,7 @@
 #include "base/base.h"
 
 #include "bbp/bbp.h"
+
 #ifdef __NVCC__  // Compiled with gpu_toolchain
 #include "bbp/bbp_gpu.h"
 static constexpr bool kDefaultUseGpu = true;
