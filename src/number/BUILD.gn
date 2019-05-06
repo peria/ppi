@@ -1,0 +1,10 @@
+static_library("number") {
+  sources = [
+    "number.h",
+    "natural.h",
+    "float.h",
+  ]
+  deps = [
+    "//src/base"
+  ]
+}

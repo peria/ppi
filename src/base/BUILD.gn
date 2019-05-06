@@ -1,5 +1,9 @@
-group("base") {
+source_set("base") {
   sources = [
-    "base.h"
+    "allocator.cc",
+    "allocator.h",
+    "base.h",
+    "timer.cc",
+    "timer.h",
   ]
 }
