@@ -1,0 +1,20 @@
+static_library("drm") {
+  sources = [
+    "drm.h",
+    "drm.cc",
+  ]
+  deps = [
+    "//src/base",
+    "//src/number"
+  ]
+}
+
+static_library("ramanujan") {
+  sources = [
+    "ramanujan.h",
+    "ramanujan.cc",
+  ]
+  deps = [
+    ":drm"
+  ]
+}

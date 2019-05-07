@@ -9,10 +9,20 @@ namespace ppi {
 class Float : public Natural {
 public:
   enum Sign { kPositive, kNegative };
+  Float() = default;
+  Float(Natural&& n);
+  Float(Float& f);
+
+  int64 exponent() const { return exponent_; }
+  Sign sign() const { return sign_; }
+
+  static Float&& iSqrt(Digit d, const int64 size);
 
 private:
   int64 exponent_ = 0;
   Sign sign_ = kPositive;
 };
+
+Float Inverse(Float&& x, const int64 length);
 
 }  // namespace ppi
