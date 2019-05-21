@@ -7,9 +7,9 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "base/timer.h"
+#include "drm/drm.h"
 #include "number/real.h"
 #include "pi/arctan.h"
-#include "pi/drm.h"
 
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0: {
-    double error = ppi::pi::Drm::Chudnovsky(&pi);
+    double error = ppi::drm::Drm::Chudnovsky(&pi);
     LOG(INFO) << "Maximum error in FFT: " << error;
     break;
   }

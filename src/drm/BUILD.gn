@@ -1,0 +1,10 @@
+static_library("drm") {
+  sources = [
+    "drm.cc",
+    "drm.h",
+  ]
+  deps = [
+    "//src/base",
+    "//src/number",
+  ]
+}

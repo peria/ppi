@@ -2,11 +2,10 @@ static_library("pi") {
   sources = [
     "arctan.cc",
     "arctan.h",
-    "drm.cc",
-    "drm.h",
   ]
   deps = [
     "//src/base",
+    "//src/drm",
     "//src/number",
   ]
 }
@@ -14,7 +13,7 @@ static_library("pi") {
 # ----------------------------------------------------------------------
 
 executable("ppi") {
-  sources = [ "pi_main.cc" ]
+  sources = [ "main.cc" ]
   deps = [
     ":pi",
     "//third_party/gflags",

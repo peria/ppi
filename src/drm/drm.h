@@ -4,7 +4,7 @@
 #include "number/real.h"
 
 namespace ppi {
-namespace pi {
+namespace drm {
 
 using number::Integer;
 using number::Real;
