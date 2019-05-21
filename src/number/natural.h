@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 #include "number/number.h"
 
 namespace ppi {
@@ -10,7 +12,7 @@ public:
   explicit Natural(Digit d);
   explicit Natural(const Natural& other);
 
-  Digit& operator[](int64 i) { return digits_[i]; }
+  Digit& operator[](int64 i) const { return digits_[i]; }
   int64 size() const { return size_; }
   void push(const Digit d);
   void resize(const int64 nsize);
@@ -28,5 +30,7 @@ private:
   Digit* digits_ = nullptr;
   int64 size_ = 0;
 };
+
+std::ostream& operator<<(std::ostream& ost, const Natural& a);
 
 }  // namespace ppi

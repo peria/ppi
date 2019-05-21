@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <memory>
+#include <iostream>
 
 #include "number/natural.h"
 #include "number/float.h"
@@ -49,6 +50,7 @@ int64 Ramanujan::numberOfTerms(int64 n_dec) {
 
 void Ramanujan::setValues(const int64 n, Natural& a0, Natural& b0, Natural& c0) {
   // Set A, B, C for n and n+1, and merge them.
+  // This hack allows us not to use negative integers.
   setA(n, a0);
   setB(n, b0);
   setC(n, c0);
@@ -58,6 +60,8 @@ void Ramanujan::setValues(const int64 n, Natural& a0, Natural& b0, Natural& c0) 
   setA(n + 1, a1);
   setB(n + 1, b1);
   setC(n + 1, c1);
+  std::cout << n << " " << a0 << " " << b0 << " " << c0 << "\n";
+  std::cout << (n + 1) << " " << a1 << " " << b1 << " " << c1 << "\n";
   
   b1 *= c0;
   b0 *= a1;

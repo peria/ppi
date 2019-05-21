@@ -13,6 +13,7 @@ public:
   Float(Natural&& n);
   Float(Float& f);
 
+  void resize(const int64 length);
   int64 exponent() const { return exponent_; }
   Sign sign() const { return sign_; }
 

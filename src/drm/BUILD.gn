@@ -18,3 +18,17 @@ static_library("ramanujan") {
     ":drm"
   ]
 }
+
+executable("drm_test") {
+  testonly = true
+
+  sources = [
+    "drm_test.cc"
+  ]
+  deps = [
+    ":drm",
+    "//src/number",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}
