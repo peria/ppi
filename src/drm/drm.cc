@@ -12,7 +12,7 @@
 namespace ppi {
 namespace drm {
 
-double Drm::Chudnovsky(Real* pi) {
+double Drm::compute(Real* pi) {
   int64 length = pi->precision();
   int64 n = length * 64 / std::log2(151931373056000.0);
   double error = 0;

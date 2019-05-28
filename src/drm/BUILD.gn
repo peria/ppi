@@ -1,5 +1,7 @@
 static_library("drm") {
   sources = [
+    "chudnovsky.cc",
+    "chudnovsky.h",
     "drm.cc",
     "drm.h",
   ]

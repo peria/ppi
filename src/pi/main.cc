@@ -8,6 +8,7 @@
 #include "base/allocator.h"
 #include "base/base.h"
 #include "base/timer.h"
+#include "drm/chudnovsky.h"
 #include "drm/drm.h"
 #include "number/real.h"
 #include "pi/arctan.h"
@@ -35,8 +36,8 @@ int main(int argc, char* argv[]) {
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0: {
-    std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Drm);
-    double error = drm->Chudnovsky(&pi);
+    std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
+    double error = drm->compute(&pi);
     LOG(INFO) << "Maximum error in FFT: " << error;
     break;
   }
