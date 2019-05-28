@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include <gflags/gflags.h>
@@ -34,7 +35,8 @@ int main(int argc, char* argv[]) {
   pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0: {
-    double error = ppi::drm::Drm::Chudnovsky(&pi);
+    std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Drm);
+    double error = drm->Chudnovsky(&pi);
     LOG(INFO) << "Maximum error in FFT: " << error;
     break;
   }
