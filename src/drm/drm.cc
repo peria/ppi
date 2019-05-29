@@ -13,50 +13,28 @@ namespace ppi {
 namespace drm {
 
 double Drm::compute(const int64 num_digits, Real* pi) {
-  const int64 num_limbs = pi->precision();
-  const int64 num_terms = num_limbs * 64 / std::log2(151931373056000.0);
+  const int64 num_limbs = num_digits / 19 + 1;
+  const int64 num_terms = numTermsForDigits(num_digits);
   double error = 0;
 
   int64 half = (num_terms + 1) / 2;
-  LOG(INFO) << "Use " << num_terms << " terms to get " << (num_limbs * 16)
-            << " hex digits.";
-  Real a, b, c;
+  LOG(INFO) << "Use " << num_terms << " terms to get "
+            << num_digits << " digits.";
 
+  Real a, b, c;
   {
     base::Timer timer;
     // Pass a, b, and c as Integer elements into binary split
     error = std::max(error, internal(0, half, &a, &b, &c));
-    // c is no longer used.
-    c.clear();
     timer.Stop();
     LOG(INFO) << "Binary Split: " << timer.GetTimeInSec() << " sec.";
     LOG(INFO) << "Sizes: a(" << a.size() << "), b(" << b.size() << ")";
   }
+  // c is no longer used.
+  c.clear();
 
-  Integer::Mult(a, 640320ULL * 8 * 10005 / 12, &a);
-  int64 len = std::max(a.size(), b.size()) + 1;
-  a.setPrecision(len);
-  b.setPrecision(len);
-  pi->setPrecision(len);
-
-  {
-    base::Timer timer;
-    error = std::max(error, Real::Inverse(b, pi));
-    error = std::max(error, Real::Mult(*pi, a, pi));
-    timer.Stop();
-    LOG(INFO) << "Division: " << timer.GetTimeInSec() << " sec.";
-  }
-
-  {
-    base::Timer timer;
-    error = std::max(error, Real::InverseSqrt(10005, &b));
-    error = std::max(error, Real::Mult(*pi, b, pi));
-    timer.Stop();
-    LOG(INFO) << "Square Root: " << timer.GetTimeInSec() << " sec.";
-  }
-
+  error = std::max(error, postCompute(&a, &b, pi));
   pi->setPrecision(num_limbs);
-
   return error;
 }
 

@@ -14,11 +14,13 @@ public:
   Drm() = default;
   virtual ~Drm() = default;
 
-  // Computes pi using arctan formula in DRM algorithm.
+  // Computes pi using DRM algorithm.
   // Returns the maximum rounding error in multiplications.
   double compute(const int64 num_digits, Real* pi);
 
 protected:
+  virtual double postCompute(Real*, Real*, Real*) { return 0; };
+
   virtual int64 numTermsForDigits(int64 num_digits) = 0;
   virtual void setValues(int64 n, Integer* a, Integer* b, Integer* c) = 0;
 

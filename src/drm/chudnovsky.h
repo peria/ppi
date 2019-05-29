@@ -16,6 +16,8 @@ class Chudnovsky : public Drm {
   ~Chudnovsky() = default;
 
  private:
+  double postCompute(Real* a, Real* b, Real* pi) override;
+
   int64 numTermsForDigits(int64 num_digits) override;
   void setValues(int64 n, Integer* a, Integer* b, Integer* c) override;
 };

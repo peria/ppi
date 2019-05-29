@@ -30,10 +30,8 @@ int main(int argc, char* argv[]) {
 
   ppi::base::Timer timer_all;
   ppi::base::Timer timer_compute;
-  int64 limbs = FLAGS_digits / 16 + 1;
 
   ppi::number::Real pi;
-  pi.setPrecision(limbs);
   switch (FLAGS_type) {
   case 0: {
     std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
@@ -42,6 +40,7 @@ int main(int argc, char* argv[]) {
     break;
   }
   case 1:
+    pi.setPrecision(FLAGS_digits / 16 + 1);
     ppi::pi::Arctan::Machin(&pi);
     break;
   }
