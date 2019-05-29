@@ -12,20 +12,20 @@
 namespace ppi {
 namespace drm {
 
-double Drm::compute(Real* pi) {
-  int64 length = pi->precision();
-  int64 n = length * 64 / std::log2(151931373056000.0);
+double Drm::compute(const int64 num_digits, Real* pi) {
+  const int64 num_limbs = pi->precision();
+  const int64 num_terms = num_limbs * 64 / std::log2(151931373056000.0);
   double error = 0;
 
-  int64 half = (n + 1) / 2;
-  LOG(INFO) << "Use " << n << " terms to get " << (length * 16)
+  int64 half = (num_terms + 1) / 2;
+  LOG(INFO) << "Use " << num_terms << " terms to get " << (num_limbs * 16)
             << " hex digits.";
   Real a, b, c;
 
   {
     base::Timer timer;
     // Pass a, b, and c as Integer elements into binary split
-    error = std::max(error, Internal(0, half, &a, &b, &c));
+    error = std::max(error, internal(0, half, &a, &b, &c));
     // c is no longer used.
     c.clear();
     timer.Stop();
@@ -55,12 +55,12 @@ double Drm::compute(Real* pi) {
     LOG(INFO) << "Square Root: " << timer.GetTimeInSec() << " sec.";
   }
 
-  pi->setPrecision(length);
+  pi->setPrecision(num_limbs);
 
   return error;
 }
 
-double Drm::Internal(int64 n0,
+double Drm::internal(int64 n0,
                      int64 n1,
                      Integer* a0,
                      Integer* b0,
@@ -68,8 +68,8 @@ double Drm::Internal(int64 n0,
   Integer a1, b1, c1;
   if (n0 + 1 == n1) {
     int64 n = 2 * n0;
-    SetValues(n, a0, b0, c0);
-    SetValues(n + 1, &a1, &b1, &c1);
+    setValues(n, a0, b0, c0);
+    setValues(n + 1, &a1, &b1, &c1);
 
     Integer::Mult(*b0, a1, b0);
     Integer::Mult(*c0, b1, &b1);
@@ -78,8 +78,8 @@ double Drm::Internal(int64 n0,
     Integer::Mult(*c0, c1, c0);
   } else {
     int64 m = (n0 + n1) / 2;
-    Internal(n0, m, a0, b0, c0);
-    Internal(m, n1, &a1, &b1, &c1);
+    internal(n0, m, a0, b0, c0);
+    internal(m, n1, &a1, &b1, &c1);
 
     Integer::Mult(*b0, a1, b0);
     Integer::Mult(*c0, b1, &b1);
@@ -94,24 +94,6 @@ double Drm::Internal(int64 n0,
   VLOG(2) << *c0;
 
   return 0;
-}
-
-void Drm::SetValues(int64 n, Integer* a, Integer* b, Integer* c) {
-  // TODO: Take care of overflow in implicit conversion
-  if (n == 0) {
-    *a = 1;
-  } else {
-    *a = n * 640320 / 24;
-    Integer t(n * 640320);
-    Integer::Mult(*a, t, a);
-    Integer::Mult(*a, t, a);
-  }
-
-  *b = 13591409 + n * 545140134;
-
-  *c = 6 * n + 1;
-  Integer::Mult(*c, 2 * n + 1, c);
-  Integer::Mult(*c, 6 * n + 5, c);
 }
 
 }  // namespace pi

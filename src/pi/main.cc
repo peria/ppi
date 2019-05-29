@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   switch (FLAGS_type) {
   case 0: {
     std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
-    double error = drm->compute(&pi);
+    double error = drm->compute(FLAGS_digits, &pi);
     LOG(INFO) << "Maximum error in FFT: " << error;
     break;
   }

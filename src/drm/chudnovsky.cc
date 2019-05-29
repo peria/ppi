@@ -12,7 +12,18 @@
 namespace ppi {
 namespace drm {
 
-void Chudnovsky::SetValues(int64 n, Integer* a, Integer* b, Integer* c) {
+namespace {
+
+// Refer https://qiita.com/peria/items/c02ef9fc18fb0362fb89
+const double kNumDigitsPerTerm = 14.1816474627;
+
+}  // namespace
+
+int64 Chudnovsky::numTermsForDigits(int64 num_digits) {
+  return num_digits / kNumDigitsPerTerm + 1;
+}
+
+void Chudnovsky::setValues(int64 n, Integer* a, Integer* b, Integer* c) {
   // TODO: Take care of overflow in implicit conversion
   if (n == 0) {
     *a = 1;
