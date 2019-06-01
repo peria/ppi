@@ -174,6 +174,15 @@ double Natural::Mult(const uint64* a,
                      const int64 nb,
                      const int64 nc,
                      uint64* c) {
+  return MultFmt(a, na, b, nb, nc, c);
+}
+
+double Natural::MultFmt(const uint64* a,
+                        const int64 na,
+                        const uint64* b,
+                        const int64 nb,
+                        const int64 nc,
+                        uint64* c) {
   const int64 n = nc;
   const int64 nd = n * 4;
   double* da = WorkArea(0, nd);

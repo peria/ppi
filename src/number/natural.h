@@ -36,6 +36,12 @@ class Natural {
   static uint64 Div(const uint64 a, const uint64 b, const int64 n, uint64* c);
 
  protected:
+  static double MultFmt(const uint64* a,
+                        const int64 na,
+                        const uint64* b,
+                        const int64 nb,
+                        const int64 nc,
+                        uint64* c);
   static void Split4(const uint64* a,
                      const int64 na,
                      const int64 n,
