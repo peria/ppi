@@ -1,9 +1,9 @@
+#include <gflags/gflags.h>
+#include <glog/logging.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
-
-#include <gflags/gflags.h>
-#include <glog/logging.h>
 
 #include "base/allocator.h"
 #include "base/base.h"

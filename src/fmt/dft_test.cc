@@ -1,7 +1,8 @@
 #include "fmt/dft.h"
 
-#include <vector>
 #include <gtest/gtest.h>
+
+#include <vector>
 
 #include "fmt/fmt.h"
 #include "fmt/rft.h"
@@ -65,8 +66,10 @@ TEST(DftTest, SixStepFftTest) {
     dft.Transform(Direction::Forward, a.data());
     dft.Transform(Direction::Backward, a.data());
     for (int64 i = 0; i < n; ++i) {
-      ASSERT_NEAR(i, a[i].real, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
-      ASSERT_NEAR(i + n, a[i].imag, kEps) << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
+      ASSERT_NEAR(i, a[i].real, kEps)
+          << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
+      ASSERT_NEAR(i + n, a[i].imag, kEps)
+          << "index=" << i << ", n=2^" << k1 << "*2^" << k2;
     }
   }
 }

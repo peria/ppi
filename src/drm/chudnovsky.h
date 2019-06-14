@@ -1,8 +1,8 @@
 #pragma once
 
 #include "base/base.h"
-#include "number/real.h"
 #include "drm/drm.h"
+#include "number/real.h"
 
 namespace ppi {
 namespace drm {
@@ -22,5 +22,5 @@ class Chudnovsky : public Drm {
   void setValues(int64 n, Integer* a, Integer* b, Integer* c) override;
 };
 
-}  // namespace pi
+}  // namespace drm
 }  // namespace ppi

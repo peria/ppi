@@ -1,16 +1,15 @@
 #include "bbp/bbp.h"
 
+#include <glog/logging.h>
+
 #include <array>
 #include <ostream>
 #include <vector>
 
-#include <glog/logging.h>
-
 #include "base/macros.h"
 #include "base/timer.h"
-#include "number/number.h"
 #include "number/natural.h"
-
+#include "number/number.h"
 
 namespace ppi {
 
@@ -28,8 +27,7 @@ std::ostream& operator<<(std::ostream& ost, const Bbp::ProcessType& pt) {
 }
 
 Bbp::Bbp(const Formula& formula)
-    : process_type_(ProcessType::kCpu),
-      formula_(formula) {
+    : process_type_(ProcessType::kCpu), formula_(formula) {
   LOG(INFO) << "BBP in " << process_type_ << " is enabled";
 }
 
@@ -63,7 +61,8 @@ void Bbp::computeTerm(const Term& term, int64 bit_index, uint64* ret) const {
   CHECK_GE(bit_index, 1);
 
   const int64 bit_shift = bit_index - 1 + term.a;
-  const int64 integer_n = (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b + 1;
+  const int64 integer_n =
+      (bit_shift - (bit_shift % term.b + term.b) % term.b) / term.b + 1;
   const int64 zero_n = (bit_shift + 64 * kLength) / term.b;
   VLOG(1) << "Compute terms: " << integer_n << " + " << (zero_n - integer_n);
 
@@ -88,9 +87,12 @@ void Bbp::computeTerm(const Term& term, int64 bit_index, uint64* ret) const {
   }
 }
 
-void Bbp::computeIntegralTerm(const Term& term, int64 bit_shift, int64 from,
-                              int64 to, uint64* ret) const {
-  uint64 value[kLength] {};
+void Bbp::computeIntegralTerm(const Term& term,
+                              int64 bit_shift,
+                              int64 from,
+                              int64 to,
+                              uint64* ret) const {
+  uint64 value[kLength]{};
   uint64 q[kLength];
   for (int64 i = from; i < to; ++i) {
     int64 shift = bit_shift - i * term.b;
@@ -114,21 +116,28 @@ std::vector<Bbp::Term> Bbp::getTerms() const {
   case Bbp::Formula::kBbp:
     LOG(INFO) << "Use BBP formula";
     return {
-        { 2, 4, 8, 1, Sign::kPositive, Flip::kNoFlip},  //  2^(-4k+2)/(8k+1)
+        {2, 4, 8, 1, Sign::kPositive, Flip::kNoFlip},   //  2^(-4k+2)/(8k+1)
         {-1, 4, 2, 1, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k-1)/(2k+1)
-        { 0, 4, 8, 5, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k  )/(8k+5)
+        {0, 4, 8, 5, Sign::kNegative, Flip::kNoFlip},   // -2^(-4k  )/(8k+5)
         {-1, 4, 4, 3, Sign::kNegative, Flip::kNoFlip},  // -2^(-4k-1)/(4k+3)
     };
   case Bbp::Formula::kBellard:
     LOG(INFO) << "Use Bellard's formula";
     return {
-        {-1, 10,  4, 1, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-1)/(4k+1)
-        {-6, 10,  4, 3, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-6)/(4k+3)
-        { 2, 10, 10, 1, Sign::kPositive, Flip::kFlip},  //  (-1)^k 2^(-10k+2)/(10k+1)
-        { 0, 10, 10, 3, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k  )/(10k+3)
-        {-4, 10, 10, 5, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+5)
-        {-4, 10, 10, 7, Sign::kNegative, Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+7)
-        {-6, 10, 10, 9, Sign::kPositive, Flip::kFlip},  //  (-1)^k 2^(-10k-6)/(10k+9)
+        {-1, 10, 4, 1, Sign::kNegative,
+         Flip::kFlip},  // -(-1)^k 2^(-10k-1)/(4k+1)
+        {-6, 10, 4, 3, Sign::kNegative,
+         Flip::kFlip},  // -(-1)^k 2^(-10k-6)/(4k+3)
+        {2, 10, 10, 1, Sign::kPositive,
+         Flip::kFlip},  //  (-1)^k 2^(-10k+2)/(10k+1)
+        {0, 10, 10, 3, Sign::kNegative,
+         Flip::kFlip},  // -(-1)^k 2^(-10k  )/(10k+3)
+        {-4, 10, 10, 5, Sign::kNegative,
+         Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+5)
+        {-4, 10, 10, 7, Sign::kNegative,
+         Flip::kFlip},  // -(-1)^k 2^(-10k-4)/(10k+7)
+        {-6, 10, 10, 9, Sign::kPositive,
+         Flip::kFlip},  //  (-1)^k 2^(-10k-6)/(10k+9)
     };
   }
 

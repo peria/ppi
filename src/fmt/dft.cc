@@ -204,7 +204,8 @@ const int64 kL2CacheSize = 4 * 1024 * 1024;
 Dft::Setting::Setting(int64 n_, const Axis axis)
     : n(n_), log2n(0), log4n(0), log8n(0), table(nullptr) {
   const int64 exp2 = GetExpOf2(n);
-  if (axis == Axis::kFirst && kL2CacheSize / static_cast<int64>(sizeof(Complex)) / 3 < n) {
+  if (axis == Axis::kFirst &&
+      kL2CacheSize / static_cast<int64>(sizeof(Complex)) / 3 < n) {
     // Run a six-step FFT.
     log2n = (exp2 + (n % 5 == 0 ? 2 : 0)) / 2;
     n = 1LL << log2n;
@@ -252,13 +253,9 @@ Dft::Setting::~Setting() {
 }
 
 Dft::Dft(const int64 n)
-    : setting1_(n, Setting::Axis::kFirst),
-      setting2_(n / setting1_.n) {
-}
+    : setting1_(n, Setting::Axis::kFirst), setting2_(n / setting1_.n) {}
 
-Dft::Dft(const int64 n1, const int64 n2)
-    : setting1_(n1), setting2_(n2) {
-}
+Dft::Dft(const int64 n1, const int64 n2) : setting1_(n1), setting2_(n2) {}
 
 void Dft::Transform(const Direction dir, Complex* a) const {
   const int64 n = setting1_.n * setting2_.n;
@@ -286,7 +283,8 @@ void Dft::Transform(const Direction dir, Complex* a) const {
       const double theta_i = theta * i;
       for (int64 j = 0; j < setting1_.n; ++j) {
         const double t = theta_i * j;
-        temp[j * setting2_.n + i] = work1[j] * Complex {std::cos(t), std::sin(t)};
+        temp[j * setting2_.n + i] =
+            work1[j] * Complex{std::cos(t), std::sin(t)};
       }
     }
     for (int64 i = 0; i < setting1_.n; ++i) {

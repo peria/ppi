@@ -18,8 +18,8 @@ double Drm::compute(const int64 num_digits, Real* pi) {
   double error = 0;
 
   int64 half = (num_terms + 1) / 2;
-  LOG(INFO) << "Use " << num_terms << " terms to get "
-            << num_digits << " digits.";
+  LOG(INFO) << "Use " << num_terms << " terms to get " << num_digits
+            << " digits.";
 
   Real a, b, c;
   {
@@ -74,5 +74,5 @@ double Drm::internal(int64 n0,
   return 0;
 }
 
-}  // namespace pi
+}  // namespace drm
 }  // namespace ppi

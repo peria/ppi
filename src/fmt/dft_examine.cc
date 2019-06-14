@@ -1,13 +1,12 @@
-#include "fmt/dft.h"
-
 #include <algorithm>
-#include <cstdio>
 #include <cinttypes>
+#include <cstdio>
 #include <iostream>
 #include <random>
 
 #include "base/base.h"
 #include "base/timer.h"
+#include "fmt/dft.h"
 #include "fmt/rft.h"
 
 namespace {
@@ -53,7 +52,7 @@ double GetRoundingError(int64 k, std::mt19937_64& rng) {
 
 using ppi::int64;
 
-int main(int, char* []) {
+int main(int, char*[]) {
   std::mt19937_64 rng;
   const int64 kMaxK = 1 << 21;
   a = new double[kMaxK];
@@ -66,8 +65,8 @@ int main(int, char* []) {
       err += ppi::fmt::GetRoundingError(k / 2, rng);
     timer.Stop();
 
-    std::printf("%10" PRId64 "\t%.3e\t%" PRId64 " ms\n",
-                k, err / n, timer.GetTimeInMs() / n);
+    std::printf("%10" PRId64 "\t%.3e\t%" PRId64 " ms\n", k, err / n,
+                timer.GetTimeInMs() / n);
   }
   return 0;
 }

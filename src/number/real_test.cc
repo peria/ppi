@@ -1,6 +1,7 @@
 #include "number/real.h"
 
 #include <gtest/gtest.h>
+
 #include <sstream>
 
 namespace ppi {

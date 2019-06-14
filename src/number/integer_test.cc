@@ -1,6 +1,7 @@
 #include "number/integer.h"
 
 #include <gtest/gtest.h>
+
 #include "base/base.h"
 
 namespace ppi {
@@ -24,8 +25,8 @@ TEST(IntegerTest, Mult) {
   Integer a, b, c;
 
   // Each number fits in splitted elements.
-  a.push_back(0x1234ULL);
-  b.push_back(0x1234ULL);
+  a.push_leading(0x1234ULL);
+  b.push_leading(0x1234ULL);
   Integer::Mult(a, b, &c);
   ASSERT_EQ(1, c.size());
   EXPECT_EQ(0x1234ULL * 0x1234ULL, c[0]);
@@ -48,10 +49,10 @@ TEST(IntegerTest, Mult) {
 
 TEST(IntegerTest, LongMult) {
   Integer a, b, c;
-  a.push_back(0xba686c78678e686bULL);
-  a.push_back(0xac7d868e97d8a076ULL);
-  b.push_back(0x7868d76876b876e8ULL);
-  b.push_back(0x97d6897c7d8976e7ULL);
+  a.push_leading(0xba686c78678e686bULL);
+  a.push_leading(0xac7d868e97d8a076ULL);
+  b.push_leading(0x7868d76876b876e8ULL);
+  b.push_leading(0x97d6897c7d8976e7ULL);
 
   Integer::Mult(a, b, &c);
   ASSERT_EQ(4, static_cast<int>(c.size()));

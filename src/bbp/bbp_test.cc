@@ -1,7 +1,8 @@
 #include "bbp/bbp.h"
 
-#include <vector>
 #include <gtest/gtest.h>
+
+#include <vector>
 
 #include "base/base.h"
 
@@ -13,8 +14,8 @@ const int64 N = Bbp::kLength;
 
 TEST(BbpTest, Basic) {
   uint64 kExpects[][3] = {
-    {0x243f6a8885a308d3u, 0x13198a2e03707344u, 0xa4093822299f31d0u},
-    {0x43f6a8885a308d31u, 0x3198a2e03707344au, 0x4093822299f31d00u},
+      {0x243f6a8885a308d3u, 0x13198a2e03707344u, 0xa4093822299f31d0u},
+      {0x43f6a8885a308d31u, 0x3198a2e03707344au, 0x4093822299f31d00u},
   };
 
   for (int i = 0; i < array_size(kExpects); ++i) {

@@ -1,15 +1,14 @@
+#include <gflags/gflags.h>
+#include <glog/logging.h>
+
 #include <cinttypes>
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include <memory>
 #include <vector>
-#include <iostream>
-
-#include <glog/logging.h>
-#include <gflags/gflags.h>
 
 #include "base/base.h"
-
 #include "bbp/bbp.h"
 
 #ifdef __NVCC__  // Compiled with gpu_toolchain
@@ -25,8 +24,8 @@ DEFINE_bool(use_gpu, kDefaultUseGpu, "Whether to use GPU or not.");
 namespace {
 
 const ppi::Bbp::Formula kFormulas[] = {
-  ppi::Bbp::Formula::kBbp,
-  ppi::Bbp::Formula::kBellard,
+    ppi::Bbp::Formula::kBbp,
+    ppi::Bbp::Formula::kBellard,
 };
 
 }  // namespace
@@ -40,7 +39,8 @@ int main(int argc, char* argv[]) {
     return 0;
   }
   const auto formula = kFormulas[FLAGS_formula];
-  const std::int64_t hex_index = (argc < 2) ? 1 : std::strtoll(argv[1], nullptr, 10);
+  const std::int64_t hex_index =
+      (argc < 2) ? 1 : std::strtoll(argv[1], nullptr, 10);
 
   std::unique_ptr<ppi::Bbp> bbp;
   if (FLAGS_use_gpu) {

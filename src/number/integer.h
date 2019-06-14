@@ -1,16 +1,13 @@
 #pragma once
 
 #include <ostream>
+
 #include "base/base.h"
 
 namespace ppi {
 namespace number {
 
-// Integer class represents a long integer, using an array of uint64.
-// It usually stores digits in hexadecimal format. 16 hexadecimal digts
-// are stored in a uint64 element.
-// size() shows its length counted in uint64. If size() is zero, then
-// it represents a zero. If size() is negative, then it shows NaN.
+// Represents a non negative integer in multiple precision format.
 class Integer {
  public:
   Integer();
@@ -21,12 +18,12 @@ class Integer {
   uint64& operator[](int64 i) const { return data_[i]; }
   int64 size() const { return static_cast<int64>((*this)[-1]); }
 
-  uint64 back() const;
+  uint64 leading() const;
   void resize(int64 size);
   void erase(int64 begin, int64 end);
   void clear();
   void insert(int64 from, int64 number, uint64 value);
-  void push_back(uint64 value);
+  void push_leading(uint64 value);
 
   void release() { data_ = nullptr; }
 

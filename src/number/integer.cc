@@ -18,7 +18,7 @@ namespace number {
 namespace {
 constexpr int64 kHalfSize = 32;
 constexpr uint64 kHalfBitMask = (1ULL << kHalfSize) - 1;
-} // namespace
+}  // namespace
 #endif
 
 Integer::Integer() : data_(base::Allocator::Allocate<uint64>(0)) {}
@@ -48,7 +48,7 @@ void Integer::Normalize() {
   erase(i, size());
 }
 
-uint64 Integer::back() const {
+uint64 Integer::leading() const {
   return (*this)[size() - 1];
 }
 
@@ -96,7 +96,7 @@ void Integer::insert(int64 from, int64 number, uint64 value) {
   base::Allocator::Deallocate(new_ptr);
 }
 
-void Integer::push_back(uint64 value) {
+void Integer::push_leading(uint64 value) {
   resize(size() + 1);
   (*this)[size() - 1] = value;
 }
@@ -113,7 +113,7 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   carry = Natural::Add(b.data_ + n, carry, nb - n, c->data_ + n);
 
   if (carry) {
-    c->push_back(carry);
+    c->push_leading(carry);
   }
   c->Normalize();
 }
@@ -198,7 +198,7 @@ void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   }
 #endif
   if (carry) {
-    c->push_back(carry);
+    c->push_leading(carry);
   }
 }
 

@@ -65,5 +65,5 @@ void Chudnovsky::setValues(int64 n, Integer* a, Integer* b, Integer* c) {
   Integer::Mult(*c, 2 * n + 1, c);
 }
 
-}  // namespace pi
+}  // namespace drm
 }  // namespace ppi

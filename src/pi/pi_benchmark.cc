@@ -1,9 +1,8 @@
-#include "pi/drm.h"
-
 #include <benchmark/benchmark.h>
 
 #include "base/base.h"
 #include "number/real.h"
+#include "pi/drm.h"
 
 using ppi::int64;
 

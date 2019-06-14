@@ -1,7 +1,8 @@
 #include "fmt/rft.h"
 
-#include <vector>
 #include <gtest/gtest.h>
+
+#include <vector>
 
 namespace ppi {
 namespace fmt {

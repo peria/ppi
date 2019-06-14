@@ -92,8 +92,8 @@ double Real::InverseSqrt(uint64 a, Real* val) {
       if (++tmp[i])
         break;
     }
-    if (tmp.back() == 0)
-      tmp.push_back(1);
+    if (tmp.leading() == 0)
+      tmp.push_leading(1);
 
     Div(tmp, 2, &tmp);
     // TODO: in this multiplication, &tmp needs to be extended.
@@ -125,7 +125,7 @@ double Real::Inverse(const Real& a, Real* val) {
   }
 
   // Initialize
-  double da = a.back();
+  double da = a.leading();
   if (a.size() > 1) {
     da += a[a.size() - 2] * kPow2_m64;
   }
@@ -149,8 +149,8 @@ double Real::Inverse(const Real& a, Real* val) {
       if (++tmp[i])
         break;
     }
-    if (tmp.back() == 0)
-      tmp.push_back(1);
+    if (tmp.leading() == 0)
+      tmp.push_leading(1);
 
     Mult(*val, tmp, &tmp);
     val->setPrecision(k * 2);
@@ -212,7 +212,7 @@ void Real::Add(const Real& a, const Real& b, Real* c) {
     carry = (sum[ic] < carry) ? 1 : 0;
   }
   if (carry)
-    sum.push_back(carry);
+    sum.push_leading(carry);
 
   sum.setPrecision(prec);
   sum.Normalize();

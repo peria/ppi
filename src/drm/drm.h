@@ -10,7 +10,7 @@ using number::Integer;
 using number::Real;
 
 class Drm {
-public:
+ public:
   Drm() = default;
   virtual ~Drm() = default;
 
@@ -18,19 +18,15 @@ public:
   // Returns the maximum rounding error in multiplications.
   double compute(const int64 num_digits, Real* pi);
 
-protected:
+ protected:
   virtual double postCompute(Real*, Real*, Real*) { return 0; };
 
   virtual int64 numTermsForDigits(int64 num_digits) = 0;
   virtual void setValues(int64 n, Integer* a, Integer* b, Integer* c) = 0;
 
-private:
-  double internal(int64 n0,
-                  int64 n1,
-                  Integer* a0,
-                  Integer* b0,
-                  Integer* c0);
+ private:
+  double internal(int64 n0, int64 n1, Integer* a0, Integer* b0, Integer* c0);
 };
 
-}  // namespace pi
+}  // namespace drm
 }  // namespace ppi
