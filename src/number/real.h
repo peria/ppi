@@ -11,12 +11,11 @@ namespace number {
 
 // Real class describes a real number
 //   |mantissa_| * (2^64)^(|exponent_|)
-// |size_| figures its precision.
 class Real : public Integer {
  public:
-  Real();
-  Real(double d);
-  Real(const Real& other);
+  explicit Real(const Base=Base::kHex);
+  explicit Real(double d, const Base=Base::kHex);
+  explicit Real(const Real& other);
 
   void fitInteger(int64 n);
 
@@ -41,6 +40,8 @@ class Real : public Integer {
   // Computes c=a/b.
   static void Div(const Real& a, const uint64 b, Real* c);
 
+  static void ConvertBase(const Real& a, Real& b);
+
   // Compares with the content of the file, and returns the number of
   // matched continuous digits.
   // If the file is not readable, returns 0.
@@ -50,6 +51,7 @@ class Real : public Integer {
   int64 precision() const { return precision_; }
   void setPrecision(int64 prec);
 
+  Real& operator=(const Real& other);
   Real& operator=(double d);
 
  protected:
@@ -60,6 +62,8 @@ class Real : public Integer {
 
   // Returns the number zeros in tail.
   int64 TailingZero();
+
+  static void HexToDecimal(const Real& a, Real& b);
 
   int64 precision_;
   int64 exponent_;

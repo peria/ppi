@@ -26,6 +26,9 @@ void* Allocator::AllocateInternal(int64 number) {
 }
 
 void Allocator::Deallocate(void* ptr) {
+  if (!ptr)
+    return;
+
   uint64* ptr64 = reinterpret_cast<uint64*>(ptr);
   --ptr64;
 

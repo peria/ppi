@@ -47,15 +47,18 @@ int main(int argc, char* argv[]) {
   timer_compute.Stop();
   LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
 
+  ppi::base::Timer timer_base;
+  const int64 prec_digits = (FLAGS_digits + 18) / 19 + 1;
+  ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
+  pi_dec.setPrecision(prec_digits);
+  ppi::pi::Real::ConvertBase(pi, pi_dec);
+  timer_base.Stop();
+  LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
+
   ppi::base::Timer timer_output;
-  if (FLAGS_base == 16) {
-    std::cout << std::hex << pi << "\n";
-  } else {
-    std::cout << pi << "\n";
-  }
+  std::cout << pi_dec << "\n";
   timer_output.Stop();
-  LOG(INFO) << "Output(Base conversion): " << timer_output.GetTimeInSec()
-            << " sec.";
+  LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";
 
   if (!FLAGS_refer.empty()) {
     int64 size = pi.size() * 16;

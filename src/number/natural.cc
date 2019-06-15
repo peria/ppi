@@ -217,6 +217,48 @@ double Natural::MultFmt(const uint64* a,
   return Gather4(da, n, c);
 }
 
+uint64 Natural::Mult(const uint64* a,
+                     const uint64 b,
+                     const int64 n,
+                     uint64* c) {
+  uint64 carry = 0;
+#if defined(UINT128)
+  uint128 b128 = b;
+  for (int64 i = 0; i < n; ++i) {
+    uint128 ab = a[i] * b128 + carry;
+    c[i] = ab;
+    carry = ab >> 64;
+  }
+#else
+  uint64 bl = b & kHalfBitMask;
+  uint64 bh = b >> kHalfSize;
+  for (int64 i = 0; i < n; ++i) {
+    uint64 al = a[i] & kHalfBitMask;
+    uint64 ah = a[i] >> kHalfSize;
+    uint64 c00 = al * bl;
+    uint64 c01 = al * bh;
+    uint64 c10 = ah * bl;
+    uint64 c11 = ah * bh;
+    c01 += c10;
+    if (c01 < c10) {
+      c11 += 1ULL << kHalfSize;
+    }
+    uint64 u = c00 + (c01 << kHalfSize);
+    if (u < c00) {
+      ++c11;
+    }
+    c11 += c01 >> kHalfSize;
+
+    c[i] = u + carry;
+    if (c[i] < u) {
+      ++c11;
+    }
+    carry = c11;
+  }
+#endif
+  return carry;
+}
+
 uint64 Natural::Div(const uint64* a, const uint64 b, uint64* c) {
   DCHECK_LT(a[1], b);
 

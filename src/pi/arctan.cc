@@ -14,9 +14,9 @@ double Arctan::Machin(Real* pi) {
   (*pi) = 0.0;
   pi->setPrecision(length);
 
-  Real a = 16.0 * 5;
-  Real sum = 0.0;
-  Real b = 0.0;
+  Real a(16.0 * 5);
+  Real sum(0.0);
+  Real b(0.0);
 
   a.setPrecision(length);
   sum.setPrecision(length);

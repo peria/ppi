@@ -10,13 +10,19 @@ namespace number {
 // Represents a non negative integer in multiple precision format.
 class Integer {
  public:
-  Integer();
-  explicit Integer(uint64 value);
+  enum class Base : uint8 {
+    kHex,
+    kDecimal,
+  };
+
+  Integer(const Base = Base::kHex);
+  explicit Integer(uint64 value, const Base = Base::kHex);
   explicit Integer(const Integer& other);
   ~Integer();
 
   uint64& operator[](int64 i) const { return data_[i]; }
   int64 size() const { return static_cast<int64>((*this)[-1]); }
+  uint64* data() const { return data_; }
 
   uint64 leading() const;
   void resize(int64 size);
@@ -24,6 +30,7 @@ class Integer {
   void clear();
   void insert(int64 from, int64 number, uint64 value);
   void push_leading(uint64 value);
+  Base base() const { return base_; }
 
   void release() { data_ = nullptr; }
 
@@ -39,7 +46,7 @@ class Integer {
   // Returns the maximum error in rounding.
   static double Mult(const Integer& a, const Integer& b, Integer* c);
 
-  // Computes c[n] = a[n] * b. Returns a carried limb.
+  // Computes c[n] = a[n] * b.
   static void Mult(const Integer& a, const uint64 b, Integer* c);
 
   // c[n] = a[n] / b
@@ -49,6 +56,7 @@ class Integer {
   // TODO: Support decimal output
   static void Show(const Integer& val, std::ostream& os);
 
+  Integer& operator=(const Integer& other);
   Integer& operator=(uint64 a);
 
  protected:
@@ -56,9 +64,11 @@ class Integer {
 
  private:
   uint64* data_;
+  const Base base_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Integer& val);
+std::ostream& operator<<(std::ostream& os, const Integer::Base& base);
 
 }  // namespace number
 }  // namespace ppi

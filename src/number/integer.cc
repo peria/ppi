@@ -21,14 +21,17 @@ constexpr uint64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 }  // namespace
 #endif
 
-Integer::Integer() : data_(base::Allocator::Allocate<uint64>(0)) {}
+Integer::Integer(const Base base)
+    : data_(base::Allocator::Allocate<uint64>(0)), base_(base) {}
 
-Integer::Integer(uint64 value) : data_(base::Allocator::Allocate<uint64>(1)) {
+Integer::Integer(uint64 value, const Base base)
+    : data_(base::Allocator::Allocate<uint64>(1)), base_(base) {
   (*this)[0] = value;
 }
 
 Integer::Integer(const Integer& other)
-    : data_(base::Allocator::Allocate<uint64>(other.size())) {
+    : data_(base::Allocator::Allocate<uint64>(other.size())),
+      base_(other.base()) {
   for (int64 i = 0; i < size(); ++i) {
     (*this)[i] = other[i];
   }
@@ -54,8 +57,10 @@ uint64 Integer::leading() const {
 
 void Integer::resize(int64 sz) {
   uint64* new_ptr = base::Allocator::Allocate<uint64>(sz);
-  for (int64 i = 0; i < std::min(sz, size()); ++i)
-    new_ptr[i] = (*this)[i];
+  if (data_) {
+    for (int64 i = 0; i < std::min(sz, size()); ++i)
+      new_ptr[i] = (*this)[i];
+  }
   std::swap(data_, new_ptr);
   base::Allocator::Deallocate(new_ptr);
 }
@@ -162,41 +167,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
 
 void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
-  uint64 carry = 0;
-#if defined(UINT128)
-  uint128 b128 = b;
-  for (int64 i = 0; i < a.size(); ++i) {
-    uint128 ab = a[i] * b128 + carry;
-    (*c)[i] = ab;
-    carry = ab >> 64;
-  }
-#else
-  uint64 bl = b & kHalfBitMask;
-  uint64 bh = b >> kHalfSize;
-  for (int64 i = 0; i < a.size(); ++i) {
-    uint64 al = a[i] & kHalfBitMask;
-    uint64 ah = a[i] >> kHalfSize;
-    uint64 c00 = al * bl;
-    uint64 c01 = al * bh;
-    uint64 c10 = ah * bl;
-    uint64 c11 = ah * bh;
-    c01 += c10;
-    if (c01 < c10) {
-      c11 += 1ULL << kHalfSize;
-    }
-    uint64 u = c00 + (c01 << kHalfSize);
-    if (u < c00) {
-      ++c11;
-    }
-    c11 += c01 >> kHalfSize;
-
-    (*c)[i] = u + carry;
-    if ((*c)[i] < u) {
-      ++c11;
-    }
-    carry = c11;
-  }
-#endif
+  uint64 carry = Natural::Mult(a.data_, b, a.size(), c->data_);
   if (carry) {
     c->push_leading(carry);
   }
@@ -206,6 +177,13 @@ void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
   Natural::Div(a.data_, b, a.size(), c->data_);
   c->Normalize();
+}
+
+Integer& Integer::operator=(const Integer& other) {
+  this->resize(other.size());
+  for (int64 i = 0; i < size(); ++i)
+    (*this)[i] = other[i];
+  return (*this);
 }
 
 Integer& Integer::operator=(uint64 a) {
@@ -219,6 +197,20 @@ std::ostream& operator<<(std::ostream& os, const Integer& val) {
   for (int64 i = val.size() - 1; i >= 0; --i) {
     sprintf(buffer, "%016" PRIX64, val[i]);
     os << buffer;
+  }
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Integer::Base& base) {
+  switch (base) {
+  case Integer::Base::kHex:
+    os << "[16]";
+    break;
+  case Integer::Base::kDecimal:
+    os << "[10]";
+    break;
+  default:
+    os << "[?]";
   }
   return os;
 }

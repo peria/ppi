@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "base/base.h"
+#include "number/natural.h"
 
 namespace ppi {
 namespace number {
@@ -24,9 +25,10 @@ const double kPow2_m64 = 1.0 / kPow2_64;
 
 }  // namespace
 
-Real::Real() : precision_(0), exponent_(0) {}
+Real::Real(const Base base) : Integer(base), precision_(0), exponent_(0) {}
 
-Real::Real(double d) {
+Real::Real(double d, const Base base)
+  : Integer(base) {
   if (d == 0.0) {
     clear();
     precision_ = 0;
@@ -307,6 +309,14 @@ void Real::Div(const Real& a, const uint64 b, Real* c) {
   c->Normalize();
 }
 
+// static
+void Real::ConvertBase(const Real& a, Real& b) {
+  CHECK_NE(a.base(), b.base());
+  if (a.base() == Integer::Base::kHex) {
+    HexToDecimal(a, b);
+  }
+}
+
 int64 Real::Compare(std::string& filename) {
   std::ifstream ifs(filename.c_str());
   if (!ifs.is_open()) {
@@ -342,6 +352,15 @@ void Real::setPrecision(int64 prec) {
 
   precision_ = prec;
   Normalize();
+}
+
+Real& Real::operator=(const Real& other) {
+  DCHECK_EQ(base(), other.base());
+
+  Integer::operator=(other);
+  precision_ = other.precision();
+  exponent_ = other.exponent();
+  return (*this);
 }
 
 Real& Real::operator=(double d) {
@@ -404,74 +423,53 @@ int64 Real::TailingZero() {
   return val;
 }
 
-namespace {
+// static
+void Real::HexToDecimal(const Real& a, Real& b) {
+  static constexpr uint64 kDecBase = 10000000000000000000ULL;
 
-std::ostream& outputInHex(std::ostream& os, const Real& val) {
+  int64 integral_size = a.size() + a.exponent();
+  // TODO: Make this routine general.
+  CHECK_EQ(1, integral_size);
+  CHECK_EQ(3, a[a.size() - 1]);
+
+  int64 sz = b.precision();
+  b.exponent_ = -sz;
+  b.resize(sz + 1);
+  b[b.size() - 1] = a[a.size() - 1];
+
+  Real tmp(a);
+  tmp.resize(tmp.size() - 1);
+  for (int64 i = b.size() - 2; i >= 0; --i) {
+    b[i] = Natural::Mult(tmp.data(), kDecBase, tmp.size(), tmp.data());
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const Real& val) {
   static char buffer[50];
+  const char* fmt_lead = (val.base() == Integer::Base::kHex) ? "%" PRIX64 : "%" PRIu64;
+  const char* fmt_digs = (val.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
 
   int64 diff = val.size() + val.exponent();
   if (diff <= 0) {
     os << "0";
   } else {
-    sprintf(buffer, "%" PRIX64, val[val.size() - 1]);
+    sprintf(buffer, fmt_lead, val[val.size() - 1]);
     os << buffer;
     for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0);
          --i) {
-      sprintf(buffer, "%016" PRIX64, val[i]);
+      sprintf(buffer, fmt_digs, val[i]);
       os << buffer;
     }
   }
-  os << ".";
-  for (int64 i = val.size() - diff - 1; i >= 0; --i) {
-    uint64 digit = (i < val.size()) ? val[i] : 0;
-    sprintf(buffer, "%016" PRIX64, digit);
-    os << buffer;
-  }
-
-  return os;
-}
-
-std::ostream& outputInDec(std::ostream& os, const Real& val) {
-  static char buffer[50];
-  static const uint64 kBase = 1e+19;
-
-  Real dec(val);
-
-  int64 exp_in_dec = (-dec.exponent() * std::log10(2) * 64 + 18) / 19;
-  int64 diff = dec.size() + dec.exponent();
-  if (diff <= 0) {
-    os << "0";
-  } else {
-    sprintf(buffer, "%" PRIX64, dec[dec.size() - 1]);
-    os << buffer;
-    dec[dec.size() - 1] = 0;
-    for (int64 i = dec.size() - 2; i >= std::max<int64>(dec.size() - diff, 0);
-         --i) {
-      sprintf(buffer, "%016" PRIX64, dec[i]);
-      dec[i] = 0;
-      os << buffer;
-    }
-  }
-  if (dec.exponent() < 0) {
+  if (val.exponent() < 0) {
     os << ".";
-    for (int64 i = 0; i < exp_in_dec; ++i) {
-      Real::Mult(dec, kBase, &dec);
-      int64 integral = -dec.exponent();
-      sprintf(buffer, "%019" PRIu64, dec[integral]);
-      dec[integral] = 0;
+    for (int64 i = val.size() - diff - 1; i >= 0; --i) {
+      uint64 digit = (i < val.size()) ? val[i] : 0;
+      sprintf(buffer, fmt_digs, digit);
       os << buffer;
     }
   }
   return os;
-}
-
-}  // namespace
-
-std::ostream& operator<<(std::ostream& os, const Real& val) {
-  if (os.flags() & std::ios_base::hex) {
-    return outputInHex(os, val);
-  }
-  return outputInDec(os, val);
 }
 
 }  // namespace number
