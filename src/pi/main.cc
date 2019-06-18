@@ -16,7 +16,6 @@
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
 DEFINE_string(refer, "", "file name which has another computing result");
-DEFINE_int32(base, 10, "Base to output. Accepts only 10 or 16.");
 
 using ppi::int64;
 
@@ -48,14 +47,16 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
 
   ppi::base::Timer timer_base;
-  const int64 prec_digits = (FLAGS_digits + 18) / 19 + 1;
+  const int64 prec_digits = (FLAGS_digits + 18) / 19;
   ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
   pi_dec.setPrecision(prec_digits);
   ppi::pi::Real::ConvertBase(pi, pi_dec);
   timer_base.Stop();
   LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
 
+  // TODO: Output values to files.
   ppi::base::Timer timer_output;
+  std::cout << pi << "\n";
   std::cout << pi_dec << "\n";
   timer_output.Stop();
   LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";

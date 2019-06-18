@@ -12,13 +12,14 @@
 namespace ppi {
 namespace drm {
 
-double Drm::compute(const int64 num_digits, Real* pi) {
-  const int64 num_limbs = num_digits / 19 + 1;
-  const int64 num_terms = numTermsForDigits(num_digits);
+double Drm::compute(const int64 num_dec, Real* pi) {
+  const int64 num_hex = num_dec / std::log10(16) + 2;
+  const int64 num_digits = num_hex / 16 + 2;
+  const int64 num_terms = numTermsForDigits(num_dec);
   double error = 0;
 
   int64 half = (num_terms + 1) / 2;
-  LOG(INFO) << "Use " << num_terms << " terms to get " << num_digits
+  LOG(INFO) << "Use " << num_terms << " terms to get " << num_dec
             << " digits.";
 
   Real a, b, c;
@@ -34,7 +35,7 @@ double Drm::compute(const int64 num_digits, Real* pi) {
   c.clear();
 
   error = std::max(error, postCompute(&a, &b, pi));
-  pi->setPrecision(num_limbs);
+  pi->setPrecision(num_digits);
   return error;
 }
 

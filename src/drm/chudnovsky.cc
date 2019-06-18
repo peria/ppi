@@ -14,7 +14,7 @@ namespace ppi {
 namespace drm {
 
 double Chudnovsky::postCompute(Real* a, Real* b, Real* pi) {
-  Integer::Mult(*a, 640320ULL * 8 * 10005 / 12, a);
+  Integer::Mult(*a, 640320ULL / 12 * 8 * 10005, a);
 
   int64 length = std::max(a->size(), b->size()) + 1;
   a->setPrecision(length);
