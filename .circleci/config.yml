@@ -29,4 +29,4 @@ jobs:
           working_directory: ~/project/ppi/out/Debug
           command: |
             source $BASH_ENV
-            for e in $(ls *_test); do ./$e; done
+            for e in `ls *_test`; do ./$e; done
