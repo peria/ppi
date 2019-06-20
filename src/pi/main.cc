@@ -1,6 +1,8 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -15,9 +17,13 @@
 
 DEFINE_int32(type, 0, "0:Chudnovsky, 1:Machin");
 DEFINE_int64(digits, 100, "Number of hexadeciaml digits to compute");
-DEFINE_string(refer, "", "file name which has another computing result");
+DEFINE_string(hex_output, "pi16.txt", "File name to output pi in hexadecimal.");
+DEFINE_string(dec_output, "pi10.txt", "File name to output pi in decimal.");
 
 using ppi::int64;
+
+void ComputePi(ppi::number::Real& pi);
+void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename);
 
 int main(int argc, char* argv[]) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -28,9 +34,43 @@ int main(int argc, char* argv[]) {
   }
 
   ppi::base::Timer timer_all;
+  {
+    ppi::number::Real pi;
+    ComputePi(pi);
+
+    ppi::base::Timer timer_base;
+    const int64 prec_digits = (FLAGS_digits + 18) / 19;
+    ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
+    pi_dec.setPrecision(prec_digits);
+    ppi::pi::Real::ConvertBase(pi, pi_dec);
+    timer_base.Stop();
+    LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
+
+    ppi::base::Timer timer_output;
+    DumpPiInFile(pi, FLAGS_hex_output);
+    DumpPiInFile(pi_dec, FLAGS_dec_output);
+    timer_output.Stop();
+    LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";
+  }
+  timer_all.Stop();
+  LOG(INFO) << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
+
+#if !defined(NDEBUG)
+  int64 used_size = ppi::base::Allocator::allocated_size_peak();
+  double used_size_kib = used_size / 1024.0;
+  if (used_size > 1024 * 1024) {
+    LOG(INFO) << "Maximum memory usage: " << used_size_kib / 1024 << " MiB";
+  } else {
+    LOG(INFO) << "Maximum memory usage: " << used_size_kib << " KiB";
+  }
+#endif
+
+  return 0;
+}
+
+void ComputePi(ppi::number::Real& pi) {
   ppi::base::Timer timer_compute;
 
-  ppi::number::Real pi;
   switch (FLAGS_type) {
   case 0: {
     std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
@@ -43,42 +83,41 @@ int main(int argc, char* argv[]) {
     ppi::pi::Arctan::Machin(&pi);
     break;
   }
+
   timer_compute.Stop();
   LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
-
-  ppi::base::Timer timer_base;
-  const int64 prec_digits = (FLAGS_digits + 18) / 19;
-  ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
-  pi_dec.setPrecision(prec_digits);
-  ppi::pi::Real::ConvertBase(pi, pi_dec);
-  timer_base.Stop();
-  LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
-
-  // TODO: Output values to files.
-  ppi::base::Timer timer_output;
-  std::cout << pi << "\n";
-  std::cout << pi_dec << "\n";
-  timer_output.Stop();
-  LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";
-
-  if (!FLAGS_refer.empty()) {
-    int64 size = pi.size() * 16;
-    int64 same = pi.Compare(FLAGS_refer);
-    std::cerr << same << " out of " << size << " digits are same.\n";
-  }
-
-  timer_all.Stop();
-  LOG(INFO) << "Elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
-
-#if !defined(BUILD_TYPE_release)
-  int64 used_size = ppi::base::Allocator::allocated_size_peak();
-  double used_size_kib = used_size / 1024.0;
-  if (used_size > 1024 * 1024) {
-    LOG(INFO) << "Maximum memory usage: " << used_size_kib / 1024 << " MiB";
-  } else {
-    LOG(INFO) << "Maximum memory usage: " << used_size_kib << " KiB";
-  }
-#endif
-
-  return 0;
 }
+
+void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename) {
+  using namespace ppi::number;
+  static constexpr int64 kDigitsPerLine = 100;
+  static char buffer[kDigitsPerLine + 50];
+  const char* fmt_digs = (pi.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
+  const int64 digs_per_elem = (pi.base() == Integer::Base::kHex) ? 16 : 19;
+
+  CHECK_EQ(pi[pi.size() - 1], 3);
+  CHECK_EQ(pi.size() + pi.exponent(), 1);
+
+  std::ofstream ofs(filename);
+  ofs << "pi = 3.\n";
+
+  int64 offset = 0;
+  for (int64 i = pi.size() - 2; i >= 0; --i) {
+    std::sprintf(buffer + offset, fmt_digs, pi[i]);
+    offset += digs_per_elem;
+    if (offset >= kDigitsPerLine) {
+      ofs.write(buffer, kDigitsPerLine);
+      ofs.write("\n", 1);
+      for (int64 j = kDigitsPerLine; j < offset; ++j)
+        buffer[j - kDigitsPerLine] = buffer[j];
+      offset -= kDigitsPerLine;
+    }
+  }
+  if (offset) {
+    buffer[offset] = '\n';
+    ofs.write(buffer, offset + 1);
+  }
+
+  ofs.close();
+}
+
