@@ -36,7 +36,11 @@ int main(int argc, char* argv[]) {
   ppi::base::Timer timer_all;
   {
     ppi::number::Real pi;
+    ppi::base::Timer timer_compute;
     ComputePi(pi);
+    timer_compute.Stop();
+    LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
+    std::cout << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.\n";
 
     ppi::base::Timer timer_base;
     const int64 prec_digits = (FLAGS_digits + 18) / 19;
@@ -54,6 +58,8 @@ int main(int argc, char* argv[]) {
   }
   timer_all.Stop();
   LOG(INFO) << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
+  std::cout << "Output is done.\n"
+            << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.\n";
 
 #if !defined(NDEBUG)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
@@ -69,8 +75,6 @@ int main(int argc, char* argv[]) {
 }
 
 void ComputePi(ppi::number::Real& pi) {
-  ppi::base::Timer timer_compute;
-
   switch (FLAGS_type) {
   case 0: {
     std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
@@ -83,9 +87,6 @@ void ComputePi(ppi::number::Real& pi) {
     ppi::pi::Arctan::Machin(&pi);
     break;
   }
-
-  timer_compute.Stop();
-  LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
 }
 
 void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename) {

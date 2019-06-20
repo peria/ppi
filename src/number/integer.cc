@@ -194,8 +194,18 @@ Integer& Integer::operator=(uint64 a) {
 
 std::ostream& operator<<(std::ostream& os, const Integer& val) {
   static char buffer[50];
-  for (int64 i = val.size() - 1; i >= 0; --i) {
-    sprintf(buffer, "%016" PRIX64, val[i]);
+  const char* fmt_lead = (val.base() == Integer::Base::kHex) ? "%" PRIX64 : "%" PRIu64;
+  const char* fmt_digs = (val.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
+
+  if (val.size() == 0) {
+    os << "0";
+    return os;
+  }
+
+  sprintf(buffer, fmt_lead, val[val.size() - 1]);
+  os << buffer;
+  for (int64 i = val.size() - 2; i >= 0; --i) {
+    sprintf(buffer, fmt_digs, val[i]);
     os << buffer;
   }
   return os;

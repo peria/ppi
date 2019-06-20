@@ -445,30 +445,9 @@ void Real::HexToDecimal(const Real& a, Real& b) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {
-  static char buffer[50];
-  const char* fmt_lead = (val.base() == Integer::Base::kHex) ? "%" PRIX64 : "%" PRIu64;
-  const char* fmt_digs = (val.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
-
-  int64 diff = val.size() + val.exponent();
-  if (diff <= 0) {
-    os << "0";
-  } else {
-    sprintf(buffer, fmt_lead, val[val.size() - 1]);
-    os << buffer;
-    for (int64 i = val.size() - 2; i >= std::max<int64>(val.size() - diff, 0);
-         --i) {
-      sprintf(buffer, fmt_digs, val[i]);
-      os << buffer;
-    }
-  }
-  if (val.exponent() < 0) {
-    os << ".";
-    for (int64 i = val.size() - diff - 1; i >= 0; --i) {
-      uint64 digit = (i < val.size()) ? val[i] : 0;
-      sprintf(buffer, fmt_digs, digit);
-      os << buffer;
-    }
-  }
+  const int64 digs_per_elem = (val.base() == Integer::Base::kHex) ? 16 : 19;
+  os << *reinterpret_cast<const Integer*>(&val)
+     << "e" << (val.exponent() * digs_per_elem);
   return os;
 }
 
