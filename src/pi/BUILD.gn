@@ -21,11 +21,12 @@ executable("ppi") {
   ]
 }
 
-# executable("pi_benchmark") {
-#   testonly = true
-#   sources = [ "pi_benchmark.cc" ]
-#   deps = [
-#     ":pi",
-#     "//third_party/benchmark",
-#   ]
-# }
+executable("pi_benchmark") {
+  testonly = true
+  sources = [ "pi_benchmark.cc" ]
+  deps = [
+    ":pi",
+    "//third_party/benchmark",
+    "//third_party/benchmark:benchmark_main",
+  ]
+}

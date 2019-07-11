@@ -1,24 +1,20 @@
 #include <benchmark/benchmark.h>
 
+#include <memory>
+
 #include "base/base.h"
 #include "number/real.h"
-#include "pi/drm.h"
+#include "drm/chudnovsky.h"
+#include "drm/drm.h"
 
 using ppi::int64;
 
-void BM_PiChudnovsky(benchmark::State& state) {
+void BM_DrmChudnovsky(benchmark::State& state) {
+  std::unique_ptr<ppi::drm::Drm> drm(new ppi::drm::Chudnovsky);
   while (state.KeepRunning()) {
     ppi::number::Real pi;
-    int64 limbs = state.range_x() / 16 + 1;
-    pi.setPrecision(limbs);
-    ppi::pi::Drm::Chudnovsky(&pi);
+    drm->compute(state.range(0), &pi);
   }
 }
 
-BENCHMARK(BM_PiChudnovsky)->Arg(100000)->Arg(1000000);
-
-int main(int argc, char** argv) {
-  benchmark::Initialize(&argc, argv);
-  benchmark::RunSpecifiedBenchmarks();
-  return 0;
-}
+BENCHMARK(BM_DrmChudnovsky)->Arg(100000)->Arg(1000000);
