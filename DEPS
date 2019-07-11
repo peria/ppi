@@ -14,6 +14,9 @@ deps = {
 
   # googletest
   "ppi/third_party/gtest/gtest": Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + '145d05750b15324899473340c8dd5af50d125d33',
+
+  # benchmark
+  "ppi/third_party/benchmark/benchmark": "https://github.com/google/benchmark.git@4abdfbb802d1b514703223f5f852ce4a507d32d2",
 }
 
 hooks = [
