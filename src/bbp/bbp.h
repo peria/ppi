@@ -37,6 +37,7 @@ class Bbp {
   static const int64 kLength = 4;  // 4 * 64bit
 
   Bbp(const Formula& formula);
+  virtual ~Bbp() = default;
 
   // Compute a part of pi, 64*4 bits from |hex_index|-th hexadecimal digit
   // after the decimal point.
