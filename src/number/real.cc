@@ -401,13 +401,6 @@ void Real::Normalize() {
   // Remove leading zeros.
   Integer::Normalize();
 
-  // Remove tailing zeros.
-  int64 tail = TailingZero();
-  if (tail > 0) {
-    erase(0, tail);
-    exponent_ += tail;
-  }
-
   // Remove tailing limbs if the mantissa is long.
   int diff = size() - precision_;
   if (diff > 0) {
@@ -437,6 +430,7 @@ void Real::HexToDecimal(const Real& a, Real& b) {
   b.resize(sz + 1);
   b[b.size() - 1] = a[a.size() - 1];
 
+  // Rational part
   Real tmp(a);
   tmp.resize(tmp.size() - 1);
   for (int64 i = b.size() - 2; i >= 0; --i) {

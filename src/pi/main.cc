@@ -49,17 +49,18 @@ int main(int argc, char* argv[]) {
     ppi::pi::Real::ConvertBase(pi, pi_dec);
     timer_base.Stop();
     LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
+    std::cout << "Base conversion: " << timer_base.GetTimeInSec() << " sec.\n";
 
     ppi::base::Timer timer_output;
     DumpPiInFile(pi, FLAGS_hex_output);
     DumpPiInFile(pi_dec, FLAGS_dec_output);
     timer_output.Stop();
     LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";
+    std::cout << "Output: " << timer_output.GetTimeInSec() << " sec.\n";
   }
   timer_all.Stop();
   LOG(INFO) << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
-  std::cout << "Output is done.\n"
-            << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.\n";
+  std::cout << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.\n";
 
 #if !defined(NDEBUG)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
@@ -118,6 +119,8 @@ void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename) {
     buffer[offset] = '\n';
     ofs.write(buffer, offset + 1);
   }
+  LOG(INFO) << "Output " << (pi.size() - 1) * digs_per_elem << " "
+            << (pi.base() == Integer::Base::kHex ? "hexa" : "") << "decimal digits.";
 
   ofs.close();
 }
