@@ -179,6 +179,56 @@ void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->Normalize();
 }
 
+void Integer::RBitShift(const Integer& a, const uint64 b, Integer* c) {
+  CHECK_NE(&a, c);
+  const uint64 limb_shift = b / 64;
+  const uint64 bit_shift = b % 64;
+  c->resize(a.size() - limb_shift);
+
+  if (bit_shift == 0) {
+    for (int64 i = 0; i < c->size(); ++i) {
+      (*c)[i] = a[i + limb_shift];
+    }
+    return;
+  }
+
+  uint64 limb = (limb_shift == 0) ? 0 : (a[limb_shift - 1] >> bit_shift);
+  for (int64 i = 0; i < c->size(); ++i) {
+    uint64 ai = a[i + limb_shift];
+    limb |= (ai << (64 - bit_shift));
+    (*c)[i] = limb;
+    limb = ai >> bit_shift;
+  }
+  c->Normalize();
+}
+
+void Integer::LBitShift(const Integer& a, const uint64 b, Integer* c) {
+  CHECK_NE(&a, c);
+  const uint64 limb_shift = b / 64;
+  const uint64 bit_shift = b % 64;
+
+  if (bit_shift == 0) {
+    c->resize(a.size() + limb_shift);
+    for (int64 i = 0; i < limb_shift; ++i) {
+      (*c)[i] = 0;
+    }
+    for (int64 i = 0; i < a.size(); ++i) {
+      (*c)[i + limb_shift] = a[i];
+    }
+    return;
+  }
+
+  c->resize(a.size() + limb_shift + 1);
+  uint64 limb = 0;
+  for (int64 i = 0; i < a.size(); ++i) {
+    limb |= a[i] << bit_shift;
+    (*c)[i + limb_shift] = limb;
+    limb = (a[i] >> (64 - bit_shift));
+  }
+  (*c)[a.size() + limb_shift] = limb;
+  c->Normalize();
+}
+
 Integer& Integer::operator=(const Integer& other) {
   this->resize(other.size());
   for (int64 i = 0; i < size(); ++i)

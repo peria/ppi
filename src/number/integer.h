@@ -52,6 +52,11 @@ class Integer {
   // c[n] = a[n] / b
   static void Div(const Integer& a, const uint64 b, Integer* c);
 
+  // c[n] = a[n] >> b
+  static void RBitShift(const Integer& a, const uint64 b, Integer* c);
+  // c[n] = a[n] << b
+  static void LBitShift(const Integer& a, const uint64 b, Integer* c);
+
   // Outputs hexadecimal representation of this integer to |os|.
   // TODO: Support decimal output
   static void Show(const Integer& val, std::ostream& os);
