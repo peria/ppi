@@ -193,12 +193,13 @@ void Integer::RBitShift(const Integer& a, const uint64 b, Integer* c) {
   }
 
   uint64 limb = (limb_shift == 0) ? 0 : (a[limb_shift - 1] >> bit_shift);
-  for (int64 i = 0; i < c->size(); ++i) {
-    uint64 ai = a[i + limb_shift];
+  for (int64 i = 0; i < c->size() - 1; ++i) {
+    uint64 ai = a[i + limb_shift + 1];
     limb |= (ai << (64 - bit_shift));
     (*c)[i] = limb;
     limb = ai >> bit_shift;
   }
+  (*c)[c->size() - 1] = limb;
   c->Normalize();
 }
 

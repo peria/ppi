@@ -79,5 +79,32 @@ TEST(IntegerTest, MultWithUint64) {
   EXPECT_EQ(1ULL, a[1]);
 }
 
+TEST(IntegerTest, BitShift) {
+  Integer a, c;
+  a.resize(2);
+  a[0] = 0;
+  a[1] = 0x10;
+
+  Integer::RBitShift(a, 1, &c);
+  EXPECT_EQ(2, c.size());
+  EXPECT_EQ(0ULL, c[0]);
+  EXPECT_EQ(8ULL, c[1]);
+
+  Integer::RBitShift(a, 5, &c);
+  EXPECT_EQ(1, c.size());
+  EXPECT_EQ(1ULL << 63, c[0]);
+
+  Integer::LBitShift(a, 1, &c);
+  EXPECT_EQ(2, c.size());
+  EXPECT_EQ(0ULL, c[0]);
+  EXPECT_EQ(32ULL, c[1]);
+
+  Integer::LBitShift(a, 60, &c);
+  EXPECT_EQ(3, c.size());
+  EXPECT_EQ(0ULL, c[0]);
+  EXPECT_EQ(0ULL, c[1]);
+  EXPECT_EQ(1ULL, c[2]);
+}
+
 }  // namespace number
 }  // namespace ppi
