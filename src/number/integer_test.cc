@@ -79,6 +79,20 @@ TEST(IntegerTest, MultWithUint64) {
   EXPECT_EQ(1ULL, a[1]);
 }
 
+TEST(IntegerTest, Power) {
+  Integer p10;
+  Integer::Power(10000000000000000000ULL, 10, &p10);  // 10^19
+  Integer p5;
+  Integer::Power(19073486328125ULL, 10, &p5);  // 19073486328125 = 5^19
+  Integer p10_2;
+  Integer::LBitShift(p5, 19 * 10, &p10_2);
+
+  ASSERT_EQ(p10.size(), p10_2.size());
+  for (int64 i = 0; i < p10.size(); ++i) {
+    EXPECT_EQ(p10[i], p10_2[i]) << "for i = " << i;
+  }
+}
+
 TEST(IntegerTest, BitShift) {
   Integer a, c;
   a.resize(2);

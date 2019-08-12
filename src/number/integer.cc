@@ -173,6 +173,36 @@ void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   }
 }
 
+namespace {
+
+uint64 getMSB(uint64 a) {
+  static constexpr uint64 kHigh32Bits = 0xFFFFFFFF00000000ULL;
+  static constexpr uint64 kHigh16Bits = 0xFFFF0000FFFF0000ULL;
+  static constexpr uint64 kHigh8Bits  = 0xFF00FF00FF00FF00ULL;
+  static constexpr uint64 kHigh4Bits  = 0xF0F0F0F0F0F0F0F0ULL;
+  static constexpr uint64 kHigh2Bits  = 0xCCCCCCCCCCCCCCCCULL;
+  static constexpr uint64 kHigh1Bit   = 0xAAAAAAAAAAAAAAAAULL;
+  a = (a & kHigh32Bits) ? (a & kHigh32Bits) : a;
+  a = (a & kHigh16Bits) ? (a & kHigh16Bits) : a;
+  a = (a & kHigh8Bits) ? (a & kHigh8Bits) : a;
+  a = (a & kHigh4Bits) ? (a & kHigh4Bits) : a;
+  a = (a & kHigh2Bits) ? (a & kHigh2Bits) : a;
+  a = (a & kHigh1Bit) ? (a & kHigh1Bit) : a;
+  return a;
+}
+
+}  // namespace
+
+void Integer::Power(const uint64 a, const uint64 e, Integer* c) {
+  (*c) = 1;
+  for (uint64 b = getMSB(e); b; b >>= 1) {
+    Integer::Mult(*c, *c, c);
+    if (b & e) {
+      Integer::Mult(*c, a, c);
+    }
+  }
+}
+
 void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
   Natural::Div(a.data_, b, a.size(), c->data_);
@@ -227,6 +257,9 @@ void Integer::LBitShift(const Integer& a, const uint64 b, Integer* c) {
     limb = (a[i] >> (64 - bit_shift));
   }
   (*c)[a.size() + limb_shift] = limb;
+  for (int64 i = 0; i < limb_shift; ++i) {
+    (*c)[i] = 0;
+  }
   c->Normalize();
 }
 

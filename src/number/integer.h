@@ -49,6 +49,9 @@ class Integer {
   // Computes c[n] = a[n] * b.
   static void Mult(const Integer& a, const uint64 b, Integer* c);
 
+  // Computes c[n] = a ** b.
+  static void Power(const uint64 a, const uint64 b, Integer* c);
+
   // c[n] = a[n] / b
   static void Div(const Integer& a, const uint64 b, Integer* c);
 
