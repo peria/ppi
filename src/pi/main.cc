@@ -42,18 +42,22 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
     std::cout << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.\n";
 
-    ppi::base::Timer timer_base;
-    const int64 prec_digits = (FLAGS_digits + 18) / 19;
     ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
-    pi_dec.setPrecision(prec_digits);
-    ppi::pi::Real::ConvertBase(pi, pi_dec);
-    timer_base.Stop();
-    LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
-    std::cout << "Base conversion: " << timer_base.GetTimeInSec() << " sec.\n";
+    if (FLAGS_dec_output != "") {
+      ppi::base::Timer timer_base;
+      const int64 prec_digits = (FLAGS_digits + 18) / 19;
+      pi_dec.setPrecision(prec_digits);
+      ppi::pi::Real::ConvertBase(pi, pi_dec);
+      timer_base.Stop();
+      LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
+      std::cout << "Base conversion: " << timer_base.GetTimeInSec() << " sec.\n";
+    }
 
     ppi::base::Timer timer_output;
     DumpPiInFile(pi, FLAGS_hex_output);
-    DumpPiInFile(pi_dec, FLAGS_dec_output);
+    if (FLAGS_dec_output != "") {
+      DumpPiInFile(pi_dec, FLAGS_dec_output);
+    }
     timer_output.Stop();
     LOG(INFO) << "Output: " << timer_output.GetTimeInSec() << " sec.";
     std::cout << "Output: " << timer_output.GetTimeInSec() << " sec.\n";
