@@ -62,15 +62,15 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.";
   std::cout << "Total elapsed Time: " << timer_all.GetTimeInSec() << " sec.\n";
 
-#if !defined(NDEBUG)
   int64 used_size = ppi::base::Allocator::allocated_size_peak();
-  double used_size_kib = used_size / 1024.0;
-  if (used_size > 1024 * 1024) {
-    LOG(INFO) << "Maximum memory usage: " << used_size_kib / 1024 << " MiB";
+  double used_size_mib = used_size / 1024.0 / 1024.0;
+  if (used_size_mib > 1024) {
+    LOG(INFO) << "Maximum memory usage: " << used_size_mib / 1024 << " GiB";
+    std::cout << "Maximum memory usage: " << used_size_mib / 1024 << " GiB\n";
   } else {
-    LOG(INFO) << "Maximum memory usage: " << used_size_kib << " KiB";
+    LOG(INFO) << "Maximum memory usage: " << used_size_mib << " MiB";
+    std::cout << "Maximum memory usage: " << used_size_mib << " MiB\n";
   }
-#endif
 
   return 0;
 }
