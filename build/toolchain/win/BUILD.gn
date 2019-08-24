@@ -1,0 +1,16 @@
+import("//build/toolchain/msvc_toolchain.gni")
+import("//build/toolchain/nvcc_msvc_toolchain.gni")
+
+msvc_toolchain("x64") {
+    cl = "cl.exe"
+    lib = "lib.exe"
+    link = "link.exe"
+    ml = "ml64.exe"
+}
+
+nvcc_msvc_toolchain("gpgpu") {
+    cl = "nvcc.exe"
+    lib = "lib.exe"
+    link = "link.exe"
+    ml = "ml64.exe"
+}

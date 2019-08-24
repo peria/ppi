@@ -1,0 +1,75 @@
+config("benchmark_config") {
+  include_dirs = [ "benchmark/include" ]
+}
+
+static_library("benchmark") {
+  testonly = true
+  sources = [
+    "benchmark/src/arraysize.h",
+    "benchmark/src/benchmark_api_internal.cc",
+    "benchmark/src/benchmark_api_internal.h",
+    "benchmark/src/benchmark.cc",
+    "benchmark/src/benchmark_name.cc",
+    "benchmark/src/benchmark_register.cc",
+    "benchmark/src/benchmark_register.h",
+    "benchmark/src/benchmark_runner.cc",
+    "benchmark/src/benchmark_runner.h",
+    "benchmark/src/check.h",
+    "benchmark/src/colorprint.cc",
+    "benchmark/src/colorprint.h",
+    "benchmark/src/commandlineflags.cc",
+    "benchmark/src/commandlineflags.h",
+    "benchmark/src/complexity.cc",
+    "benchmark/src/complexity.h",
+    "benchmark/src/console_reporter.cc",
+    "benchmark/src/counter.cc",
+    "benchmark/src/counter.h",
+    "benchmark/src/csv_reporter.cc",
+    "benchmark/src/cycleclock.h",
+    "benchmark/src/internal_macros.h",
+    "benchmark/src/json_reporter.cc",
+    "benchmark/src/log.h",
+    "benchmark/src/mutex.h",
+    "benchmark/src/re.h",
+    "benchmark/src/reporter.cc",
+    "benchmark/src/sleep.cc",
+    "benchmark/src/sleep.h",
+    "benchmark/src/statistics.cc",
+    "benchmark/src/statistics.h",
+    "benchmark/src/string_util.cc",
+    "benchmark/src/string_util.h",
+    "benchmark/src/sysinfo.cc",
+    "benchmark/src/thread_manager.h",
+    "benchmark/src/thread_timer.h",
+    "benchmark/src/timers.cc",
+    "benchmark/src/timers.h",
+  ]
+  include_dirs = [
+    "benchmark/include",
+  ]
+  public_configs = [
+    ":benchmark_config",
+  ]
+
+#  if (is_posix) {
+#    public_configs += [ ":has_rtti_config" ]
+#  }
+#  if (is_clang && os != "win") {
+#    public_configs += [ ":use_own_tr1_tuple_config" ]
+#  }
+#  if (os == "win") {
+#    # http://stackoverflow.com/questions/12558327/google-test-in-visual-studio-2012
+#    public_configs += [ ":variadix_max_config" ]
+#  }
+}
+
+static_library("benchmark_main") {
+  testonly = true
+  deps = [
+    ":benchmark",
+  ]
+  sources = [
+    "benchmark/src/benchmark_main.cc",
+  ]
+}
+
