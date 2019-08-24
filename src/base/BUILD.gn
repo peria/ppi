@@ -1,0 +1,8 @@
+static_library("base") {
+  sources = [
+    "allocator.cc",
+    "allocator.h",
+    "base.cc",
+    "base.h",
+  ]
+}
