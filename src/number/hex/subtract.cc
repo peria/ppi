@@ -7,7 +7,7 @@ namespace internal {
 
 namespace {
 
-Digit add111(const Digit a, const Digit b, Digit& c) {
+Digit subtract111(const Digit a, const Digit b, Digit& c) {
   Digit s = a - c;
   c = (s > a) ? 1 : 0;
   Digit t = s - b;
@@ -16,7 +16,7 @@ Digit add111(const Digit a, const Digit b, Digit& c) {
   return t;
 }
 
-Digit add11(const Digit a, Digit& c) {
+Digit subtract11(const Digit a, Digit& c) {
   Digit s = a - c;
   c = (s > a) ? 1 : 0;
   return s;
