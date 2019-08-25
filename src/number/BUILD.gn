@@ -1,6 +1,17 @@
 import("//src/number/number.gni")
 
 static_library("number") {
+  sources = [
+    "natural.cc",
+    "natural.h",
+  ]
+  deps = [
+    ":internal",
+    "//src/base",
+  ]
+}
+
+static_library("internal") {
   if (use_decimal_operation) {
     radix_dir = get_path_info("./decimal", "abspath")
   } else {
@@ -8,8 +19,8 @@ static_library("number") {
   }
 
   sources = [
-    "${radix_dir}/natural.cc",
-    "natural.h",
+    "${radix_dir}/add.cc",
+    "internal/add.h",
   ]
   deps = [
     "//src/base",

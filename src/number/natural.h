@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/base.h"
+#include "base/allocator.h"
 
 namespace ppi {
 
@@ -13,9 +14,37 @@ public:
   Digit& operator[](int64 i) { return digits_[i]; }
   const Digit& operator[](int64 i) const { return digits_[i]; }
 
+  // Operations including memory size management.
+  static void add(const Natural& a, const Natural& b, Natural& c);
+
+protected:
+  inline void push_lead(const Digit d);
+  inline void resize(const int64 n);
+
 private:
+  int64 capacity() const {
+    return base::Allocator::getSizeInByte(digits_) / sizeof(Digit);
+  }
+
   Digit* digits_ = nullptr;
   int64 size_ = 0;
 };
+
+void Natural::push_lead(const Digit d) {
+  int64 n = size();
+  resize(n + 1);
+  digits_[n] = d;
+}
+
+void Natural::resize(const int64 n) {
+  if (capacity() > n) {
+    Digit* old = digits_;
+    digits_ = base::Allocator::allocate<Digit>(n);
+    for (int64 i = 0; i < size(); ++i)
+      digits_[i] = old[i];
+    base::Allocator::deallocate(old);
+  }
+  size_ = n;
+}
 
 }  // namespace ppi

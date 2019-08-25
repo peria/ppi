@@ -1,2 +1,0 @@
-#include "number/natural.h"
-
