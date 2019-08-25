@@ -12,6 +12,8 @@ using Digit = uint64;
 // Representa a non negative integers.  A digit contains 16 decimal digits.
 class Natural {
 public:
+  ~Natural();
+
   int64 size() const { return size_; }
   Digit& operator[](int64 i) { return digits_[i]; }
   const Digit& operator[](int64 i) const { return digits_[i]; }
@@ -36,6 +38,7 @@ public:
   // Operations including memory size management.
   static void add(const Natural& a, const Natural& b, Natural& c);
   static void subtract(const Natural& a, const Natural& b, Natural& c);
+  static void div(const Natural& a, const Digit b, Natural& c);
 
 protected:
   inline void push_lead(const Digit d);

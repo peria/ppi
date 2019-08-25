@@ -7,6 +7,11 @@
 
 namespace ppi {
 
+Natural::~Natural() {
+  if (digits_)
+    base::Allocator::deallocate(digits_);
+}
+
 bool Natural::operator<(const Natural& other) const {
   if (size() != other.size())
     return size() < other.size();
@@ -45,13 +50,16 @@ void Natural::add(const Natural& a, const Natural& b, Natural& c) {
   Digit* dig_b = b.digits_;
   Digit* dig_c = c.digits_;
 
-  int64 n = a.size();
+  const int64 n = a.size();
   if (c.size() < a.size()) {
     dig_c = base::Allocator::allocate<Digit>(a.size());
   }
 
-  Digit carry = internal::add(dig_a, a.size(), dig_b, b.size(), dig_c);
-  c.digits_ = dig_c;
+  Digit carry = internal::add(dig_a, n, dig_b, b.size(), dig_c);
+  if (dig_c != c.digits_) {
+    base::Allocator::deallocate(c.digits_);
+    c.digits_ = dig_c;
+  }
   c.size_ = n;
 
   if (carry)
@@ -65,12 +73,36 @@ void Natural::subtract(const Natural& a, const Natural& b, Natural& c) {
   Digit* dig_b = b.digits_;
   Digit* dig_c = c.digits_;
 
+  const int64 n = a.size();
+  if (c.size() < a.size()) {
+    dig_c = base::Allocator::allocate<Digit>(a.size());
+  }
+
+  internal::subtract(dig_a, n, dig_b, b.size(), dig_c);
+  if (dig_c != c.digits_) {
+    base::Allocator::deallocate(c.digits_);
+    c.digits_ = dig_c;
+  }
+  c.digits_ = dig_c;
+  c.size_ = n;
+
+  c.normalize();
+}
+
+void Natural::div(const Natural& a, const Digit b, Natural& c) {
+  Digit* dig_a = a.digits_;
+  Digit* dig_c = c.digits_;
+
   int64 n = a.size();
   if (c.size() < a.size()) {
     dig_c = base::Allocator::allocate<Digit>(a.size());
   }
 
-  internal::subtract(dig_a, a.size(), dig_b, b.size(), dig_c);
+  internal::div(dig_a, n, b, dig_c);
+  if (dig_c != c.digits_) {
+    base::Allocator::deallocate(c.digits_);
+    c.digits_ = dig_c;
+  }
   c.digits_ = dig_c;
   c.size_ = n;
 

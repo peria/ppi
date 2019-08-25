@@ -21,9 +21,11 @@ static_library("internal") {
 
   sources = [
     "${radix_dir}/add.cc",
+    "${radix_dir}/div.cc",
     "${radix_dir}/ostream.cc",
     "${radix_dir}/subtract.cc",
     "internal.h",
+    "uint128.h",
   ]
   deps = [
     "//src/base",
