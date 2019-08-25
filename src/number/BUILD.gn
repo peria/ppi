@@ -24,5 +24,6 @@ static_library("internal") {
   ]
   deps = [
     "//src/base",
+    "//third_party/glog",
   ]
 }
