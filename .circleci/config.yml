@@ -17,6 +17,7 @@ jobs:
             source $BASH_ENV
             gclient config --unmanaged https://github.com/peria/ppi.git
             gclient sync
+            git checkout origin advent_calendar
       - run:
           name: Build
           working_directory: ~/project/ppi
