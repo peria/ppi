@@ -1,6 +1,6 @@
 #include "number/internal.h"
 
-#include "glog/logging.h"
+#include <glog/logging.h>
 
 namespace ppi {
 namespace internal {

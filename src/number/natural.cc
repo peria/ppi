@@ -1,6 +1,6 @@
 #include "number/natural.h"
 
-#include "glog/logging.h"
+#include <glog/logging.h>
 
 #include "base/allocator.h"
 #include "number/internal.h"
