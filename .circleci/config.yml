@@ -24,6 +24,13 @@ jobs:
             source $BASH_ENV
             gn gen out/Debug
             ninja -C out/Debug
+      - run:
+          name: BuildHex
+          working_directory: ~/project/ppi
+          command: |
+            source $BASH_ENV
+            gn gen --args="use_decimal_operation=false" out/Hex
+            ninja -C out/Hex
       # - run:
       #     name: Test
       #     working_directory: ~/project/ppi/out/Debug
