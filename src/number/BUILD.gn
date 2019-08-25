@@ -8,6 +8,7 @@ static_library("number") {
   deps = [
     ":internal",
     "//src/base",
+    "//third_party/glog",
   ]
 }
 
@@ -20,7 +21,9 @@ static_library("internal") {
 
   sources = [
     "${radix_dir}/add.cc",
-    "internal/add.h",
+    "${radix_dir}/ostream.cc",
+    "${radix_dir}/subtract.cc",
+    "internal.h",
   ]
   deps = [
     "//src/base",

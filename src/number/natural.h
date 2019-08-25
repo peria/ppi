@@ -3,6 +3,8 @@
 #include "base/base.h"
 #include "base/allocator.h"
 
+#include <ostream>
+
 namespace ppi {
 
 using Digit = uint64;
@@ -22,9 +24,18 @@ public:
   bool operator!=(const Natural& other) const {
     return !((*this) == other);
   }
+  bool operator>=(const Natural& other) const {
+    return !((*this) < other);
+  }
+  bool operator<=(const Natural& other) const {
+    return !((*this) > other);
+  }
+
+  void normalize();
 
   // Operations including memory size management.
   static void add(const Natural& a, const Natural& b, Natural& c);
+  static void subtract(const Natural& a, const Natural& b, Natural& c);
 
 protected:
   inline void push_lead(const Digit d);
@@ -38,6 +49,8 @@ private:
   Digit* digits_ = nullptr;
   int64 size_ = 0;
 };
+
+std::ostream& operator<<(std::ostream&, const Natural&);
 
 void Natural::push_lead(const Digit d) {
   int64 n = size();

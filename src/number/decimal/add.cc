@@ -1,6 +1,6 @@
-#include "number/internal/add.h"
+#include "number/internal.h"
 
-#include <glog/logging.h>
+#include "glog/logging.h"
 
 #include "number/decimal/decimal.h"
 
