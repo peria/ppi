@@ -18,7 +18,7 @@ jobs:
             gclient config --unmanaged https://github.com/peria/ppi.git
             gclient sync
             cd ppi
-            git checkout origin advent_calendar
+            git checkout origin/advent_calendar
       - run:
           name: Build
           working_directory: ~/project/ppi
