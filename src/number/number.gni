@@ -1,0 +1,4 @@
+declare_args() {
+  # Use decimal presentation for internal operations.
+  use_decimal_operation = true
+}

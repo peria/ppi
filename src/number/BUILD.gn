@@ -1,0 +1,17 @@
+import("//src/number/number.gni")
+
+static_library("number") {
+  if (use_decimal_operation) {
+    radix_dir = get_path_info("./decimal", "abspath")
+  } else {
+    radix_dir = get_path_info("./hex", "abspath")
+  }
+
+  sources = [
+    "${radix_dir}/natural.cc",
+    "natural.h",
+  ]
+  deps = [
+    "//src/base",
+  ]
+}
