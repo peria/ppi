@@ -4,5 +4,6 @@ static_library("base") {
     "allocator.h",
     "base.cc",
     "base.h",
+    "macros.h",
   ]
 }
