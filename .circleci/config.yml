@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: debian:stretch
+    steps:
+      - run:
+          name: Setup
+          command: |
+            apt-get update
+            apt-get install -y git clang python curl wget
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+      - run:
+          name: Checkout
+          command: |
+            echo 'export PATH=$HOME/project/depot_tools:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            gclient config --unmanaged https://github.com/peria/ppi.git
+            gclient sync
+      - run:
+          name: Build
+          working_directory: ~/project/ppi
+          command: |
+            source $BASH_ENV
+            gn gen out/Debug
+            ninja -C out/Debug
+      # - run:
+      #     name: Test
+      #     working_directory: ~/project/ppi/out/Debug
+      #     command: |
+      #       source $BASH_ENV
+      #       for t in *_test; do ./${t} done
