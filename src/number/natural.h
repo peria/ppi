@@ -14,6 +14,15 @@ public:
   Digit& operator[](int64 i) { return digits_[i]; }
   const Digit& operator[](int64 i) const { return digits_[i]; }
 
+  bool operator<(const Natural& other) const;
+  bool operator==(const Natural& other) const;
+  bool operator>(const Natural& other) const {
+    return other < (*this);
+  }
+  bool operator!=(const Natural& other) const {
+    return !((*this) == other);
+  }
+
   // Operations including memory size management.
   static void add(const Natural& a, const Natural& b, Natural& c);
 

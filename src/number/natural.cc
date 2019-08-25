@@ -5,6 +5,28 @@
 
 namespace ppi {
 
+bool Natural::operator<(const Natural& other) const {
+  if (size() != other.size())
+    return size() < other.size();
+  for (int64 i = size() - 1; i >= 0; --i) {
+    if ((*this)[i] != other[i])
+      return (*this)[i] < other[i];
+  }
+  // ==
+  return false;
+}
+
+bool Natural::operator==(const Natural& other) const {
+  if (size() != other.size())
+    return false;
+  for (int64 i = size() - 1; i >= 0; --i) {
+    if ((*this)[i] != other[i])
+      return false;
+  }
+  // ==
+  return true;
+}
+
 void Natural::add(const Natural& a, const Natural& b, Natural& c) {
   if (a.size() < b.size())
     return add(b, a, c);
