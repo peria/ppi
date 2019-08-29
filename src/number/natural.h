@@ -40,6 +40,8 @@ public:
   static void subtract(const Natural& a, const Natural& b, Natural& c);
   static void div(const Natural& a, const Digit b, Natural& c);
 
+  static constexpr int64 kDigitsPerDigit = 16;
+
 protected:
   inline void push_lead(const Digit d);
   inline void resize(const int64 n);
