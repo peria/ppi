@@ -3,11 +3,11 @@
 #include <vector>
 
 #include "base/base.h"
-#include "pi/pi_computer.h"
+#include "pi/computer.h"
 
 namespace ppi {
 
-class ArcTan : public PiComputer {
+class ArcTan : public Computer {
 public:
   struct Formula {
     const char* name;

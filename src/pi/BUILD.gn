@@ -2,9 +2,10 @@ static_library("pi") {
   sources = [
     "arctan.cc",
     "arctan.h",
-    "pi_computer.h"
+    "computer.h"
   ]
   deps = [
     "//src/number",
+    "//third_party/gflags",
   ]
 }
