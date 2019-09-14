@@ -2,6 +2,8 @@
 
 #include "base/base.h"
 
+#include <glog/logging.h>
+
 namespace ppi {
 namespace base {
 
@@ -13,7 +15,8 @@ public:
 
     T* memory = new uint64[number + 1];
     *memory = number * 8;
-    return memory + 1;
+    ++memory;
+    return memory;
   }
 
   static void deallocate(void* ptr) {

@@ -32,3 +32,15 @@ static_library("internal") {
     "//third_party/glog",
   ]
 }
+
+executable("number_test") {
+  testonly = true
+  sources = [
+    "natural_test.cc",
+  ]
+  deps = [
+    ":number",
+    "//third_party/gtest",
+    "//third_party/gtest:gtest_main",
+  ]
+}

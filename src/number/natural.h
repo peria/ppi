@@ -3,6 +3,8 @@
 #include "base/base.h"
 #include "base/allocator.h"
 
+#include <glog/logging.h>
+
 #include <ostream>
 
 namespace ppi {
@@ -10,6 +12,7 @@ namespace ppi {
 using Digit = uint64;
 
 // Representa a non negative integers.  A digit contains 16 decimal digits.
+// If it represents a 0, its size == 1.
 class Natural {
 public:
   Natural();
@@ -62,6 +65,7 @@ protected:
 
 private:
   int64 capacity() const {
+    DCHECK(digits_);
     return base::Allocator::getSizeInByte(digits_) / sizeof(Digit);
   }
 
@@ -78,7 +82,8 @@ void Natural::push_lead(const Digit d) {
 }
 
 void Natural::resize(const int64 n) {
-  if (capacity() > n) {
+  int64 cap = capacity();
+  if (cap < n) {
     Digit* old = digits_;
     digits_ = base::Allocator::allocate<Digit>(n);
     for (int64 i = 0; i < size(); ++i)
