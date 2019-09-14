@@ -8,3 +8,14 @@ static_library("pi") {
     "//src/number",
   ]
 }
+
+executable("ppi") {
+  sources = [
+    "main.cc",
+  ]
+  deps = [
+    ":pi",
+    "//third_party/gflags",
+    "//third_party/glog",
+  ]
+}

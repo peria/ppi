@@ -7,16 +7,17 @@
 
 namespace ppi {
 
-class ArcTan : public PiComputer {
+class Arctan : public PiComputer {
 public:
   struct Formula {
     const char* name;
-    std::vector<std::vector<int64>> terms;
+    std::vector<std::pair<int64, int64>> terms;
   };
 
-  ArcTan(int formula_id);
+  Arctan(int formula_id);
 
   void compute(int64 num_dec_digits, Natural& pi) override;
+  const char* name() const override { return "arctan"; }
 
 private:
   const Formula& formula_;

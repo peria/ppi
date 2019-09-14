@@ -18,6 +18,16 @@ public:
   Digit& operator[](int64 i) { return digits_[i]; }
   const Digit& operator[](int64 i) const { return digits_[i]; }
 
+  Natural& operator=(const Digit& d) {
+    if (d == 0) {
+      resize(0);
+    } else {
+      resize(1);
+      (*this)[0] = d;
+    }
+    return *this;
+  }
+
   bool operator<(const Natural& other) const;
   bool operator==(const Natural& other) const;
   bool operator>(const Natural& other) const {
@@ -42,9 +52,12 @@ public:
 
   static constexpr int64 kDigitsPerDigit = 16;
 
+  // This is temporarily public.
+  // TODO: Make this protected.
+  inline void resize(const int64 n);
+
 protected:
   inline void push_lead(const Digit d);
-  inline void resize(const int64 n);
 
 private:
   int64 capacity() const {
