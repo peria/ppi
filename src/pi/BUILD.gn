@@ -9,3 +9,14 @@ static_library("pi") {
     "//third_party/gflags",
   ]
 }
+
+executable("ppi") {
+  sources = [
+    "main.cc",
+  ]
+  deps = [
+    ":pi",
+    "//third_party/gflags",
+    "//third_party/glog",
+  ]
+}
