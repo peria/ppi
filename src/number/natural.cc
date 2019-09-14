@@ -7,6 +7,10 @@
 
 namespace ppi {
 
+Natural::Natural()
+  : digits_(base::Allocator::allocate<Digit>(0)),
+    size_(0) {}
+
 Natural::~Natural() {
   if (digits_)
     base::Allocator::deallocate(digits_);

@@ -12,6 +12,7 @@ using Digit = uint64;
 // Representa a non negative integers.  A digit contains 16 decimal digits.
 class Natural {
 public:
+  Natural();
   ~Natural();
 
   int64 size() const { return size_; }
@@ -82,6 +83,8 @@ void Natural::resize(const int64 n) {
     digits_ = base::Allocator::allocate<Digit>(n);
     for (int64 i = 0; i < size(); ++i)
       digits_[i] = old[i];
+    for (int64 i = size(); i < n; ++i)
+      digits_[i] = 0;
     base::Allocator::deallocate(old);
   }
   size_ = n;
