@@ -40,6 +40,7 @@ executable("number_test") {
   ]
   deps = [
     ":number",
+    "//src/base",
     "//third_party/gtest",
     "//third_party/gtest:gtest_main",
   ]
