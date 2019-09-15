@@ -6,4 +6,8 @@ static_library("base") {
     "base.h",
     "macros.h",
   ]
+  public_deps = [
+    "//third_party/glog",
+    "//third_party/gflags",
+  ]
 }
