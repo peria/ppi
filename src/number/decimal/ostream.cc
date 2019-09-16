@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& os, const Natural& a) {
   std::sprintf(buffer, "%" PRIu64, a[a.size() - 1]);
   os << buffer;
   for (int64 i = a.size() - 2; i >= 0; --i) {
-    std::sprintf(buffer, "%016" PRIu64, a[a.size() - 1]);
+    std::sprintf(buffer, "%016" PRIu64, a[i]);
     os << buffer;
   }
   return os;

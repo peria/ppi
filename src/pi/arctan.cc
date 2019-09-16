@@ -24,7 +24,7 @@ void Arctan::compute(int64 num_dec_digits, Natural& pi) {
   // The number of Digit's after the decimal point.
   const int64 num_digits = num_dec_digits / Natural::kDigitsPerDigit +
     (num_dec_digits % Natural::kDigitsPerDigit != 0);
-  LOG(INFO) << num_digits;
+  LOG(INFO) << "number of digits: " << num_digits;
 
   pi = 0;
   for (auto& term : formula_.terms) {
@@ -33,12 +33,13 @@ void Arctan::compute(int64 num_dec_digits, Natural& pi) {
 
     Natural ax;
     ax.resize(num_digits + 1);
-    ax[num_digits] = a * x;
+    ax[num_digits] = std::abs(a) * x;
     for (int64 i = 0; i < num_digits; ++i)
       ax[i] = 0;
 
     const int64 num_terms = num_dec_digits / std::log10(term.second) / 2 + 1;
     const int64 x2 = x * x;
+    LOG(INFO) << num_terms << " terms for " << a << " * arctan(1/" << x << ")";
     for (int64 i = 0; i < num_terms; ++i) {
       Natural t;
       Natural::div(ax, x2, ax);

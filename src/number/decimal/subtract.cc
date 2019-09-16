@@ -23,7 +23,7 @@ Digit subtract(const Digit* a, const int64 na, const Digit* b, const int64 nb, D
   }
   for (int64 i = nb; i < na; ++i) {
     Digit sum = a[i] - borrow;
-    if (sum >= a[i]) {
+    if (sum > a[i]) {
       borrow = 1;
       sum += kBase;
     } else {
