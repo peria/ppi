@@ -11,7 +11,7 @@ Digit subtract111(const Digit a, const Digit b, Digit& c) {
   Digit s = a - c;
   c = (s > a) ? 1 : 0;
   Digit t = s - b;
-  if (t > b)
+  if (t > s)
     c = 1;
   return t;
 }

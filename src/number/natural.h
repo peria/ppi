@@ -12,7 +12,7 @@ namespace ppi {
 using Digit = uint64;
 
 // Representa a non negative integers.  A digit contains 16 decimal digits.
-// If it represents a 0, its size == 1.
+// If it represents a 0, its size == 0.
 class Natural {
 public:
   Natural();

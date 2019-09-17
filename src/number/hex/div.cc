@@ -9,8 +9,9 @@ namespace internal {
 
 Digit div(const Digit* a, const int64 n, const Digit b, Digit* c) {
   uint128 r = 0;
-  for (int64 i = n - 1; i >= 0; ++i) {
-    r = (r << 64) + a[i];
+  for (int64 i = n - 1; i >= 0; --i) {
+    r <<= 64;
+    r += a[i];
     c[i] = r / b;
     r %= b;
   }
