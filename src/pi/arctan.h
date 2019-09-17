@@ -18,6 +18,7 @@ public:
 
   void compute(int64 num_dec_digits, Natural& pi) override;
   const char* name() const override { return "arctan"; }
+  const char* formula() const override { return formula_.name; }
 
 private:
   const Formula& formula_;

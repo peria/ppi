@@ -24,7 +24,7 @@ void Arctan::compute(int64 num_dec_digits, Natural& pi) {
   // The number of Digit's after the decimal point.
   const int64 num_digits = num_dec_digits / Natural::kDigitsPerDigit +
     (num_dec_digits % Natural::kDigitsPerDigit != 0);
-  LOG(INFO) << "number of digits: " << num_digits;
+  VLOG(1) << "number of digits: " << num_digits;
 
   pi = 0;
   for (auto& term : formula_.terms) {

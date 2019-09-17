@@ -11,6 +11,7 @@ public:
 
   virtual void compute(int64 num_dec_digits, Natural& pi) = 0;
   virtual const char* name() const = 0;
+  virtual const char* formula() const = 0;
 };
 
 }  // namespace ppi

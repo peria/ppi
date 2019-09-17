@@ -31,6 +31,9 @@ int main(int argc, char* argv[]) {
   ppi::Natural pi;
   std::unique_ptr<ppi::Computer> computer(GetComputer());
   ppi::int64 num_dec_digits = std::strtoll(argv[1], nullptr, 10);
+  LOG(INFO) << "Digits to compute: " << num_dec_digits;
+  LOG(INFO) << "Algorithm: " << computer->name();
+  LOG(INFO) << "Formula: " << computer->formula();
   computer->compute(num_dec_digits, pi);
 
   std::cout << pi << "\n";
