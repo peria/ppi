@@ -26,6 +26,10 @@ class Timer {
     return time();
   }
   Duration time() const { return Duration(end_ - start_); }
+
+  double timeInSec() const { return time().timeInSec(); }
+  int64 timeInMsec() const { return time().timeInMsec(); }
+
   Duration split() {
     TimePoint now = Clock::now();
     Duration d(now - split_);

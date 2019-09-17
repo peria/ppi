@@ -6,6 +6,7 @@
 #include <gflags/gflags.h>
 
 #include "base/base.h"
+#include "base/timer.h"
 #include "number/natural.h"
 #include "pi/arctan.h"
 #include "pi/computer.h"
@@ -34,7 +35,11 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Digits to compute: " << num_dec_digits;
   LOG(INFO) << "Algorithm: " << computer->name();
   LOG(INFO) << "Formula: " << computer->formula();
+  ppi::Timer timer;
   computer->compute(num_dec_digits, pi);
+  timer.stop();
+
+  LOG(INFO) << "Total time: " << timer.timeInSec() << " sec.";
 
   std::cout << pi << "\n";
 

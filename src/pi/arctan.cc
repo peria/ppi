@@ -13,6 +13,7 @@ namespace {
 
 const Arctan::Formula kFormulae[] = {
   {"Machin", {{16, 5}, {-4, 239}}},
+  {"Euler", {{16, 5}, {-4, 70}, {4, 99}}}
 };
 
 }  // namespace
