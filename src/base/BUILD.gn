@@ -5,6 +5,8 @@ static_library("base") {
     "base.cc",
     "base.h",
     "macros.h",
+    "timer.cc",
+    "timer.h",
   ]
   public_deps = [
     "//third_party/glog",
