@@ -93,6 +93,48 @@ void Natural::subtract(const Natural& a, const Natural& b, Natural& c) {
   c.normalize();
 }
 
+void Natural::mult(const Natural& a, const Natural& b, Natural& c) {
+  Digit* dig_a = a.digits_;
+  Digit* dig_b = b.digits_;
+  Digit* dig_c = c.digits_;
+
+  const int64 nc = a.size() + b.size();
+  if (c.size() < nc) {
+    dig_c = base::Allocator::allocate<Digit>(nc);
+  }
+
+  internal::mult(dig_a, a.size(), dig_b, b.size(), dig_c);
+  if (dig_c != c.digits_) {
+    base::Allocator::deallocate(c.digits_);
+    c.digits_ = dig_c;
+  }
+  c.digits_ = dig_c;
+  c.size_ = nc;
+
+  c.normalize();
+}
+
+void Natural::mult(const Natural& a, const Digit b, Natural& c) {
+  Digit* dig_a = a.digits_;
+  Digit* dig_c = c.digits_;
+
+  const int64 nc = a.size();
+  if (dig_a == dig_c || c.size() < nc) {
+    dig_c = base::Allocator::allocate<Digit>(nc);
+  }
+
+  Digit carry = internal::mult(dig_a, a.size(), b, dig_c);
+  if (dig_c != c.digits_) {
+    base::Allocator::deallocate(c.digits_);
+    c.digits_ = dig_c;
+  }
+  c.digits_ = dig_c;
+  c.size_ = nc;
+
+  if (carry)
+    c.push_lead(carry);
+}
+
 void Natural::div(const Natural& a, const Digit b, Natural& c) {
   Digit* dig_a = a.digits_;
   Digit* dig_c = c.digits_;

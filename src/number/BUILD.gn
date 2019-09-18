@@ -22,6 +22,7 @@ static_library("internal") {
   sources = [
     "${radix_dir}/add.cc",
     "${radix_dir}/div.cc",
+    "${radix_dir}/mult.cc",
     "${radix_dir}/ostream.cc",
     "${radix_dir}/subtract.cc",
     "internal.h",
@@ -31,6 +32,18 @@ static_library("internal") {
     "//src/base",
     "//third_party/glog",
   ]
+}
+
+config("number_base") {
+  if (use_decimal_operation) {
+    defines = [
+      "NUMBER_BASE=10",
+    ]
+  } else {
+    defines = [
+      "NUMBER_BASE=16",
+    ]
+  }
 }
 
 executable("number_test") {
@@ -43,5 +56,8 @@ executable("number_test") {
     "//src/base",
     "//third_party/gtest",
     "//third_party/gtest:gtest_main",
+  ]
+  configs += [
+    ":number_base"
   ]
 }

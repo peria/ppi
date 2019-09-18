@@ -52,6 +52,8 @@ public:
   // Operations including memory size management.
   static void add(const Natural& a, const Natural& b, Natural& c);
   static void subtract(const Natural& a, const Natural& b, Natural& c);
+  static void mult(const Natural& a, const Natural& b, Natural& c);
+  static void mult(const Natural& a, const Digit b, Natural& c);
   static void div(const Natural& a, const Digit b, Natural& c);
 
   static constexpr int64 kDigitsPerDigit = 16;
