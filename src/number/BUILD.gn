@@ -25,6 +25,7 @@ static_library("internal") {
     "${radix_dir}/mult.cc",
     "${radix_dir}/ostream.cc",
     "${radix_dir}/subtract.cc",
+    "internal.cc",
     "internal.h",
     "uint128.h",
   ]

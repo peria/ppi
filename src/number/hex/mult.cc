@@ -8,7 +8,7 @@
 namespace ppi {
 namespace internal {
 
-void mult(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c) {
+void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c) {
   DCHECK_NE(a, c);
   DCHECK_NE(b, c);
 
