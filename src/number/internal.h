@@ -23,6 +23,7 @@ Digit div(const Digit* a, const int64 na, const Digit b, Digit* c);
 
 // Algorithms in multiplication
 void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c);
+void mult_karatsuba(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c);
 
 std::ostream& operator<<(std::ostream& os, const Natural& a);
 

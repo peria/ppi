@@ -8,6 +8,20 @@
 namespace ppi {
 namespace internal {
 
+Digit mult(const Digit* a, const int64 na, const Digit b, Digit* c) {
+  DCHECK_NE(a, c);
+
+  Digit carry = 0;
+  for (int64 i = 0; i < na; ++i) {
+    uint128 m = a[i];
+    m *= b;
+    m += carry;
+    c[i] = static_cast<uint64>(m);
+    carry = m >> 64;
+  }
+  return carry;
+}
+
 void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c) {
   DCHECK_NE(a, c);
   DCHECK_NE(b, c);
@@ -29,18 +43,12 @@ void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, 
   }
 }
 
-Digit mult(const Digit* a, const int64 na, const Digit b, Digit* c) {
-  DCHECK_NE(a, c);
-
-  Digit carry = 0;
-  for (int64 i = 0; i < na; ++i) {
-    uint128 m = a[i];
-    m *= b;
-    m += carry;
-    c[i] = static_cast<uint64>(m);
-    carry = m >> 64;
-  }
-  return carry;
+void mult_karatsuba(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c) {
+  ((void)a);
+  ((void)na);
+  ((void)b);
+  ((void)nb);
+  ((void)c);
 }
 
 }  // namespace internal
