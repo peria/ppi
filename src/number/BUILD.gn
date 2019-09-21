@@ -62,3 +62,18 @@ executable("number_test") {
     ":number_base"
   ]
 }
+
+executable("number_benchmark") {
+  testonly = true
+  sources = [
+    "natural_benchmark.cc",
+  ]
+  deps = [
+    ":number",
+    "//src/base",
+    "//third_party/benchmark",
+  ]
+  configs += [
+    ":number_base"
+  ]
+}
