@@ -43,13 +43,5 @@ void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, 
   }
 }
 
-void mult_karatsuba(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c) {
-  ((void)a);
-  ((void)na);
-  ((void)b);
-  ((void)nb);
-  ((void)c);
-}
-
 }  // namespace internal
 }  // namespace ppi

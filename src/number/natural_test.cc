@@ -84,19 +84,21 @@ void FactDC(int64 a, int64 b, Natural& c) {
 }  // namespace
 
 TEST(NaturalTest, Mult2) {
-  TestableNatural n;
-  n.resize(1);
-  n[0] = 1;
-  for (int64 i = 2; i <= 50; ++i) {
-    Natural::mult(n, i, n);
-  }
+  for (int64 k = 30; k < 1000; k += 10) {
+    TestableNatural n;
+    n.resize(1);
+    n[0] = 1;
+    for (int64 i = 2; i <= k; ++i) {
+      Natural::mult(n, i, n);
+    }
 
-  TestableNatural m;
-  FactDC(1, 51, m);
+    TestableNatural m;
+    FactDC(1, k + 1, m);
   
-  EXPECT_EQ(m.size(), n.size());
-  for (int64 i = 0; i < m.size(); ++i) {
-    EXPECT_EQ(m[i], n[i]);
+    ASSERT_EQ(m.size(), n.size());
+    for (int64 i = 0; i < m.size(); ++i) {
+      EXPECT_EQ(m[i], n[i]);
+    }
   }
 }
 
