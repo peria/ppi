@@ -69,6 +69,42 @@ void mult_karatsuba(const Digit* a, const int64 na, const Digit* b, const int64 
   base::Allocator::deallocate(ab);
 }
 
+Digit fadd(const Digit* a, const int64 na, const int64 ea,
+           const Digit* b, const int64 nb, const int64 eb,
+           const int64, const int64 ec, Digit* c) {
+  int64 la = ea + na;
+  int64 lb = eb + nb;
+
+  // Case A: B's mantissa is out of A's scope.
+  //   aaaaa
+  // +       bbb
+  if (lb < ea) {
+    for (int64 i = 0; i < eb - ec; ++i)
+      c[i] = 0;
+    for (int64 i = std::max<int64>(0, eb - ec); i < lb - ec; ++i)
+      c[i] = b[i - eb + ec];
+    for (int64 i = std::max<int64>(0, lb - ec); i < ea - ec; ++i)
+      c[i] = 0;
+    for (int64 i = std::max<int64>(0, ea - ec); i < la - ec; ++i)
+      c[i] = a[i - ea + ec];
+    return 0;
+  }
+
+  // Case B: A and B's mantissas are overwrapped.
+  //   aaaaa
+  // +    bbb
+  for (int64 i = 0; i < std::min(ea, eb) - ec; ++i)
+    c[i] = 0;
+  for (int64 i = std::max<int64>(0, ea - ec); i < std::max(ea, eb) - ec; ++i)
+    c[i] = a[i - ea + ec];
+  for (int64 i = std::max<int64>(0, eb - ec); i < std::max(ea, eb) - ec; ++i)
+    c[i] = b[i - eb + ec];
+
+  int64 eadd = std::max(ea, eb);
+  return add(&a[eadd - ea], la - eadd,
+             &b[eadd - eb], lb - eadd,
+             &c[eadd - ec]);
+}
 
 }  // namespace internal
 }  // namespace ppi

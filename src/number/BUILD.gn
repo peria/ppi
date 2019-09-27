@@ -4,6 +4,8 @@ static_library("number") {
   sources = [
     "natural.cc",
     "natural.h",
+    "float.cc",
+    "float.h",
   ]
   deps = [
     ":internal",

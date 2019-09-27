@@ -65,14 +65,14 @@ public:
 protected:
   inline void push_lead(const Digit d);
 
+  Digit* digits_ = nullptr;
+  int64 size_ = 0;
+
 private:
   int64 capacity() const {
     DCHECK(digits_);
     return base::Allocator::getSizeInByte(digits_) / sizeof(Digit);
   }
-
-  Digit* digits_ = nullptr;
-  int64 size_ = 0;
 };
 
 std::ostream& operator<<(std::ostream&, const Natural&);
