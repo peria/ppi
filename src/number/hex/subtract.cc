@@ -69,7 +69,7 @@ void fsubtract(const Digit* a, const int64 na, const int64 ea,
   for (int64 i = std::max<int64>(0, ea - ec); i < std::max(ea, eb) - ec; ++i)
     c[i] = a[i - ea + ec];
   for (int64 i = std::max<int64>(0, eb - ec); i < std::max(ea, eb) - ec; ++i)
-    c[i] = kBase - b[i - eb + ec] - 1;
+    c[i] = ~b[i - eb + ec];
 
   int64 esub = std::max(ea, eb);
   subtract(&a[esub - ea], la - esub,
