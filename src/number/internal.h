@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/base.h"
+#include "number/float.h"
 #include "number/natural.h"
 
 namespace ppi {
@@ -26,6 +27,7 @@ void mult_basic(const Digit* a, const int64 na, const Digit* b, const int64 nb, 
 void mult_karatsuba(const Digit* a, const int64 na, const Digit* b, const int64 nb, Digit* c);
 
 std::ostream& operator<<(std::ostream& os, const Natural& a);
+std::ostream& operator<<(std::ostream& os, const Float& a);
 
 // Algorithms for floating point numbers
 Digit fadd(const Digit* a, const int64 na, const int64 ea,
@@ -36,4 +38,3 @@ void fsubtract(const Digit* a, const int64 na, const int64 ea,
                const int64 nc, const int64 ec, Digit* c);
 }  // namespace internal
 }  // namespace ppi
-
