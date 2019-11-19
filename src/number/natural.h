@@ -68,6 +68,15 @@ protected:
   Digit* digits_ = nullptr;
   int64 size_ = 0;
 
+#if NUMBER_BASE == 16
+  // 2^64
+  static constexpr double kBaseInDouble = 18446744073709551616.0;
+  static constexpr Digit kBase = 0;  // 2^64 with overflow.
+#else
+  static constexpr double kBaseInDouble = 1e+16;
+  static constexpr Digit kBase = 1'0000'0000'0000'0000ULL;
+#endif
+
 private:
   int64 capacity() const {
     DCHECK(digits_);

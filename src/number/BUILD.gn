@@ -53,6 +53,7 @@ executable("number_test") {
   testonly = true
   sources = [
     "natural_test.cc",
+    "float_test.cc",
   ]
   deps = [
     ":number",

@@ -2,6 +2,8 @@
 
 #include <glog/logging.h>
 
+#include <cmath>
+
 #include "base/allocator.h"
 #include "number/internal.h"
 
@@ -150,6 +152,38 @@ int Float::cmpAbs(const Float& a, const Float& b) {
         return -1;
   }
   return 0;
+}
+
+void Float::inverse(const Float& a, Float& c) {
+  double da = a[a.size() - 1];
+  if (a.size() > 2) {
+    da += a[a.size() - 2] / kBaseInDouble;
+  }
+  // Set the initial value a bit smaller than the exact value.
+  double dc = (1.0 - 8e-17) / da * kBaseInDouble;
+  c.resize(2);
+  c[1] = std::floor(dc);
+  dc -= c[1];
+  c[0] = dc * kBaseInDouble;
+  c.exponent_ = -(a.exponent() + a.size()) - 2;
+  //for (int64 pa = a.precision(), pc = 4; pa > 2; pa = (pa + 1) / 2, pc *= 2) {
+  c.setPrecision(2);
+  Float t;
+  t.setPrecision(2);
+  Float::mult(a, c, t);
+  LOG(INFO) << c << " " << t;
+  for (int64 i = 0; i < t.size(); ++i) {
+    t[i] = kBase - 1 - t[i];
+  }
+  // t.normalize();
+  LOG(INFO) << t;
+  //}
+  // c = t;  // doesn't work with optimization.
+  c.resize(t.size());
+  for (int64 i = 0; i < c.precision(); ++i) {
+    c[i] = t[i];
+  }
+  c.exponent_ = t.exponent();
 }
 
 std::ostream& operator<<(std::ostream& os, const Float& a) {
