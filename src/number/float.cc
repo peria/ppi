@@ -121,6 +121,13 @@ void Float::subtract(const Float& a, const Float& b, Float& c) {
   c.normalize();
 }
 
+double Float::mult(const Float& a, const Float& b, Float& c) {
+  double err = Natural::mult(a, b, c);
+  c.exponent_ = a.exponent_ + b.exponent_ + 1;
+  c.normalize();
+  return err;
+}
+
 int Float::cmpAbs(const Float& a, const Float& b) {
   int64 ea = a.size() + a.exponent();
   int64 eb = b.size() + b.exponent();
@@ -145,17 +152,8 @@ int Float::cmpAbs(const Float& a, const Float& b) {
   return 0;
 }
 
-std::ostream& operator<<(std::ostream& os, const Float& f) {
-  if (f.size() == 0) {
-    return os << "0";
-  }
-
-  if (f.sign() < 0)
-    os << "-";
-  os << "0." << reinterpret_cast<const Natural&>(f)
-     << "e" << (f.exponent() + f.size());
-  
-  return os;
+std::ostream& operator<<(std::ostream& os, const Float& a) {
+  return internal::operator<<(os, a);
 }
 
 }  // namespace ppi

@@ -93,7 +93,7 @@ void Natural::subtract(const Natural& a, const Natural& b, Natural& c) {
   c.normalize();
 }
 
-void Natural::mult(const Natural& a, const Natural& b, Natural& c) {
+double Natural::mult(const Natural& a, const Natural& b, Natural& c) {
   Digit* dig_a = a.digits_;
   Digit* dig_b = b.digits_;
   Digit* dig_c = c.digits_;
@@ -112,6 +112,7 @@ void Natural::mult(const Natural& a, const Natural& b, Natural& c) {
   c.size_ = nc;
 
   c.normalize();
+  return 0;
 }
 
 void Natural::mult(const Natural& a, const Digit b, Natural& c) {
