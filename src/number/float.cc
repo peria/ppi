@@ -11,6 +11,25 @@ namespace ppi {
 
 Float::Float() : Natural() {}
 
+void Float::normalize() {
+  int64 bottom = 0;
+  while (bottom < size() && (*this)[bottom] == 0)
+    ++bottom;
+  int64 top = size() - 1;
+  while (top >= bottom && (*this)[top] == 0)
+    --top;
+  ++top;
+  if (bottom) {
+    for (int64 i = 0, j = bottom; j < top; ++i, ++j) {
+      (*this)[j] = (*this)[i];
+    }
+    exponent_ += bottom;
+    top -= bottom;
+  }
+  if (top != size())
+    resize(top);
+}
+
 void Float::add(const Float& a, const Float& b, Float& c) {
   const Digit* dig_a = a.digits_;
   const Digit* dig_b = b.digits_;
@@ -175,8 +194,8 @@ void Float::inverse(const Float& a, Float& c) {
   for (int64 i = 0; i < t.size(); ++i) {
     t[i] = kBase - 1 - t[i];
   }
-  // t.normalize();
-  LOG(INFO) << t;
+  t.normalize();
+  LOG(INFO) << t << " " << t.precision();
   //}
   // c = t;  // doesn't work with optimization.
   c.resize(t.size());

@@ -18,6 +18,7 @@ public:
   int64 precision() const { return precision_; }
 
   void setPrecision(int64 p) { precision_ = p; }
+  void normalize();
 
   // Operations including memory size management.
   static void add(const Float& a, const Float& b, Float& c);
