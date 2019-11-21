@@ -144,7 +144,7 @@ void Float::subtract(const Float& a, const Float& b, Float& c) {
 
 double Float::mult(const Float& a, const Float& b, Float& c) {
   double err = Natural::mult(a, b, c);
-  c.exponent_ = a.exponent_ + b.exponent_ + 1;
+  c.exponent_ = a.exponent_ + b.exponent_;
   c.normalize();
   return err;
 }
@@ -174,6 +174,8 @@ int Float::cmpAbs(const Float& a, const Float& b) {
 }
 
 void Float::inverse(const Float& a, Float& c) {
+  int64 precision = c.precision();
+
   double da = a[a.size() - 1];
   if (a.size() > 2) {
     da += a[a.size() - 2] / kBaseInDouble;
@@ -185,24 +187,30 @@ void Float::inverse(const Float& a, Float& c) {
   dc -= c[1];
   c[0] = dc * kBaseInDouble;
   c.exponent_ = -(a.exponent() + a.size()) - 2;
-  //for (int64 pa = a.precision(), pc = 4; pa > 2; pa = (pa + 1) / 2, pc *= 2) {
+
   c.setPrecision(2);
   Float t;
   t.setPrecision(2);
   Float::mult(a, c, t);
-  LOG(INFO) << c << " " << t;
   for (int64 i = 0; i < t.size(); ++i) {
     t[i] = kBase - 1 - t[i];
   }
   t.normalize();
-  LOG(INFO) << t << " " << t.precision();
-  //}
-  // c = t;  // doesn't work with optimization.
-  c.resize(t.size());
-  for (int64 i = 0; i < c.precision(); ++i) {
-    c[i] = t[i];
+  Float::add(c, t, c);
+
+  for (int64 pa = a.precision(), pc = 4; pa > 2; pa = (pa + 1) / 2, pc *= 2) {
+    c.setPrecision(pc);
+    t.setPrecision(pc);
+    Float::mult(a, c, t);
+    for (int64 i = 0; i < t.size(); ++i) {
+      t[i] = kBase - 1 - t[i];
+    }
+    t.normalize();
+    Float::add(c, t, c);
   }
-  c.exponent_ = t.exponent();
+
+  c.setPrecision(precision);
+  c.normalize();
 }
 
 std::ostream& operator<<(std::ostream& os, const Float& a) {
