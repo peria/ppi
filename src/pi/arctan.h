@@ -13,7 +13,7 @@ class Arctan {
  public:
   // Computes pi using arctan formula in O(n^2) algorithm.
   // Returns the maximum rounding error in Multiplications.
-  static double Machin(Real* pi);
+  static double Machin(Real& pi);
 };
 
 }  // namespace pi

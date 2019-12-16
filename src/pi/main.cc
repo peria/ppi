@@ -89,7 +89,7 @@ void ComputePi(ppi::number::Real& pi) {
   }
   case 1:
     pi.setPrecision(FLAGS_digits / 16 + 1);
-    ppi::pi::Arctan::Machin(&pi);
+    ppi::pi::Arctan::Machin(pi);
     break;
   }
 }

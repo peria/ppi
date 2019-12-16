@@ -9,10 +9,10 @@
 namespace ppi {
 namespace pi {
 
-double Arctan::Machin(Real* pi) {
-  int64 length = pi->precision();
-  (*pi) = 0.0;
-  pi->setPrecision(length);
+double Arctan::Machin(Real& pi) {
+  int64 length = pi.precision();
+  pi = 0.0;
+  pi.setPrecision(length);
 
   Real a(16.0 * 5);
   Real sum(0.0);
@@ -31,7 +31,7 @@ double Arctan::Machin(Real* pi) {
       Real::Sub(sum, b, &sum);
     }
   }
-  Real::Add(*pi, sum, pi);
+  Real::Add(pi, sum, &pi);
 
   a = 4 * 239.0;
   sum = 0.0;
@@ -49,7 +49,7 @@ double Arctan::Machin(Real* pi) {
       Real::Sub(sum, b, &sum);
     }
   }
-  Real::Sub(*pi, sum, pi);
+  Real::Sub(pi, sum, &pi);
 
   return 0;
 }
