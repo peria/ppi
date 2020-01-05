@@ -22,10 +22,7 @@ class Natural {
                      const int64 nb,
                      const int64 nc,
                      uint64* c);
-  static uint64 Mult(const uint64* a,
-                     const uint64 b,
-                     const int64 n,
-                     uint64* c);
+  static uint64 Mult(const uint64* a, const uint64 b, const int64 n, uint64* c);
 
   // Computes a[2] / b, assuming a[1] < b.  It means the quotient is storable in
   // uint64.

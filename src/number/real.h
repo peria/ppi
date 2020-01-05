@@ -13,8 +13,8 @@ namespace number {
 //   |mantissa_| * (2^64)^(|exponent_|)
 class Real : public Integer {
  public:
-  explicit Real(const Base=Base::kHex);
-  explicit Real(double d, const Base=Base::kHex);
+  explicit Real(const Base = Base::kHex);
+  explicit Real(double d, const Base = Base::kHex);
   explicit Real(const Real& other);
 
   void fitInteger(int64 n);

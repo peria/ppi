@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
     ComputePi(pi);
     timer_compute.Stop();
     LOG(INFO) << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.";
-    std::cout << "Computing Time: " << timer_compute.GetTimeInSec() << " sec.\n";
+    std::cout << "Computing Time: " << timer_compute.GetTimeInSec()
+              << " sec.\n";
 
     ppi::number::Real pi_dec(ppi::number::Integer::Base::kDecimal);
     if (FLAGS_dec_output != "") {
@@ -50,7 +51,8 @@ int main(int argc, char* argv[]) {
       ppi::pi::Real::ConvertBase(pi, pi_dec);
       timer_base.Stop();
       LOG(INFO) << "Base conversion: " << timer_base.GetTimeInSec() << " sec.";
-      std::cout << "Base conversion: " << timer_base.GetTimeInSec() << " sec.\n";
+      std::cout << "Base conversion: " << timer_base.GetTimeInSec()
+                << " sec.\n";
     }
 
     ppi::base::Timer timer_output;
@@ -98,7 +100,8 @@ void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename) {
   using namespace ppi::number;
   static constexpr int64 kDigitsPerLine = 100;
   static char buffer[kDigitsPerLine + 50];
-  const char* fmt_digs = (pi.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
+  const char* fmt_digs =
+      (pi.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
   const int64 digs_per_elem = (pi.base() == Integer::Base::kHex) ? 16 : 19;
 
   CHECK_EQ(pi[pi.size() - 1], 3);
@@ -124,8 +127,8 @@ void DumpPiInFile(const ppi::number::Real& pi, const std::string& filename) {
     ofs.write(buffer, offset + 1);
   }
   LOG(INFO) << "Output " << (pi.size() - 1) * digs_per_elem << " "
-            << (pi.base() == Integer::Base::kHex ? "hexa" : "") << "decimal digits.";
+            << (pi.base() == Integer::Base::kHex ? "hexa" : "")
+            << "decimal digits.";
 
   ofs.close();
 }
-

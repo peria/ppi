@@ -178,10 +178,10 @@ namespace {
 uint64 getMSB(uint64 a) {
   static constexpr uint64 kHigh32Bits = 0xFFFFFFFF00000000ULL;
   static constexpr uint64 kHigh16Bits = 0xFFFF0000FFFF0000ULL;
-  static constexpr uint64 kHigh8Bits  = 0xFF00FF00FF00FF00ULL;
-  static constexpr uint64 kHigh4Bits  = 0xF0F0F0F0F0F0F0F0ULL;
-  static constexpr uint64 kHigh2Bits  = 0xCCCCCCCCCCCCCCCCULL;
-  static constexpr uint64 kHigh1Bit   = 0xAAAAAAAAAAAAAAAAULL;
+  static constexpr uint64 kHigh8Bits = 0xFF00FF00FF00FF00ULL;
+  static constexpr uint64 kHigh4Bits = 0xF0F0F0F0F0F0F0F0ULL;
+  static constexpr uint64 kHigh2Bits = 0xCCCCCCCCCCCCCCCCULL;
+  static constexpr uint64 kHigh1Bit = 0xAAAAAAAAAAAAAAAAULL;
   a = (a & kHigh32Bits) ? (a & kHigh32Bits) : a;
   a = (a & kHigh16Bits) ? (a & kHigh16Bits) : a;
   a = (a & kHigh8Bits) ? (a & kHigh8Bits) : a;
@@ -278,8 +278,10 @@ Integer& Integer::operator=(uint64 a) {
 
 std::ostream& operator<<(std::ostream& os, const Integer& val) {
   static char buffer[50];
-  const char* fmt_lead = (val.base() == Integer::Base::kHex) ? "%" PRIX64 : "%" PRIu64;
-  const char* fmt_digs = (val.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
+  const char* fmt_lead =
+      (val.base() == Integer::Base::kHex) ? "%" PRIX64 : "%" PRIu64;
+  const char* fmt_digs =
+      (val.base() == Integer::Base::kHex) ? "%016" PRIX64 : "%019" PRIu64;
 
   if (val.size() == 0) {
     os << "0";

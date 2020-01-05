@@ -27,8 +27,7 @@ const double kPow2_m64 = 1.0 / kPow2_64;
 
 Real::Real(const Base base) : Integer(base), precision_(0), exponent_(0) {}
 
-Real::Real(double d, const Base base)
-  : Integer(base) {
+Real::Real(double d, const Base base) : Integer(base) {
   if (d == 0.0) {
     clear();
     precision_ = 0;
@@ -440,8 +439,8 @@ void Real::HexToDecimal(const Real& a, Real& b) {
 
 std::ostream& operator<<(std::ostream& os, const Real& val) {
   const int64 digs_per_elem = (val.base() == Integer::Base::kHex) ? 16 : 19;
-  os << *reinterpret_cast<const Integer*>(&val)
-     << "e" << (val.exponent() * digs_per_elem);
+  os << *reinterpret_cast<const Integer*>(&val) << "e"
+     << (val.exponent() * digs_per_elem);
   return os;
 }
 

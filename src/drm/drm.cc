@@ -19,8 +19,7 @@ double Drm::compute(const int64 num_dec, Real* pi) {
   double error = 0;
 
   int64 half = (num_terms + 1) / 2;
-  LOG(INFO) << "Use " << num_terms << " terms to get " << num_dec
-            << " digits.";
+  LOG(INFO) << "Use " << num_terms << " terms to get " << num_dec << " digits.";
 
   Real a, b, c;
   {
