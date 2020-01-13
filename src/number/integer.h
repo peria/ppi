@@ -1,7 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <ostream>
 
+#include "base/allocator.h"
 #include "base/base.h"
 
 namespace ppi {
@@ -20,9 +22,9 @@ class Integer {
   explicit Integer(const Integer& other);
   ~Integer();
 
-  uint64& operator[](int64 i) const { return data_[i]; }
+  uint64& operator[](int64 i) const { return data()[i]; }
   int64 size() const { return static_cast<int64>((*this)[-1]); }
-  uint64* data() const { return data_; }
+  uint64* data() const { return data_.get(); }
 
   uint64 leading() const;
   void resize(int64 size);
@@ -71,7 +73,9 @@ class Integer {
   void Normalize();
 
  private:
-  uint64* data_;
+  using Digits = std::unique_ptr<uint64, void (*)(void*)>;
+
+  Digits data_;
   const Base base_;
 };
 

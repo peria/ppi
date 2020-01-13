@@ -7,7 +7,6 @@
 #include <cmath>
 #include <ostream>
 
-#include "base/allocator.h"
 #include "base/base.h"
 #include "number/natural.h"
 
@@ -22,25 +21,25 @@ constexpr uint64 kHalfBitMask = (1ULL << kHalfSize) - 1;
 #endif
 
 Integer::Integer(const Base base)
-    : data_(base::Allocator::Allocate<uint64>(0)), base_(base) {}
+    : data_(base::Allocator::Allocate<uint64>(0), &base::Allocator::Deallocate),
+      base_(base) {}
 
 Integer::Integer(uint64 value, const Base base)
-    : data_(base::Allocator::Allocate<uint64>(1)), base_(base) {
+    : data_(base::Allocator::Allocate<uint64>(1), &base::Allocator::Deallocate),
+      base_(base) {
   (*this)[0] = value;
 }
 
 Integer::Integer(const Integer& other)
-    : data_(base::Allocator::Allocate<uint64>(other.size())),
+    : data_(base::Allocator::Allocate<uint64>(other.size()),
+            &base::Allocator::Deallocate),
       base_(other.base()) {
   for (int64 i = 0; i < size(); ++i) {
     (*this)[i] = other[i];
   }
 }
 
-Integer::~Integer() {
-  if (data_)
-    base::Allocator::Deallocate(data_);
-}
+Integer::~Integer() = default;
 
 void Integer::Normalize() {
   int64 i = size() - 1;
@@ -56,13 +55,14 @@ uint64 Integer::leading() const {
 }
 
 void Integer::resize(int64 sz) {
-  uint64* new_ptr = base::Allocator::Allocate<uint64>(sz);
+  Digits new_ptr_impl(base::Allocator::Allocate<uint64>(sz),
+                      &base::Allocator::Deallocate);
+  uint64* new_ptr = new_ptr_impl.get();
   if (data_) {
     for (int64 i = 0; i < std::min(sz, size()); ++i)
       new_ptr[i] = (*this)[i];
   }
-  std::swap(data_, new_ptr);
-  base::Allocator::Deallocate(new_ptr);
+  std::swap(data_, new_ptr_impl);
 }
 
 void Integer::erase(int64 begin, int64 end) {
@@ -70,7 +70,9 @@ void Integer::erase(int64 begin, int64 end) {
     return;
 
   int64 erase_size = end - begin;
-  uint64* new_ptr = base::Allocator::Allocate<uint64>(size() - erase_size);
+  Digits new_ptr_impl(base::Allocator::Allocate<uint64>(size() - erase_size),
+                      &base::Allocator::Deallocate);
+  uint64* new_ptr = new_ptr_impl.get();
   for (int64 i = 0; i < begin; ++i) {
     new_ptr[i] = (*this)[i];
   }
@@ -78,17 +80,17 @@ void Integer::erase(int64 begin, int64 end) {
     new_ptr[j] = (*this)[i];
   }
 
-  std::swap(data_, new_ptr);
-  base::Allocator::Deallocate(new_ptr);
+  std::swap(data_, new_ptr_impl);
 }
 
 void Integer::clear() {
-  base::Allocator::Deallocate(data_);
-  data_ = base::Allocator::Allocate<uint64>(0);
+  data_.reset(base::Allocator::Allocate<uint64>(0));
 }
 
 void Integer::insert(int64 from, int64 number, uint64 value) {
-  uint64* new_ptr = base::Allocator::Allocate<uint64>(size() + number);
+  Digits new_ptr_impl(base::Allocator::Allocate<uint64>(size() + number),
+                      &base::Allocator::Deallocate);
+  uint64* new_ptr = new_ptr_impl.get();
 
   for (int64 i = 0; i < from; ++i)
     new_ptr[i] = (*this)[i];
@@ -97,8 +99,7 @@ void Integer::insert(int64 from, int64 number, uint64 value) {
   for (int64 i = from + number, j = from; j < size(); ++i, ++j)
     new_ptr[i] = (*this)[j];
 
-  std::swap(data_, new_ptr);
-  base::Allocator::Deallocate(new_ptr);
+  std::swap(data_, new_ptr_impl);
 }
 
 void Integer::push_leading(uint64 value) {
@@ -113,9 +114,9 @@ void Integer::Add(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = std::min(na, nb);
   c->resize(std::max(na, nb));
 
-  uint64 carry = Natural::Add(a.data_, b.data_, n, c->data_);
-  carry = Natural::Add(a.data_ + n, carry, na - n, c->data_ + n);
-  carry = Natural::Add(b.data_ + n, carry, nb - n, c->data_ + n);
+  uint64 carry = Natural::Add(a.data(), b.data(), n, c->data());
+  carry = Natural::Add(a.data() + n, carry, na - n, c->data() + n);
+  carry = Natural::Add(b.data() + n, carry, nb - n, c->data() + n);
 
   if (carry) {
     c->push_leading(carry);
@@ -130,8 +131,8 @@ void Integer::Subtract(const Integer& a, const Integer& b, Integer* c) {
   CHECK_GE(na, nb);
   c->resize(na);
 
-  uint64 carry = Natural::Subtract(a.data_, b.data_, nb, c->data_);
-  carry = Natural::Subtract(a.data_ + nb, carry, na - nb, c->data_ + nb);
+  uint64 carry = Natural::Subtract(a.data(), b.data(), nb, c->data());
+  carry = Natural::Subtract(a.data() + nb, carry, na - nb, c->data() + nb);
   CHECK_EQ(0ULL, carry);
 
   c->Normalize();
@@ -158,7 +159,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
   const int64 n = MinPow2(na + nb);
   c->resize(n);
 
-  double err = Natural::Mult(a.data_, na, b.data_, nb, n, c->data_);
+  double err = Natural::Mult(a.data(), na, b.data(), nb, n, c->data());
 
   c->Normalize();
 
@@ -167,7 +168,7 @@ double Integer::Mult(const Integer& a, const Integer& b, Integer* c) {
 
 void Integer::Mult(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
-  uint64 carry = Natural::Mult(a.data_, b, a.size(), c->data_);
+  uint64 carry = Natural::Mult(a.data(), b, a.size(), c->data());
   if (carry) {
     c->push_leading(carry);
   }
@@ -205,7 +206,7 @@ void Integer::Power(const uint64 a, const uint64 e, Integer* c) {
 
 void Integer::Div(const Integer& a, const uint64 b, Integer* c) {
   c->resize(a.size());
-  Natural::Div(a.data_, b, a.size(), c->data_);
+  Natural::Div(a.data(), b, a.size(), c->data());
   c->Normalize();
 }
 
